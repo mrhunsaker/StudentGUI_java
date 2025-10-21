@@ -1,0 +1,217 @@
+package com.studentgui.apphelpers;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Miscellaneous filesystem and small utility helpers used by the UI pages.
+ *
+ * Responsibilities include selecting and creating the application home
+ * directory, creating per-student folder hierarchies, and providing a
+ * small roster fallback when no students.json exists.
+ */
+public class Helpers {
+    /**
+     * Private constructor to prevent instantiation of this utility class.
+     */
+    private Helpers() {
+        throw new AssertionError("Helpers is a utility class");
+    }
+    /** The project working directory (where the process was started). */
+    public static final Path PROJECT_ROOT = Paths.get(System.getProperty("user.dir"));
+    /** Application home used for storing app-specific files (defaults to ./app_home). */
+    public static final Path APP_HOME = selectAppHome();
+    /** Root directory for persisted application data (alias of APP_HOME). */
+    public static final Path DATA_ROOT = APP_HOME;
+    /** Directory that holds the database file. */
+    public static final Path DATABASE_ROOT = DATA_ROOT.resolve("StudentDatabase");
+    /** Canonical database file path used by SQLite operations. */
+    public static final Path DATABASE_PATH = DATABASE_ROOT.resolve("students20252026.db");
+
+    /**
+     * Select a suitable application home directory. Attempts to use a
+     * ./app_home subdirectory of the working directory and falls back to the
+     * system temporary directory if creation fails.
+     */
+    private static Path selectAppHome() {
+        try {
+            Path candidate = PROJECT_ROOT.resolve("app_home");
+            Files.createDirectories(candidate);
+            // test write
+            Path test = candidate.resolve(".write_test");
+            Files.writeString(test, "");
+            Files.deleteIfExists(test);
+            return candidate;
+        } catch (IOException e) {
+            try {
+                Path tmp = Paths.get(System.getProperty("java.io.tmpdir"), "StudentDataGUI");
+                Files.createDirectories(tmp);
+                return tmp;
+            } catch (IOException ex) {
+                return Paths.get(".");
+            }
+        }
+    }
+
+    /**
+     * Attempt to set the JVM working directory to APP_HOME. Fails silently if
+     * the property cannot be set in the running environment.
+     */
+    public static void setStartDir() {
+        /**
+         * Set the JVM working directory to the application home when possible.
+         * Fail silently if the property cannot be set.
+         */
+        try {
+            System.setProperty("user.dir", APP_HOME.toString());
+        } catch (SecurityException ignored) {
+        }
+    }
+
+    /**
+     * Ensure the working data directory exists under APP_HOME. This is
+     * idempotent and safe to call on startup.
+     */
+    public static void workingDir() {
+        /**
+         * Ensure the working data directory exists under the application home.
+         */
+        try {
+            Path studentDataDir = APP_HOME.resolve("StudentDataFiles");
+            Files.createDirectories(studentDataDir);
+        } catch (IOException ignored) {
+        }
+    }
+
+    /**
+     * Create a basic folder hierarchy under DATA_ROOT for each student.
+     * This will create StudentDataFiles, backups and errorLogs and a
+     * per-student folder with subfolders for data sheets and materials.
+     */
+    public static void createFolderHierarchy() {
+        /**
+         * Create a basic folder hierarchy under DATA_ROOT for each student.
+         * This is idempotent and will create per-student subfolders and an
+         * omnibus csv file when missing.
+         */
+        // Create basic folders for each student in a simple roster
+        List<String> students = getStudents();
+        Path studentDatafilesRoot = DATA_ROOT.resolve("StudentDataFiles");
+        Path studentErrorlogsRoot = DATA_ROOT.resolve("errorLogs");
+        Path studentBackupsRoot = DATA_ROOT.resolve("backups");
+        try {
+            Files.createDirectories(studentDatafilesRoot);
+            Files.createDirectories(studentErrorlogsRoot);
+            Files.createDirectories(studentBackupsRoot);
+        } catch (IOException ignored) {
+        }
+
+        for (String name : students) {
+            String safe = sanitize(name);
+            Path studentFolder = studentDatafilesRoot.resolve(safe);
+            try {
+                Files.createDirectories(studentFolder.resolve("StudentDataSheets"));
+                Files.createDirectories(studentFolder.resolve("StudentInstructionMaterials"));
+                Files.createDirectories(studentFolder.resolve("StudentVisionAssessments"));
+                Path omnibus = studentFolder.resolve("omnibusDatabase.csv");
+                if (!Files.exists(omnibus)) {
+                    Files.createFile(omnibus);
+                }
+            } catch (IOException ignored) {
+            }
+        }
+    }
+
+    /**
+     * Make a filesystem-safe folder name by stripping or replacing forbidden
+     * characters.
+     */
+    private static String sanitize(String s) {
+        if (s == null) return "";
+        String t = s.trim();
+        // remove control characters (newline, carriage return, etc.)
+        t = t.replaceAll("[\\p{Cntrl}]", "");
+        // replace common filesystem-forbidden characters with underscore
+        char[] forbidden = new char[]{'<','>',';',':','"','/','\\','|','?','*'};
+        for (char c : forbidden) {
+            t = t.replace(c, '_');
+        }
+        // collapse runs of whitespace into single space
+        t = t.replaceAll("\\s+", " ").trim();
+        // prevent names that are just dots
+        if (t.matches("^[.]+$")) t = "_";
+        return t;
+    }
+
+    /**
+     * Public safe name helper for filesystem paths. Mirrors the internal
+     * sanitize implementation but is callable from other packages.
+     */
+    public static String safeName(String s) {
+        if (s == null) return "";
+        return sanitize(s);
+    }
+
+    /**
+     * Find the latest PNG plot file for a named student with the given prefix.
+     * Returns null when no matching files exist.
+     */
+    public static java.nio.file.Path latestPlotPath(String studentName, String prefix) {
+        if (studentName == null || studentName.trim().isEmpty()) return null;
+        java.nio.file.Path dir = APP_HOME.resolve("StudentDataFiles").resolve(safeName(studentName)).resolve("plots");
+        if (!java.nio.file.Files.exists(dir)) return null;
+        java.nio.file.Path latest = null;
+        try (java.nio.file.DirectoryStream<java.nio.file.Path> ds = java.nio.file.Files.newDirectoryStream(dir, prefix + "-*.png")) {
+            for (java.nio.file.Path p : ds) {
+                try {
+                    if (latest == null) latest = p;
+                    else {
+                        java.nio.file.attribute.FileTime t1 = java.nio.file.Files.getLastModifiedTime(p);
+                        java.nio.file.attribute.FileTime t2 = java.nio.file.Files.getLastModifiedTime(latest);
+                        if (t1.compareTo(t2) > 0) latest = p;
+                    }
+                } catch (IOException ignored) {
+                }
+            }
+    } catch (IOException ignored) {
+    }
+        return latest;
+    }
+
+    /**
+     * Attempt to return a simple list of students from PROJECT_ROOT/json_Files/students.json.
+     * Falls back to a single 'Test Student' entry when the file is missing or cannot be read.
+     *
+     * @return list of student display names (never null)
+     */
+    public static List<String> getStudents() {
+        // Attempt to read a simple students.json in PROJECT_ROOT/json_Files/students.json
+        List<String> list = new ArrayList<>();
+        Path p = PROJECT_ROOT.resolve("json_Files").resolve("students.json");
+        if (Files.exists(p)) {
+            try {
+                String text = Files.readString(p);
+                // try to isolate the array portion if present
+                int start = text.indexOf('[');
+                int end = text.lastIndexOf(']');
+                String body = (start >= 0 && end > start) ? text.substring(start, end + 1) : text;
+                java.util.regex.Pattern pat = java.util.regex.Pattern.compile("\"([^\"]+)\"");
+                java.util.regex.Matcher m = pat.matcher(body);
+                while (m.find()) {
+                    String candidate = m.group(1).trim();
+                    if (!candidate.isEmpty()) list.add(candidate);
+                }
+            } catch (IOException ignored) {
+            }
+        }
+        if (list.isEmpty()) {
+            // fallback roster
+            list.add("Test Student");
+        }
+        return list;
+    }
+}

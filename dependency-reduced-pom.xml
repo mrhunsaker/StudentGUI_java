@@ -4,8 +4,8 @@
   <groupId>com.example</groupId>
   <artifactId>Main</artifactId>
   <name>Vision Skills Progression Tracker</name>
-  <version>2024.0.0-alpha</version>
-  <description>Vision Skills Progression ttracker</description>
+  <version>1.0.0-beta</version>
+  <description>Vision Skills Progression Tracker</description>
   <developers>
     <developer>
       <id>mrhunsaker</id>
@@ -26,6 +26,7 @@
     <url>https://github.com/mrhunsaker/</url>
   </organization>
   <build>
+    <finalName>vision-skills-progression-tracker-${project.version}</finalName>
     <plugins>
       <plugin>
         <artifactId>maven-javadoc-plugin</artifactId>
@@ -96,12 +97,9 @@
               </filters>
               <transformers>
                 <transformer>
-                  <mainClass>Main</mainClass>
-                </transformer>
-                <transformer>
+                  <mainClass>com.studentgui.app.Main</mainClass>
                   <manifestEntries>
-                    <Main-Class>Main</Main-Class>
-                    <Built-By>mrhunsaker</Built-By>
+                    <Built-By>Michael Ryan Hunsaker, M.Ed., Ph.D.</Built-By>
                   </manifestEntries>
                 </transformer>
               </transformers>
@@ -109,8 +107,37 @@
           </execution>
         </executions>
       </plugin>
+      <plugin>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>3.0.0-M7</version>
+        <configuration>
+          <useModulePath>false</useModulePath>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
+  <dependencies>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <version>5.10.0</version>
+      <scope>test</scope>
+      <exclusions>
+        <exclusion>
+          <artifactId>junit-jupiter-api</artifactId>
+          <groupId>org.junit.jupiter</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>junit-jupiter-params</artifactId>
+          <groupId>org.junit.jupiter</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>junit-jupiter-engine</artifactId>
+          <groupId>org.junit.jupiter</groupId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+  </dependencies>
   <reporting>
     <plugins>
       <plugin>

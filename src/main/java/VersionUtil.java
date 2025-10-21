@@ -2,14 +2,18 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
- * Utility class to retrieve the version of the application from a properties file.
- * <p>
- * The version is read from a properties file named {@code version.properties} located in the root of the classpath.
- * If the file is not found or an I/O error occurs, the version is set to "unknown".
- * </p>
+ * Utility to surface project version information.
+ *
+ * Reads the {@code /version.properties} file from the classpath and exposes
+ * the {@link #getVersion()} helper. If the file cannot be read, returns
+ * {@code "unknown"}.
  */
 public class VersionUtil {
+    private static final Logger LOG = LoggerFactory.getLogger(VersionUtil.class);
 
     /** The path to the properties file containing the version information. */
     private static final String VERSION_FILE = "/version.properties";
@@ -27,18 +31,18 @@ public class VersionUtil {
     static {
         try (InputStream input = VersionUtil.class.getResourceAsStream(VERSION_FILE)) {
             Properties properties = new Properties();
-            if (input == null) {
-                // If the properties file is not found, set version to "unknown"
-                System.err.println("Unable to find " + VERSION_FILE);
-                version = "unknown";
-            } else {
+                if (input == null) {
+                    // If the properties file is not found, set version to "unknown"
+                    LOG.warn("Unable to find {}", VERSION_FILE);
+                    version = "unknown";
+                } else {
                 // Load the properties file and set the version
                 properties.load(input);
                 version = properties.getProperty("version", "unknown");
             }
         } catch (IOException ex) {
-            // Print the stack trace and set version to "unknown" in case of an exception
-            ex.printStackTrace();
+            // Log the exception and set version to "unknown" in case of an exception
+            LOG.error("Error reading version properties", ex);
             version = "unknown";
         }
     }
@@ -54,5 +58,12 @@ public class VersionUtil {
      */
     public static String getVersion() {
         return version;
+    }
+
+    /**
+     * Private constructor to prevent instantiation of this utility class.
+     */
+    private VersionUtil() {
+        throw new AssertionError("Not instantiable");
     }
 }

@@ -6,7 +6,7 @@
 
     <groupId>com.example</groupId>
     <artifactId>Main</artifactId>
-    <version>2024.0.0-alpha</version>
+    <version>1.0.0-beta</version>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -54,8 +54,16 @@
             <artifactId>logback-core</artifactId>
             <version>1.5.7</version>
         </dependency>
+        <!-- JUnit 5 for unit testing -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>5.10.0</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
     <build>
+        <finalName>vision-skills-progression-tracker-${project.version}</finalName>
         <plugins>
             <plugin>
                 <inherited>true</inherited>
@@ -128,18 +136,24 @@
                             </filters>
                             <transformers>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>Main</mainClass>
-                                </transformer>
-                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass>com.studentgui.app.Main</mainClass>
                                     <manifestEntries>
-                                        <Main-Class>Main</Main-Class>
-                                        <Built-By>mrhunsaker</Built-By>
+                                        <Built-By>Michael Ryan Hunsaker, M.Ed., Ph.D.</Built-By>
                                     </manifestEntries>
                                 </transformer>
                             </transformers>
                         </configuration>
                     </execution>
                 </executions>
+            </plugin>
+            <!-- Configure Surefire to run JUnit 5 tests -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.0.0-M7</version>
+                <configuration>
+                    <useModulePath>false</useModulePath>
+                </configuration>
             </plugin>
         </plugins>
     </build>
@@ -160,7 +174,7 @@
         </plugins>
     </reporting>
     <name>Vision Skills Progression Tracker</name>
-    <description>Vision Skills Progression ttracker</description>
+    <description>Vision Skills Progression Tracker</description>
     <licenses>
         <license>
             <name>Apache-2.0</name>
