@@ -174,9 +174,16 @@ public class Abacus extends JPanel {
     private void initDatabase() {
         try {
             int ptId = com.studentgui.apphelpers.Database.getOrCreateProgressType("Abacus");
-            String[] codes = new String[28];
-            for (int i = 0; i < 28; i++) codes[i] = "P" + (i+1);
+            // Use the canonical part codes declared on this page so parts are created
+            // with the expected codes like "P1_1", "P1_2", ...
+            String[] codes = new String[this.parts.length];
+            for (int i = 0; i < this.parts.length; i++) codes[i] = this.parts[i][0];
             com.studentgui.apphelpers.Database.ensureAssessmentParts(ptId, codes);
+            try {
+                com.studentgui.apphelpers.Database.cleanupAssessmentParts(ptId, codes);
+            } catch (SQLException se) {
+                LOG.warn("Could not cleanup legacy parts for Abacus", se);
+            }
         } catch (SQLException e) {
             LOG.error("SQL error initializing Abacus parts", e);
         }
@@ -224,7 +231,10 @@ public class Abacus extends JPanel {
         try {
             List<List<Integer>> allSkillValues = com.studentgui.apphelpers.Database.fetchLatestAssessmentResults(studentNameParam, "Abacus", 5);
             if (allSkillValues != null && !allSkillValues.isEmpty()) {
-                lineGraph.updateWithData(allSkillValues);
+                // Group plots by part prefix (P1_, P2_, ...)
+                String[] codes = new String[this.parts.length];
+                for (int i = 0; i < this.parts.length; i++) codes[i] = this.parts[i][0];
+                lineGraph.updateWithGroupedData(allSkillValues, codes);
                 LOG.debug("Graph updated with data: {}", allSkillValues);
                 if (this.studentNameParam != null && !this.studentNameParam.trim().isEmpty()) {
                     try {

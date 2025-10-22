@@ -171,8 +171,8 @@ public class BrailleNote extends JPanel {
     private void initDatabase() {
         try {
             int ptId = com.studentgui.apphelpers.Database.getOrCreateProgressType("BrailleNote");
-            String[] codes = new String[28];
-            for (int i = 0; i < 28; i++) codes[i] = "P" + (i+1);
+            String[] codes = new String[this.parts.length];
+            for (int i = 0; i < this.parts.length; i++) codes[i] = this.parts[i][0];
             com.studentgui.apphelpers.Database.ensureAssessmentParts(ptId, codes);
         } catch (SQLException e) {
             LOG.error("SQL error initializing braille note parts", e);
@@ -220,7 +220,9 @@ public class BrailleNote extends JPanel {
         try {
             List<List<Integer>> allSkillValues = com.studentgui.apphelpers.Database.fetchLatestAssessmentResults(studentNameParam, "BrailleNote", 5);
             if (allSkillValues != null && !allSkillValues.isEmpty()) {
-                lineGraph.updateWithData(allSkillValues);
+                String[] codes = new String[this.parts.length];
+                for (int i = 0; i < this.parts.length; i++) codes[i] = this.parts[i][0];
+                lineGraph.updateWithGroupedData(allSkillValues, codes);
                 LOG.debug("Graph updated with data: {}", allSkillValues);
                 if (this.studentNameParam != null && !this.studentNameParam.trim().isEmpty()) {
                     try {

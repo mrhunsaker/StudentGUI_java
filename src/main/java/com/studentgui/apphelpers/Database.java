@@ -115,6 +115,34 @@ public class Database {
     }
 
     /**
+     * Remove any AssessmentPart rows for the given progress type whose code is
+     * not present in the provided canonical codes array. This helps clean up
+     * legacy/malformed entries that could cause part ordering mismatches.
+     *
+     * @param progressTypeId id of the ProgressType
+     * @param allowedCodes canonical set of codes to keep
+     * @throws SQLException on database errors
+     */
+    public static void cleanupAssessmentParts(int progressTypeId, String[] allowedCodes) throws SQLException {
+        if (allowedCodes == null || allowedCodes.length == 0) return;
+        try (Connection c = getConnection()) {
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < allowedCodes.length; i++) {
+                if (i > 0) sb.append(',');
+                sb.append('?');
+            }
+            String sql = "DELETE FROM AssessmentPart WHERE progress_type_id = ? AND code NOT IN (" + sb.toString() + ")";
+            try (PreparedStatement ps = c.prepareStatement(sql)) {
+                ps.setInt(1, progressTypeId);
+                for (int i = 0; i < allowedCodes.length; i++) {
+                    ps.setString(i + 2, allowedCodes[i]);
+                }
+                ps.executeUpdate();
+            }
+        }
+    }
+
+    /**
      * Create a ProgressSession for a student and progress type on the given date.
      *
      * @param studentId existing student id

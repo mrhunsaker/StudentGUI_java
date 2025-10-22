@@ -104,7 +104,7 @@ public class IOS extends JPanel {
             row++;
         }
     // Buttons: Save iOS Data + Open Latest Plot (side-by-side, match IOS styling)
-    gbc.gridx = 0; gbc.gridy = row; gbc.gridwidth = 2; gbc.anchor = GridBagConstraints.WEST;
+    gbc.gridx = 0; gbc.gridy = row; gbc.gridwidth = 1; gbc.anchor = GridBagConstraints.WEST;
     javax.swing.JPanel buttonRow = new javax.swing.JPanel(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT, 8, 0));
     buttonRow.setOpaque(false);
 
@@ -210,7 +210,10 @@ public class IOS extends JPanel {
         try {
             java.util.List<java.util.List<Integer>> data = com.studentgui.apphelpers.Database.fetchLatestAssessmentResults(this.studentNameParam, "iOS", 20);
             if (data != null && !data.isEmpty()) {
-                graph.updateWithData(data);
+                // Build codes array in the same order as inputs were created
+                String[] codes = new String[inputs.size()];
+                int idx = 0; for (String k: inputs.keySet()) codes[idx++] = k;
+                graph.updateWithGroupedData(data, codes);
                 // Save static PNG
                 if (this.studentNameParam != null && !this.studentNameParam.trim().isEmpty()) {
                     try {

@@ -1,4 +1,5 @@
 com\studentgui\apphelpers\SqlGenerateTest.class
+com\studentgui\apphelpers\SessionJsonWriterTest.class
 com\studentgui\apphelpers\DatabaseContactLogTest.class
 com\studentgui\test\BrailleDatabaseTest.class
 com\studentgui\test\DatabaseTest.class

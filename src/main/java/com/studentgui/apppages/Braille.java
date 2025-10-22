@@ -187,10 +187,8 @@ public class Braille extends JPanel {
         // Ensure normalized schema parts for Braille exist
         try {
             int ptId = com.studentgui.apphelpers.Database.getOrCreateProgressType("Braille");
-            // Define canonical codes for braille parts (P1_1... etc). We'll use indices as codes here.
-            String[] codes = new String[28];
-            for (int i = 0; i < 28; i++) codes[i] = "P" + (i+1);
-            com.studentgui.apphelpers.Database.ensureAssessmentParts(ptId, codes);
+            // Use the canonical part codes defined in this.parts
+            com.studentgui.apphelpers.Database.ensureAssessmentParts(ptId, this.partCodes);
         } catch (SQLException e) {
             LOG.error("Error initializing Braille parts", e);
         }
@@ -214,7 +212,7 @@ public class Braille extends JPanel {
             String[] codes = new String[28];
             int[] scores = new int[28];
             for (int i = 0; i < 28; i++) {
-                codes[i] = "P" + (i+1);
+                codes[i] = this.partCodes[i];
                 scores[i] = skillFields[i].getValue();
             }
             com.studentgui.apphelpers.Database.insertAssessmentResults(sessionId, ptId, codes, scores);
@@ -247,7 +245,7 @@ public class Braille extends JPanel {
             // We will try to use the first skill field's content as a student name fallback; in the UI flow this should be provided.
             // For now use a placeholder when no student is selected.
             if (allSkillValues != null && !allSkillValues.isEmpty()) {
-                lineGraph.updateWithData(allSkillValues);
+                lineGraph.updateWithGroupedData(allSkillValues, this.partCodes);
                 LOG.debug("Graph updated with data: {}", allSkillValues);
                 // Save static PNG to student's plots folder and open it
                 if (this.studentNameParam != null && !this.studentNameParam.trim().isEmpty()) {
