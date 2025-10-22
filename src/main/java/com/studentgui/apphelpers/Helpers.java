@@ -21,6 +21,7 @@ public class Helpers {
     private Helpers() {
         throw new AssertionError("Helpers is a utility class");
     }
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Helpers.class);
     /** The project working directory (where the process was started). */
     public static final Path PROJECT_ROOT = Paths.get(System.getProperty("user.dir"));
     /** Application home used for storing app-specific files (defaults to ./app_home). */
@@ -47,13 +48,15 @@ public class Helpers {
             Files.deleteIfExists(test);
             return candidate;
         } catch (IOException e) {
-            try {
-                Path tmp = Paths.get(System.getProperty("java.io.tmpdir"), "StudentDataGUI");
-                Files.createDirectories(tmp);
-                return tmp;
-            } catch (IOException ex) {
-                return Paths.get(".");
-            }
+                LOG.debug("Unable to create app_home; falling back to temp dir", e);
+                try {
+                    Path tmp = Paths.get(System.getProperty("java.io.tmpdir"), "StudentDataGUI");
+                    Files.createDirectories(tmp);
+                    return tmp;
+                } catch (IOException ex) {
+                    LOG.debug("Unable to create fallback temp dir; using CWD", ex);
+                    return Paths.get(".");
+                }
         }
     }
 
@@ -68,7 +71,8 @@ public class Helpers {
          */
         try {
             System.setProperty("user.dir", APP_HOME.toString());
-        } catch (SecurityException ignored) {
+        } catch (SecurityException se) {
+            LOG.debug("Unable to set user.dir to APP_HOME {}", APP_HOME, se);
         }
     }
 
@@ -83,7 +87,8 @@ public class Helpers {
         try {
             Path studentDataDir = APP_HOME.resolve("StudentDataFiles");
             Files.createDirectories(studentDataDir);
-        } catch (IOException ignored) {
+        } catch (IOException ioe) {
+            LOG.debug("Unable to create StudentDataFiles directory under {}", APP_HOME, ioe);
         }
     }
 
@@ -107,7 +112,8 @@ public class Helpers {
             Files.createDirectories(studentDatafilesRoot);
             Files.createDirectories(studentErrorlogsRoot);
             Files.createDirectories(studentBackupsRoot);
-        } catch (IOException ignored) {
+        } catch (IOException ioe) {
+            LOG.debug("Unable to create one or more data folders under {}", DATA_ROOT, ioe);
         }
 
         for (String name : students) {
@@ -121,7 +127,8 @@ public class Helpers {
                 if (!Files.exists(omnibus)) {
                     Files.createFile(omnibus);
                 }
-            } catch (IOException ignored) {
+            } catch (IOException ioe) {
+                LOG.debug("Unable to create per-student folder or omnibus file for {}", name, ioe);
             }
         }
     }
@@ -150,6 +157,9 @@ public class Helpers {
     /**
      * Public safe name helper for filesystem paths. Mirrors the internal
      * sanitize implementation but is callable from other packages.
+     *
+     * @param s input display name
+     * @return sanitized filesystem-safe name (never null)
      */
     public static String safeName(String s) {
         if (s == null) return "";
@@ -159,6 +169,10 @@ public class Helpers {
     /**
      * Find the latest PNG plot file for a named student with the given prefix.
      * Returns null when no matching files exist.
+    *
+    * @param studentName display name of student
+    * @param prefix file prefix such as "iOS" or "ScreenReader"
+    * @return path to the most recently modified matching PNG, or null
      */
     public static java.nio.file.Path latestPlotPath(String studentName, String prefix) {
         if (studentName == null || studentName.trim().isEmpty()) return null;
@@ -174,11 +188,13 @@ public class Helpers {
                         java.nio.file.attribute.FileTime t2 = java.nio.file.Files.getLastModifiedTime(latest);
                         if (t1.compareTo(t2) > 0) latest = p;
                     }
-                } catch (IOException ignored) {
+                } catch (IOException ioe) {
+                    LOG.debug("Error reading file metadata for {}", p, ioe);
                 }
             }
-    } catch (IOException ignored) {
-    }
+        } catch (IOException ioe) {
+            LOG.debug("Error listing plot directory {}", dir, ioe);
+        }
         return latest;
     }
 
@@ -205,7 +221,8 @@ public class Helpers {
                     String candidate = m.group(1).trim();
                     if (!candidate.isEmpty()) list.add(candidate);
                 }
-            } catch (IOException ignored) {
+            } catch (IOException ioe) {
+                LOG.debug("Unable to read students.json {}", p, ioe);
             }
         }
         if (list.isEmpty()) {

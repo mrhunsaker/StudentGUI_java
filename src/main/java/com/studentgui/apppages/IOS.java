@@ -104,7 +104,7 @@ public class IOS extends JPanel {
             row++;
         }
     // Buttons: Save iOS Data + Open Latest Plot (side-by-side, match IOS styling)
-    gbc.gridx = 0; gbc.gridy = row; gbc.gridwidth = 2; gbc.anchor = GridBagConstraints.WEST;
+    gbc.gridx = 0; gbc.gridy = row; gbc.gridwidth = 1; gbc.anchor = GridBagConstraints.WEST;
     javax.swing.JPanel buttonRow = new javax.swing.JPanel(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT, 8, 0));
     buttonRow.setOpaque(false);
 
@@ -184,6 +184,9 @@ public class IOS extends JPanel {
             com.studentgui.apphelpers.Database.insertAssessmentResults(sessionId, ptId, codes, scores);
             LOG.info("iOS data saved for {}", this.studentNameParam);
             com.studentgui.apphelpers.UiNotifier.show("iOS data saved.");
+            com.studentgui.apphelpers.dto.AssessmentPayload payload = new com.studentgui.apphelpers.dto.AssessmentPayload(sessionId, codes, scores);
+            java.nio.file.Path jsonOut = com.studentgui.apphelpers.SessionJsonWriter.writeSessionJson(this.studentNameParam, "iOS", payload, sessionId);
+            if (jsonOut == null) LOG.warn("Unable to save iOS session JSON for sessionId={}", sessionId);
             try {
                 java.nio.file.Path out = com.studentgui.apphelpers.Helpers.APP_HOME.resolve("StudentDataFiles").resolve(com.studentgui.apphelpers.Helpers.safeName(this.studentNameParam)).resolve("plots");
                 java.time.format.DateTimeFormatter df = java.time.format.DateTimeFormatter.ISO_DATE;
@@ -207,7 +210,10 @@ public class IOS extends JPanel {
         try {
             java.util.List<java.util.List<Integer>> data = com.studentgui.apphelpers.Database.fetchLatestAssessmentResults(this.studentNameParam, "iOS", 20);
             if (data != null && !data.isEmpty()) {
-                graph.updateWithData(data);
+                // Build codes array in the same order as inputs were created
+                String[] codes = new String[inputs.size()];
+                int idx = 0; for (String k: inputs.keySet()) codes[idx++] = k;
+                graph.updateWithGroupedData(data, codes);
                 // Save static PNG
                 if (this.studentNameParam != null && !this.studentNameParam.trim().isEmpty()) {
                     try {

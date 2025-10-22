@@ -13,8 +13,19 @@ import com.studentgui.apppages.JLineGraph;
 /**
  * Programmatically create a Braille page, populate PhaseScoreField values,
  * and trigger the submit action to verify DB insert and PNG export.
+ * <p>
+ * This small test runs without user interaction and is useful during
+ * automated smoke tests or developer verification of page submission
+ * behaviour. Outputs are written under the application's app_home.
+ * </p>
  */
 public class ProgrammaticPageSaveTest {
+    /**
+     * Program entry to run the programmatic page save test.
+     *
+     * @param args ignored
+     * @throws Exception on reflection or DB errors
+     */
     public static void main(String[] args) throws Exception {
         Helpers.createFolderHierarchy();
         JLineGraph graph = new JLineGraph();
@@ -65,5 +76,13 @@ public class ProgrammaticPageSaveTest {
             }
         }
         return null;
+    }
+
+    /**
+     * Private constructor to avoid instantiation - this class is a programmatic
+     * test harness containing only static helpers and a main method.
+     */
+    private ProgrammaticPageSaveTest() {
+        // no instances
     }
 }

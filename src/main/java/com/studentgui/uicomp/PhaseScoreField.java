@@ -21,14 +21,25 @@ import javax.swing.SpinnerNumberModel;
  */
 public class PhaseScoreField extends JPanel {
     private static final long serialVersionUID = 1L;
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PhaseScoreField.class);
+    /** Wrapped, read-only label area used to display the description text. */
     private final JTextArea labelArea;
+    /** Numeric spinner used for 0..4 score entry. */
     private final JSpinner spinner;
+    /** Container used to constrain the wrap width of the label area. */
     private final JPanel labelWrap;
     // Global label width (pixels) used to make all rows align; default ~200
     private static int GLOBAL_LABEL_WIDTH_PX = 200;
 
+    /** Horizontal spacer panel inserted to tune the gap between label and spinner. */
     private final JPanel spacer;
 
+    /**
+     * Create a PhaseScoreField containing a wrapped label and a numeric spinner.
+     *
+     * @param labelText text label to display (may be multi-line)
+     * @param initial initial integer value for the spinner (0..4)
+     */
     public PhaseScoreField(String labelText, int initial) {
         super(new GridBagLayout());
     this.labelArea = new JTextArea(labelText);
@@ -65,7 +76,7 @@ public class PhaseScoreField extends JPanel {
             f.setAccessible(true);
             Object tf = f.get(editor);
             if (tf instanceof javax.swing.JTextField) ((javax.swing.JTextField) tf).setFont(spinnerFont);
-        } catch (ReflectiveOperationException ignored) { }
+        } catch (ReflectiveOperationException roe) { LOG.debug("Could not adjust spinner editor textField font", roe); }
         editor.setPreferredSize(new Dimension(48, 20));
         spinner.setPreferredSize(new Dimension(48, 24));
 
@@ -131,6 +142,8 @@ public class PhaseScoreField extends JPanel {
      * Set a global label width used by all PhaseScoreField instances created
      * after calling this method. This helps align the spinner input across
      * multiple rows so the entry fields start at a consistent position.
+     *
+     * @param px target global label width in pixels (will be clamped to a sensible minimum)
      */
     public static void setGlobalLabelWidth(int px) {
         GLOBAL_LABEL_WIDTH_PX = Math.max(80, px);
@@ -144,11 +157,20 @@ public class PhaseScoreField extends JPanel {
         return Math.max(40, h);
     }
 
+    /**
+     * Return the configured global label width in pixels used by new instances.
+     *
+     * @return global label width in pixels
+     */
     public static int getGlobalLabelWidth() { return GLOBAL_LABEL_WIDTH_PX; }
 
     /**
      * Compute the pixel width of the longest label string using the given
      * font. Returns the maximum string width in pixels.
+    *
+    * @param font font to use when measuring (may be null to use default)
+    * @param labels array of label texts to measure
+    * @return maximum string width in pixels (>=0)
      */
     public static int computeMaxLabelPixelWidth(java.awt.Font font, String[] labels) {
         if (labels == null || labels.length == 0) return GLOBAL_LABEL_WIDTH_PX;
@@ -159,12 +181,42 @@ public class PhaseScoreField extends JPanel {
         return max;
     }
 
+    /**
+     * Set the visible label text for this row.
+     *
+     * @param text new label text
+     */
     public void setLabel(String text) { labelArea.setText(text); }
 
+    /**
+     * Get the current label text for this field.
+     *
+     * @return label text
+     */
     public String getLabel() { return labelArea.getText(); }
 
-    public int getValue() { return (Integer) spinner.getValue(); }
+    /**
+     * Get the integer value currently selected in the spinner.
+     *
+     * @return spinner integer value (0..4)
+     */
+    public int getValue() {
+        // If the user is mid-edit in the spinner's text field, try to commit the edit
+        try {
+            java.awt.Component ed = spinner.getEditor();
+            if (ed instanceof javax.swing.JSpinner.DefaultEditor) {
+                javax.swing.JFormattedTextField tf = ((javax.swing.JSpinner.DefaultEditor) ed).getTextField();
+                try { tf.commitEdit(); } catch (java.text.ParseException pe) { LOG.debug("Spinner editor parse error", pe); }
+            }
+    } catch (IllegalArgumentException | IllegalStateException re) { LOG.debug("Unexpected error committing spinner edit", re); }
+        return (Integer) spinner.getValue();
+    }
 
+    /**
+     * Set the spinner value clamped to the valid range (0..4).
+     *
+     * @param v desired spinner value
+     */
     public void setValue(int v) { spinner.setValue(Math.max(0, Math.min(4, v))); }
 
     @Override
@@ -174,9 +226,25 @@ public class PhaseScoreField extends JPanel {
     }
 
     // Diagnostics: expose spinner X and label wrap width (useful to verify layout)
+    /**
+     * Get the X coordinate of the spinner inside this component (pixels).
+     *
+     * @return spinner X position in pixels
+     */
     public int getSpinnerX() { return spinner.getLocation().x; }
+
+    /**
+     * Return the configured label wrap container's current width in pixels.
+     *
+     * @return label wrap width in pixels
+     */
     public int getLabelWrapWidth() { return labelWrap.getWidth(); }
-    /** Actual horizontal gap in pixels between the label wrap right edge and the spinner left edge. */
+
+    /**
+     * Actual horizontal gap in pixels between the label wrap right edge and the spinner left edge.
+     *
+     * @return pixel gap between label and spinner
+     */
     public int getActualGap() {
         int labelRight = labelWrap.getX() + labelWrap.getWidth();
         return spinner.getX() - labelRight;

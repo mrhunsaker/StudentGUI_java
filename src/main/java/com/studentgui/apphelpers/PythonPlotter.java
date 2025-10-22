@@ -10,13 +10,23 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Helper to invoke the repository's Python plot runner asynchronously.
+ * <p>
+ * This wrapper launches the repository's Python runner script in a
+ * background thread and collects its combined output. It is used by some
+ * legacy pages; newer pages prefer the Java-based charting helpers.
+ * </p>
  */
 public class PythonPlotter {
     private static final Logger LOG = LoggerFactory.getLogger(PythonPlotter.class);
 
     /**
      * Run the python runner for the given module and student name in a background thread.
-     * The onComplete consumer receives combined stdout/stderr text when the process finishes.
+     * The {@code onComplete} consumer receives combined stdout/stderr text when the
+     * process finishes.
+     *
+     * @param moduleName module identifier passed to the python runner (non-null)
+     * @param studentName student display name used by the plotter (non-null)
+     * @param onComplete optional consumer receiving process output when complete; may be null
      */
     public static void runPlotAsync(String moduleName, String studentName, Consumer<String> onComplete) {
         if (studentName == null || studentName.trim().isEmpty()) {
@@ -51,12 +61,21 @@ public class PythonPlotter {
             if (onComplete != null) {
                 try {
                     onComplete.accept(out.toString());
-                } catch (RuntimeException ex) {
-                    LOG.warn("onComplete consumer threw", ex);
+                } catch (Exception ex) {
+                    // Log and continue: we don't want a faulty consumer to terminate
+                    // the worker thread unexpectedly. Avoid catching Error/Throwable.
+                    LOG.warn("onComplete consumer threw an exception; continuing. Output length={}", out.length(), ex);
                 }
             }
         }, "PythonPlotter-" + moduleName);
         t.setDaemon(true);
         t.start();
+    }
+
+    /**
+     * Private constructor to prevent instantiation of this helper class.
+     */
+    private PythonPlotter() {
+        // utility only
     }
 }

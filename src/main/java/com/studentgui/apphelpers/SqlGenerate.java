@@ -136,11 +136,8 @@ public class SqlGenerate {
 
     /**
      * Ensure the database file and canonical schema exist. This method is idempotent
-     * and safe to call on application startup.
-     */
-    /**
-     * Ensure the database file and canonical schema exist. This method is idempotent
-     * and safe to call on application startup.
+     * and safe to call on application startup. It will create the parent folder
+     * for the DB file if necessary and apply the embedded SCHEMA statements.
      */
     public static void initializeDatabase() {
         try {
@@ -172,6 +169,9 @@ public class SqlGenerate {
     /**
      * Execute the SCHEMA statements on the provided connection.
      * Extracted to make the schema application clearer and easier to test.
+     *
+     * @param conn established JDBC connection to the target SQLite DB
+     * @throws SQLException if applying any schema statement fails
      */
     private static void executeSchema(Connection conn) throws SQLException {
         try (Statement st = conn.createStatement()) {

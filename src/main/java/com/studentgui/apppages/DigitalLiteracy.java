@@ -33,6 +33,7 @@ public class DigitalLiteracy extends JPanel {
     private static final Logger LOG = LoggerFactory.getLogger(DigitalLiteracy.class);
     /** Array of input fields for each digital literacy skill part. */
     private final com.studentgui.uicomp.PhaseScoreField[] skillFields;
+    /** Canonical list of digital literacy assessment parts: code and display label. */
     private final String[][] parts;
 
     /** Shared graph used to visualize recent digital literacy sessions. */
@@ -169,8 +170,9 @@ public class DigitalLiteracy extends JPanel {
     private void initDatabase() {
         try {
             int ptId = com.studentgui.apphelpers.Database.getOrCreateProgressType("DigitalLiteracy");
-            String[] codes = new String[28];
-            for (int i = 0; i < 28; i++) codes[i] = "P" + (i+1);
+            // Use canonical part codes from this.parts
+            String[] codes = new String[this.parts.length];
+            for (int i = 0; i < this.parts.length; i++) codes[i] = this.parts[i][0];
             com.studentgui.apphelpers.Database.ensureAssessmentParts(ptId, codes);
         } catch (SQLException e) {
             LOG.error("SQL error ensuring assessment parts for DigitalLiteracy", e);
@@ -201,6 +203,9 @@ public class DigitalLiteracy extends JPanel {
             com.studentgui.apphelpers.Database.insertAssessmentResults(sessionId, ptId, codes, scores);
             LOG.info("Data submitted successfully via normalized schema.");
             com.studentgui.apphelpers.UiNotifier.show("Digital Literacy data saved.");
+            com.studentgui.apphelpers.dto.AssessmentPayload payload = new com.studentgui.apphelpers.dto.AssessmentPayload(sessionId, codes, scores);
+            java.nio.file.Path jsonOut = com.studentgui.apphelpers.SessionJsonWriter.writeSessionJson(this.studentNameParam, "DigitalLiteracy", payload, sessionId);
+            if (jsonOut == null) LOG.warn("Unable to save DigitalLiteracy session JSON for sessionId={}", sessionId);
         } catch (SQLException e) {
             LOG.error("SQL error submitting Digital Literacy data", e);
             JOptionPane.showMessageDialog(this, "Database error saving Digital Literacy data: " + e.getMessage(), "Database error", JOptionPane.ERROR_MESSAGE);
@@ -215,7 +220,10 @@ public class DigitalLiteracy extends JPanel {
         try {
             List<List<Integer>> allSkillValues = com.studentgui.apphelpers.Database.fetchLatestAssessmentResults(studentNameParam, "DigitalLiteracy", 5);
             if (allSkillValues != null && !allSkillValues.isEmpty()) {
-                lineGraph.updateWithData(allSkillValues);
+                // Build canonical codes array in the same order used when ensuring parts
+                String[] codes = new String[this.parts.length];
+                for (int i = 0; i < this.parts.length; i++) codes[i] = this.parts[i][0];
+                lineGraph.updateWithGroupedData(allSkillValues, codes);
                 LOG.debug("Graph updated with data: {}", allSkillValues);
                 if (this.studentNameParam != null && !this.studentNameParam.trim().isEmpty()) {
                     try {

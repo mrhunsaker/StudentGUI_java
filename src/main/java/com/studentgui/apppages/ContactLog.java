@@ -35,13 +35,19 @@ public class ContactLog extends JPanel {
     /** Text area where the user enters contact notes for the selected student. */
     private final JTextArea notesArea;
     // additional contact fields
+    /** Guardian or parent name associated with the student. */
     private final JTextField guardianField;
-    
+    /** Phone number used for contact. */
     private final JTextField phoneField;
+    /** Email address used for contact. */
     private final JTextField emailField;
+    /** Method of contact (Phone/Email/In Person/Other). */
     private final JComboBox<String> contactMethodCombo;
+    /** Short description of the response received during contact. */
     private final JTextField contactResponseField;
+    /** High-level/general contact notes (summary). */
     private final JTextField contactGeneralField;
+    /** Specific items or action points discussed during contact. */
     private final JTextField contactSpecificField;
 
     /** Selected student display name associated with this page instance (may be null). */
@@ -129,20 +135,20 @@ public class ContactLog extends JPanel {
 
     private void loadLastContact() {
         try {
-            java.util.Map<String,String> m = com.studentgui.apphelpers.Database.fetchLatestContactLog(this.studentNameParam);
-            if (m == null) {
+            com.studentgui.apphelpers.dto.ContactPayload p = com.studentgui.apphelpers.Database.fetchLatestContactLog(this.studentNameParam);
+            if (p == null) {
                 com.studentgui.apphelpers.UiNotifier.show("No contact found for this student.");
                 return;
             }
-            guardianField.setText(m.getOrDefault("guardianName", ""));
-            String method = m.getOrDefault("contactMethod", "");
+            guardianField.setText(p.guardian != null ? p.guardian : "");
+            String method = p.method != null ? p.method : "";
             if (method != null) contactMethodCombo.setSelectedItem(method);
-            phoneField.setText(m.getOrDefault("phoneNumber", ""));
-            emailField.setText(m.getOrDefault("emailAddress", ""));
-            contactResponseField.setText(m.getOrDefault("contactResponse", ""));
-            contactGeneralField.setText(m.getOrDefault("contactGeneral", ""));
-            contactSpecificField.setText(m.getOrDefault("contactSpecific", ""));
-            notesArea.setText(m.getOrDefault("contactNotes", ""));
+            phoneField.setText(p.phone != null ? p.phone : "");
+            emailField.setText(p.email != null ? p.email : "");
+            contactResponseField.setText(p.response != null ? p.response : "");
+            contactGeneralField.setText(p.general != null ? p.general : "");
+            contactSpecificField.setText(p.specific != null ? p.specific : "");
+            notesArea.setText(p.notes != null ? p.notes : "");
         } catch (SQLException ex) {
             LOG.error("Error loading last contact", ex);
             JOptionPane.showMessageDialog(this, "Database error loading contact: " + ex.getMessage(), "Database error", JOptionPane.ERROR_MESSAGE);
@@ -184,6 +190,9 @@ public class ContactLog extends JPanel {
             com.studentgui.apphelpers.Database.saveContactLog(sessionId, this.studentNameParam, this.dateParam.toString(), guardian, method, phone, email, response, general, specific, notes);
             LOG.info("Saved contact log for {}", studentNameParam);
             com.studentgui.apphelpers.UiNotifier.show("Contact log saved.");
+            com.studentgui.apphelpers.dto.ContactPayload payload = new com.studentgui.apphelpers.dto.ContactPayload(sessionId, guardian, method, phone, email, response, general, specific, notes);
+            java.nio.file.Path jsonOut = com.studentgui.apphelpers.SessionJsonWriter.writeSessionJson(this.studentNameParam, "ContactLog", payload, sessionId);
+            if (jsonOut == null) LOG.warn("Unable to save ContactLog session JSON for sessionId={}", sessionId);
         } catch (SQLException ex) {
             LOG.error("Error saving contact log", ex);
             javax.swing.JOptionPane.showMessageDialog(this, "Database error saving contact log: " + ex.getMessage(), "Database error", javax.swing.JOptionPane.ERROR_MESSAGE);

@@ -184,6 +184,9 @@ public class ScreenReader extends JPanel {
             com.studentgui.apphelpers.Database.insertAssessmentResults(sessionId, ptId, codes, scores);
             LOG.info("ScreenReader data submitted for student={}", this.studentNameParam);
             com.studentgui.apphelpers.UiNotifier.show("ScreenReader data saved.");
+            com.studentgui.apphelpers.dto.AssessmentPayload payload = new com.studentgui.apphelpers.dto.AssessmentPayload(sessionId, codes, scores);
+            java.nio.file.Path jsonOut = com.studentgui.apphelpers.SessionJsonWriter.writeSessionJson(this.studentNameParam, "ScreenReader", payload, sessionId);
+            if (jsonOut == null) LOG.warn("Unable to save ScreenReader session JSON for sessionId={}", sessionId);
             try {
                 java.nio.file.Path out = com.studentgui.apphelpers.Helpers.APP_HOME.resolve("StudentDataFiles").resolve(com.studentgui.apphelpers.Helpers.safeName(this.studentNameParam)).resolve("plots");
                 java.time.format.DateTimeFormatter df = java.time.format.DateTimeFormatter.ISO_DATE;
@@ -209,7 +212,9 @@ public class ScreenReader extends JPanel {
         try {
             List<List<Integer>> allSkillValues = com.studentgui.apphelpers.Database.fetchLatestAssessmentResults(studentNameParam, "ScreenReader", 5);
             if (allSkillValues != null && !allSkillValues.isEmpty()) {
-                lineGraph.updateWithData(allSkillValues);
+                String[] codes = new String[this.parts.length];
+                for (int i = 0; i < this.parts.length; i++) codes[i] = this.parts[i][0];
+                lineGraph.updateWithGroupedData(allSkillValues, codes);
                 LOG.info("Graph updated with {} series", allSkillValues.size());
             } else {
                 LOG.info("No ScreenReader data to plot for {}", studentNameParam);

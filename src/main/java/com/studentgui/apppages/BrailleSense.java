@@ -182,6 +182,9 @@ public class BrailleSense extends JPanel {
             com.studentgui.apphelpers.Database.insertAssessmentResults(sessionId, ptId, codes, scores);
             LOG.info("BrailleSense data saved for {}", studentNameParam);
             com.studentgui.apphelpers.UiNotifier.show("BrailleSense data saved.");
+            com.studentgui.apphelpers.dto.AssessmentPayload payload = new com.studentgui.apphelpers.dto.AssessmentPayload(sessionId, codes, scores);
+            java.nio.file.Path jsonOut = com.studentgui.apphelpers.SessionJsonWriter.writeSessionJson(this.studentNameParam, "BrailleSense", payload, sessionId);
+            if (jsonOut == null) LOG.warn("Unable to save BrailleSense session JSON for sessionId={}", sessionId);
             try {
                 java.nio.file.Path out = com.studentgui.apphelpers.Helpers.APP_HOME.resolve("StudentDataFiles").resolve(com.studentgui.apphelpers.Helpers.safeName(this.studentNameParam)).resolve("plots");
                 java.time.format.DateTimeFormatter df = java.time.format.DateTimeFormatter.ISO_DATE;

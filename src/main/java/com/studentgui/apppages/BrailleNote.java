@@ -171,8 +171,8 @@ public class BrailleNote extends JPanel {
     private void initDatabase() {
         try {
             int ptId = com.studentgui.apphelpers.Database.getOrCreateProgressType("BrailleNote");
-            String[] codes = new String[28];
-            for (int i = 0; i < 28; i++) codes[i] = "P" + (i+1);
+            String[] codes = new String[this.parts.length];
+            for (int i = 0; i < this.parts.length; i++) codes[i] = this.parts[i][0];
             com.studentgui.apphelpers.Database.ensureAssessmentParts(ptId, codes);
         } catch (SQLException e) {
             LOG.error("SQL error initializing braille note parts", e);
@@ -203,6 +203,9 @@ public class BrailleNote extends JPanel {
             com.studentgui.apphelpers.Database.insertAssessmentResults(sessionId, ptId, codes, scores);
             LOG.info("Data submitted successfully via normalized schema.");
             com.studentgui.apphelpers.UiNotifier.show("BrailleNote data saved.");
+            com.studentgui.apphelpers.dto.AssessmentPayload payload = new com.studentgui.apphelpers.dto.AssessmentPayload(sessionId, codes, scores);
+            java.nio.file.Path jsonOut = com.studentgui.apphelpers.SessionJsonWriter.writeSessionJson(this.studentNameParam, "BrailleNote", payload, sessionId);
+            if (jsonOut == null) LOG.warn("Unable to save BrailleNote session JSON for sessionId={}", sessionId);
         } catch (SQLException e) {
             LOG.error("SQL error saving braille note data", e);
             JOptionPane.showMessageDialog(this, "Database error saving BrailleNote data: " + e.getMessage(), "Database error", JOptionPane.ERROR_MESSAGE);
@@ -217,7 +220,9 @@ public class BrailleNote extends JPanel {
         try {
             List<List<Integer>> allSkillValues = com.studentgui.apphelpers.Database.fetchLatestAssessmentResults(studentNameParam, "BrailleNote", 5);
             if (allSkillValues != null && !allSkillValues.isEmpty()) {
-                lineGraph.updateWithData(allSkillValues);
+                String[] codes = new String[this.parts.length];
+                for (int i = 0; i < this.parts.length; i++) codes[i] = this.parts[i][0];
+                lineGraph.updateWithGroupedData(allSkillValues, codes);
                 LOG.debug("Graph updated with data: {}", allSkillValues);
                 if (this.studentNameParam != null && !this.studentNameParam.trim().isEmpty()) {
                     try {

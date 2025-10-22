@@ -187,10 +187,8 @@ public class Braille extends JPanel {
         // Ensure normalized schema parts for Braille exist
         try {
             int ptId = com.studentgui.apphelpers.Database.getOrCreateProgressType("Braille");
-            // Define canonical codes for braille parts (P1_1... etc). We'll use indices as codes here.
-            String[] codes = new String[28];
-            for (int i = 0; i < 28; i++) codes[i] = "P" + (i+1);
-            com.studentgui.apphelpers.Database.ensureAssessmentParts(ptId, codes);
+            // Use the canonical part codes defined in this.parts
+            com.studentgui.apphelpers.Database.ensureAssessmentParts(ptId, this.partCodes);
         } catch (SQLException e) {
             LOG.error("Error initializing Braille parts", e);
         }
@@ -214,12 +212,15 @@ public class Braille extends JPanel {
             String[] codes = new String[28];
             int[] scores = new int[28];
             for (int i = 0; i < 28; i++) {
-                codes[i] = "P" + (i+1);
+                codes[i] = this.partCodes[i];
                 scores[i] = skillFields[i].getValue();
             }
             com.studentgui.apphelpers.Database.insertAssessmentResults(sessionId, ptId, codes, scores);
             LOG.info("Data submitted successfully via normalized schema.");
             com.studentgui.apphelpers.UiNotifier.show("Braille data saved.");
+            com.studentgui.apphelpers.dto.AssessmentPayload payload = new com.studentgui.apphelpers.dto.AssessmentPayload(sessionId, codes, scores);
+            java.nio.file.Path jsonOut = com.studentgui.apphelpers.SessionJsonWriter.writeSessionJson(this.studentNameParam, "Braille", payload, sessionId);
+            if (jsonOut == null) LOG.warn("Unable to save Braille session JSON for sessionId={}", sessionId);
             try {
                 java.nio.file.Path out = com.studentgui.apphelpers.Helpers.APP_HOME.resolve("StudentDataFiles").resolve(com.studentgui.apphelpers.Helpers.safeName(this.studentNameParam)).resolve("plots");
                 java.time.format.DateTimeFormatter df = java.time.format.DateTimeFormatter.ISO_DATE;
@@ -244,7 +245,7 @@ public class Braille extends JPanel {
             // We will try to use the first skill field's content as a student name fallback; in the UI flow this should be provided.
             // For now use a placeholder when no student is selected.
             if (allSkillValues != null && !allSkillValues.isEmpty()) {
-                lineGraph.updateWithData(allSkillValues);
+                lineGraph.updateWithGroupedData(allSkillValues, this.partCodes);
                 LOG.debug("Graph updated with data: {}", allSkillValues);
                 // Save static PNG to student's plots folder and open it
                 if (this.studentNameParam != null && !this.studentNameParam.trim().isEmpty()) {

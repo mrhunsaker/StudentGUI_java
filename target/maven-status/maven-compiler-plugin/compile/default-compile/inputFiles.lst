@@ -4,8 +4,14 @@ D:\GitHubRepos\StudentGUI_java\src\main\java\BrailleNote.java
 D:\GitHubRepos\StudentGUI_java\src\main\java\BrailleSense.java
 D:\GitHubRepos\StudentGUI_java\src\main\java\com\studentgui\app\Main.java
 D:\GitHubRepos\StudentGUI_java\src\main\java\com\studentgui\apphelpers\Database.java
+D:\GitHubRepos\StudentGUI_java\src\main\java\com\studentgui\apphelpers\dto\AssessmentPayload.java
+D:\GitHubRepos\StudentGUI_java\src\main\java\com\studentgui\apphelpers\dto\ContactPayload.java
+D:\GitHubRepos\StudentGUI_java\src\main\java\com\studentgui\apphelpers\dto\KeyboardingPayload.java
+D:\GitHubRepos\StudentGUI_java\src\main\java\com\studentgui\apphelpers\dto\NotesPayload.java
+D:\GitHubRepos\StudentGUI_java\src\main\java\com\studentgui\apphelpers\dto\SessionPayload.java
 D:\GitHubRepos\StudentGUI_java\src\main\java\com\studentgui\apphelpers\Helpers.java
 D:\GitHubRepos\StudentGUI_java\src\main\java\com\studentgui\apphelpers\PythonPlotter.java
+D:\GitHubRepos\StudentGUI_java\src\main\java\com\studentgui\apphelpers\SessionJsonWriter.java
 D:\GitHubRepos\StudentGUI_java\src\main\java\com\studentgui\apphelpers\Settings.java
 D:\GitHubRepos\StudentGUI_java\src\main\java\com\studentgui\apphelpers\SqlGenerate.java
 D:\GitHubRepos\StudentGUI_java\src\main\java\com\studentgui\apphelpers\UiNotifier.java
@@ -26,6 +32,7 @@ D:\GitHubRepos\StudentGUI_java\src\main\java\com\studentgui\apppages\ScreenReade
 D:\GitHubRepos\StudentGUI_java\src\main\java\com\studentgui\apppages\SessionNotes.java
 D:\GitHubRepos\StudentGUI_java\src\main\java\com\studentgui\apptheming\Theme.java
 D:\GitHubRepos\StudentGUI_java\src\main\java\com\studentgui\test\BrailleSmokeTest.java
+D:\GitHubRepos\StudentGUI_java\src\main\java\com\studentgui\tools\GroupedSmoke.java
 D:\GitHubRepos\StudentGUI_java\src\main\java\com\studentgui\tools\ProgrammaticPageSaveTest.java
 D:\GitHubRepos\StudentGUI_java\src\main\java\com\studentgui\tools\SmokeTest.java
 D:\GitHubRepos\StudentGUI_java\src\main\java\com\studentgui\uicomp\PhaseScoreField.java

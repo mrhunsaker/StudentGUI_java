@@ -35,6 +35,7 @@ public class Abacus extends JPanel {
 
     /** Array of input components for each skill. */
     private final com.studentgui.uicomp.PhaseScoreField[] skillFields;
+    /** Canonical list of abacus assessment parts: code and display label. */
     private final String[][] parts;
     /** Shared graph component used to visualize recent results. */
     private final JLineGraph lineGraph; // Reference to the JLineGraph instance
@@ -173,9 +174,16 @@ public class Abacus extends JPanel {
     private void initDatabase() {
         try {
             int ptId = com.studentgui.apphelpers.Database.getOrCreateProgressType("Abacus");
-            String[] codes = new String[28];
-            for (int i = 0; i < 28; i++) codes[i] = "P" + (i+1);
+            // Use the canonical part codes declared on this page so parts are created
+            // with the expected codes like "P1_1", "P1_2", ...
+            String[] codes = new String[this.parts.length];
+            for (int i = 0; i < this.parts.length; i++) codes[i] = this.parts[i][0];
             com.studentgui.apphelpers.Database.ensureAssessmentParts(ptId, codes);
+            try {
+                com.studentgui.apphelpers.Database.cleanupAssessmentParts(ptId, codes);
+            } catch (SQLException se) {
+                LOG.warn("Could not cleanup legacy parts for Abacus", se);
+            }
         } catch (SQLException e) {
             LOG.error("SQL error initializing Abacus parts", e);
         }
@@ -205,6 +213,10 @@ public class Abacus extends JPanel {
             com.studentgui.apphelpers.Database.insertAssessmentResults(sessionId, ptId, codes, scores);
             LOG.info("Data submitted successfully via normalized schema.");
             com.studentgui.apphelpers.UiNotifier.show("Abacus data saved.");
+            // Also persist this session as a JSON file in the student's folder (timestamped per-session)
+            com.studentgui.apphelpers.dto.AssessmentPayload payload = new com.studentgui.apphelpers.dto.AssessmentPayload(sessionId, codes, scores);
+            java.nio.file.Path jsonOut = com.studentgui.apphelpers.SessionJsonWriter.writeSessionJson(this.studentNameParam, "Abacus", payload, sessionId);
+            if (jsonOut == null) LOG.warn("Unable to save Abacus session JSON for sessionId={}", sessionId);
         } catch (SQLException e) {
             LOG.error("SQL error in submitData", e);
             JOptionPane.showMessageDialog(this, "Database error saving Abacus data: " + e.getMessage(), "Database error", JOptionPane.ERROR_MESSAGE);
@@ -219,7 +231,10 @@ public class Abacus extends JPanel {
         try {
             List<List<Integer>> allSkillValues = com.studentgui.apphelpers.Database.fetchLatestAssessmentResults(studentNameParam, "Abacus", 5);
             if (allSkillValues != null && !allSkillValues.isEmpty()) {
-                lineGraph.updateWithData(allSkillValues);
+                // Group plots by part prefix (P1_, P2_, ...)
+                String[] codes = new String[this.parts.length];
+                for (int i = 0; i < this.parts.length; i++) codes[i] = this.parts[i][0];
+                lineGraph.updateWithGroupedData(allSkillValues, codes);
                 LOG.debug("Graph updated with data: {}", allSkillValues);
                 if (this.studentNameParam != null && !this.studentNameParam.trim().isEmpty()) {
                     try {

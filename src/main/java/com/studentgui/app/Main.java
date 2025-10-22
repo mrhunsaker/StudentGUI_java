@@ -76,12 +76,10 @@ public class Main {
      */
     public static void main(String[] args) {
         // Apply saved look and feel (default to light)
-        try {
-            String saved = com.studentgui.apphelpers.Settings.get("theme", "light");
-            setTheme(saved);
-        } catch (RuntimeException e) {
-            LOG.error("Failed to initialize look and feel", e);
-        }
+        // Settings.get and setTheme handle any expected failures internally;
+        // call directly so we avoid a broad RuntimeException catch.
+        String saved = com.studentgui.apphelpers.Settings.get("theme", "light");
+        setTheme(saved);
 
         // Initialize helpers and DB
         Helpers.setStartDir();
@@ -107,6 +105,17 @@ public class Main {
             fileMenu.add(exitItem);
             // Insert file menu at position 0 so it appears on the far left
             themeBar.add(fileMenu, 0);
+            // Ensure the Themes menu (if present) appears immediately after File
+            int themesIdx = -1;
+            for (int i = 0; i < themeBar.getMenuCount(); i++) {
+                javax.swing.JMenu m = themeBar.getMenu(i);
+                if (m != null && "Themes".equals(m.getText())) { themesIdx = i; break; }
+            }
+            if (themesIdx > 1) {
+                javax.swing.JMenu themesMenu = themeBar.getMenu(themesIdx);
+                themeBar.remove(themesIdx);
+                themeBar.add(themesMenu, 1);
+            }
             frame.setJMenuBar(themeBar);
 
 
@@ -131,6 +140,8 @@ public class Main {
     /**
      * Change application theme at runtime. Supported values: "light", "dark", "darcula".
      * This method updates the installed Look and Feel and refreshes the main frame.
+    *
+    * @param theme human-friendly theme name or fully-qualified LookAndFeel class name
      */
     public static void setTheme(String theme) {
         try {

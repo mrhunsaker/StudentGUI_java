@@ -175,28 +175,39 @@ public class Theme {
 
         // Themes menu (top-level)
         JMenu themesMenu = new JMenu("Themes");
-        JMenuItem light = new JMenuItem(new AbstractAction("Light") {
+        // Read persisted theme choice so we can mark the active menu item
+        String currentTheme = com.studentgui.apphelpers.Settings.get("theme", "light");
+
+        javax.swing.ButtonGroup themeGroup = new javax.swing.ButtonGroup();
+
+        javax.swing.JRadioButtonMenuItem light = new javax.swing.JRadioButtonMenuItem(new AbstractAction("Light") {
             @Override public void actionPerformed(ActionEvent e) { Main.setTheme("light"); com.studentgui.apphelpers.Settings.put("theme", "light"); }
         });
         light.setIcon(makeIcon(new Color(0x000000), 12));
         light.getAccessibleContext().setAccessibleName("Light theme");
         light.getAccessibleContext().setAccessibleDescription("Switch to the light theme");
+        if ("light".equalsIgnoreCase(currentTheme) || "flatlightlaf".equalsIgnoreCase(currentTheme)) light.setSelected(true);
+        themeGroup.add(light);
         themesMenu.add(light);
 
-        JMenuItem dark = new JMenuItem(new AbstractAction("Dark") {
+        javax.swing.JRadioButtonMenuItem dark = new javax.swing.JRadioButtonMenuItem(new AbstractAction("Dark") {
             @Override public void actionPerformed(ActionEvent e) { Main.setTheme("dark"); com.studentgui.apphelpers.Settings.put("theme", "dark"); }
         });
         dark.setIcon(makeIcon(new Color(0x2C2C2C), 12));
         dark.getAccessibleContext().setAccessibleName("Dark theme");
         dark.getAccessibleContext().setAccessibleDescription("Switch to the dark theme");
+        if ("dark".equalsIgnoreCase(currentTheme) || "flatdarklaf".equalsIgnoreCase(currentTheme)) dark.setSelected(true);
+        themeGroup.add(dark);
         themesMenu.add(dark);
 
-        JMenuItem intellij = new JMenuItem(new AbstractAction("IntelliJ (Darcula)") {
+        javax.swing.JRadioButtonMenuItem intellij = new javax.swing.JRadioButtonMenuItem(new AbstractAction("IntelliJ (Darcula)") {
             @Override public void actionPerformed(ActionEvent e) { Main.setTheme("darcula"); com.studentgui.apphelpers.Settings.put("theme", "darcula"); }
         });
         intellij.setIcon(makeIcon(new Color(0x4A4A4A), 12));
         intellij.getAccessibleContext().setAccessibleName("IntelliJ Darcula");
         intellij.getAccessibleContext().setAccessibleDescription("Switch to the IntelliJ Darcula theme");
+        if ("darcula".equalsIgnoreCase(currentTheme)) intellij.setSelected(true);
+        themeGroup.add(intellij);
         themesMenu.add(intellij);
         themesMenu.addSeparator();
 
