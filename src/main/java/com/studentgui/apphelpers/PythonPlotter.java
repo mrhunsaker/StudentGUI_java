@@ -61,8 +61,10 @@ public class PythonPlotter {
             if (onComplete != null) {
                 try {
                     onComplete.accept(out.toString());
-                } catch (RuntimeException ex) {
-                    LOG.warn("onComplete consumer threw", ex);
+                } catch (Exception ex) {
+                    // Log and continue: we don't want a faulty consumer to terminate
+                    // the worker thread unexpectedly. Avoid catching Error/Throwable.
+                    LOG.warn("onComplete consumer threw an exception; continuing. Output length={}", out.length(), ex);
                 }
             }
         }, "PythonPlotter-" + moduleName);
