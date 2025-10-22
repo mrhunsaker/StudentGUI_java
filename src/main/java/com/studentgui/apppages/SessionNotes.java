@@ -97,6 +97,9 @@ public class SessionNotes extends JPanel {
             com.studentgui.apphelpers.Database.saveSessionNotes(sessionId, notes);
             LOG.info("Saved session notes for {}", studentNameParam);
             com.studentgui.apphelpers.UiNotifier.show("Session notes saved.");
+            com.studentgui.apphelpers.dto.NotesPayload payload = new com.studentgui.apphelpers.dto.NotesPayload(sessionId, notes);
+            java.nio.file.Path jsonOut = com.studentgui.apphelpers.SessionJsonWriter.writeSessionJson(this.studentNameParam, "SessionNotes", payload, sessionId);
+            if (jsonOut == null) LOG.warn("Unable to save SessionNotes session JSON for sessionId={}", sessionId);
         } catch (SQLException ex) {
             LOG.error("Error saving session notes", ex);
             javax.swing.JOptionPane.showMessageDialog(this, "Database error saving session notes: " + ex.getMessage(), "Database error", javax.swing.JOptionPane.ERROR_MESSAGE);

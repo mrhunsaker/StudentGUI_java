@@ -33,6 +33,7 @@ public class DigitalLiteracy extends JPanel {
     private static final Logger LOG = LoggerFactory.getLogger(DigitalLiteracy.class);
     /** Array of input fields for each digital literacy skill part. */
     private final com.studentgui.uicomp.PhaseScoreField[] skillFields;
+    /** Canonical list of digital literacy assessment parts: code and display label. */
     private final String[][] parts;
 
     /** Shared graph used to visualize recent digital literacy sessions. */
@@ -201,6 +202,9 @@ public class DigitalLiteracy extends JPanel {
             com.studentgui.apphelpers.Database.insertAssessmentResults(sessionId, ptId, codes, scores);
             LOG.info("Data submitted successfully via normalized schema.");
             com.studentgui.apphelpers.UiNotifier.show("Digital Literacy data saved.");
+            com.studentgui.apphelpers.dto.AssessmentPayload payload = new com.studentgui.apphelpers.dto.AssessmentPayload(sessionId, codes, scores);
+            java.nio.file.Path jsonOut = com.studentgui.apphelpers.SessionJsonWriter.writeSessionJson(this.studentNameParam, "DigitalLiteracy", payload, sessionId);
+            if (jsonOut == null) LOG.warn("Unable to save DigitalLiteracy session JSON for sessionId={}", sessionId);
         } catch (SQLException e) {
             LOG.error("SQL error submitting Digital Literacy data", e);
             JOptionPane.showMessageDialog(this, "Database error saving Digital Literacy data: " + e.getMessage(), "Database error", JOptionPane.ERROR_MESSAGE);

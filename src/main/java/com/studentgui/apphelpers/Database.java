@@ -334,8 +334,12 @@ public class Database {
     /**
      * Fetch the most recent ContactLog entry for the given student name.
      * Returns a map of column names to string values, or null if none found.
+    *
+    * @param studentName student display name to search for
+    * @return map of contact log columns to values or null when not found
+    * @throws SQLException on database errors
      */
-    public static Map<String,String> fetchLatestContactLog(String studentName) throws SQLException {
+    public static com.studentgui.apphelpers.dto.ContactPayload fetchLatestContactLog(String studentName) throws SQLException {
         try (Connection c = getConnection()) {
             Integer studentId = null;
             try (PreparedStatement ps = c.prepareStatement("SELECT id FROM Student WHERE name = ?")) {
@@ -370,18 +374,18 @@ public class Database {
                 ps.setInt(1, sessionId);
                 try (ResultSet rs = ps.executeQuery()) {
                     if (rs.next()) {
-                        Map<String,String> m = new HashMap<>();
-                        m.put("studentname", rs.getString("student_name"));
-                        m.put("date", rs.getString("date"));
-                        m.put("guardianName", rs.getString("guardian_name"));
-                        m.put("contactMethod", rs.getString("contact_method"));
-                        m.put("phoneNumber", rs.getString("phone_number"));
-                        m.put("emailAddress", rs.getString("email_address"));
-                        m.put("contactResponse", rs.getString("contact_response"));
-                        m.put("contactGeneral", rs.getString("contact_general"));
-                        m.put("contactSpecific", rs.getString("contact_specific"));
-                        m.put("contactNotes", rs.getString("contact_notes"));
-                        return m;
+                        com.studentgui.apphelpers.dto.ContactPayload p = new com.studentgui.apphelpers.dto.ContactPayload(
+                            sessionId,
+                            rs.getString("guardian_name"),
+                            rs.getString("contact_method"),
+                            rs.getString("phone_number"),
+                            rs.getString("email_address"),
+                            rs.getString("contact_response"),
+                            rs.getString("contact_general"),
+                            rs.getString("contact_specific"),
+                            rs.getString("contact_notes")
+                        );
+                        return p;
                     }
                 }
             }

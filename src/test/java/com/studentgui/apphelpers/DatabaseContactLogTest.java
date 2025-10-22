@@ -1,7 +1,6 @@
 package com.studentgui.apphelpers;
 
 import java.time.LocalDate;
-import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -17,10 +16,10 @@ public class DatabaseContactLogTest {
         int pt = Database.getOrCreateProgressType("ContactLog");
         int sessionId = Database.createProgressSession(sid, pt, LocalDate.now());
         Database.saveContactLog(sessionId, student, LocalDate.now().toString(), "Guardian A", "Phone", "+1234567890", "a@example.com", "Left voicemail", "General summary", "Specific item", "Detailed notes");
-        Map<String,String> fetched = Database.fetchLatestContactLog(student);
-        assertNotNull(fetched);
-        assertEquals("Guardian A", fetched.get("guardianName"));
-        assertEquals("+1234567890", fetched.get("phoneNumber"));
-        assertEquals("Detailed notes", fetched.get("contactNotes"));
+    com.studentgui.apphelpers.dto.ContactPayload fetched = Database.fetchLatestContactLog(student);
+    assertNotNull(fetched);
+    assertEquals("Guardian A", fetched.guardian);
+    assertEquals("+1234567890", fetched.phone);
+    assertEquals("Detailed notes", fetched.notes);
     }
 }

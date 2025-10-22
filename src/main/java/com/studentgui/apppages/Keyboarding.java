@@ -144,6 +144,9 @@ public class Keyboarding extends JPanel {
             com.studentgui.apphelpers.Database.insertKeyboardingResult(sessionId, program, topic, speed, accuracy);
             LOG.info("Keyboarding data saved for {}", this.studentNameParam);
             com.studentgui.apphelpers.UiNotifier.show("Keyboarding data saved.");
+            com.studentgui.apphelpers.dto.KeyboardingPayload payload = new com.studentgui.apphelpers.dto.KeyboardingPayload(sessionId, program, topic, speed, accuracy);
+            java.nio.file.Path jsonOut = com.studentgui.apphelpers.SessionJsonWriter.writeSessionJson(this.studentNameParam, "Keyboarding", payload, sessionId);
+            if (jsonOut == null) LOG.warn("Unable to save Keyboarding session JSON for sessionId={}", sessionId);
         } catch (SQLException ex) {
             LOG.error("DB error saving keyboarding data", ex);
             JOptionPane.showMessageDialog(this, "Database error saving keyboarding data: " + ex.getMessage(), "Database error", JOptionPane.ERROR_MESSAGE);

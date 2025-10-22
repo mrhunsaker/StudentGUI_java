@@ -86,32 +86,27 @@ public class CVI extends JPanel {
         row++;
     }
 
-    gbc.gridx=0; gbc.gridy=row; gbc.gridwidth=GridBagConstraints.REMAINDER;
-    JButton save = new JButton("Save CVI Data");
-    save.setPreferredSize(new java.awt.Dimension(0, 32));
-    save.addActionListener((ActionEvent e)-> save());
-    save.setToolTipText("Save CVI assessment for selected student");
-    save.setMnemonic(KeyEvent.VK_S);
-    save.getAccessibleContext().setAccessibleName("Save CVI Data");
-    save.setName("cvi_save");
-    panel.add(save, gbc);
-    gbc.gridwidth = 1;
-    row++;
-    gbc.gridy=row;
-    JButton plot = new JButton("Plot CVI Data");
-    plot.addActionListener((ActionEvent e)-> plot());
-    plot.setToolTipText("Fetch and plot recent CVI data");
-    plot.setMnemonic(KeyEvent.VK_P);
-    plot.getAccessibleContext().setAccessibleName("Plot CVI Data");
-    plot.setName("cvi_plot");
-    panel.add(plot, gbc);
-    gbc.gridy = row + 1; gbc.gridx = 0; gbc.gridwidth = GridBagConstraints.REMAINDER;
+    // Two side-by-side buttons: Submit Data (save + save PNG) and Open Latest Plot
+    gbc.gridx = 0; gbc.gridy = row; gbc.gridwidth = 1; gbc.anchor = GridBagConstraints.WEST;
+    JButton submit = new JButton("Submit Data");
+    submit.setPreferredSize(new java.awt.Dimension(0, 32));
+    submit.addActionListener((ActionEvent e) -> save());
+    submit.setToolTipText("Save CVI assessment for selected student (Alt+S)");
+    submit.setMnemonic(KeyEvent.VK_S);
+    submit.getAccessibleContext().setAccessibleName("Submit CVI Data");
+    submit.setName("cvi_submit");
+    panel.add(submit, gbc);
+
+    gbc.gridx = 1; gbc.gridwidth = 1; gbc.anchor = GridBagConstraints.WEST;
     JButton openLatest = new JButton("Open Latest Plot");
     openLatest.setPreferredSize(new java.awt.Dimension(0, 32));
     openLatest.addActionListener((ActionEvent e) -> {
         java.nio.file.Path plotPath = com.studentgui.apphelpers.Helpers.latestPlotPath(this.studentNameParam, "CVI");
         if (plotPath == null) com.studentgui.apphelpers.UiNotifier.show("No CVI plot found for student");
-    else { try { java.awt.Desktop.getDesktop().open(plotPath.toFile()); } catch (java.io.IOException | UnsupportedOperationException | SecurityException ex) { com.studentgui.apphelpers.UiNotifier.show("Unable to open plot: " + plotPath.getFileName().toString()); } }
+        else {
+            try { java.awt.Desktop.getDesktop().open(plotPath.toFile()); }
+            catch (java.io.IOException | UnsupportedOperationException | SecurityException ex) { com.studentgui.apphelpers.UiNotifier.show("Unable to open plot: " + plotPath.getFileName().toString()); }
+        }
     });
     panel.add(openLatest, gbc);
     gbc.gridwidth = 1;
@@ -163,6 +158,9 @@ public class CVI extends JPanel {
             com.studentgui.apphelpers.Database.insertAssessmentResults(sessionId, ptId, codes, scores);
             LOG.info("CVI data saved for {}", studentNameParam);
             com.studentgui.apphelpers.UiNotifier.show("CVI data saved.");
+            com.studentgui.apphelpers.dto.AssessmentPayload payload = new com.studentgui.apphelpers.dto.AssessmentPayload(sessionId, codes, scores);
+            java.nio.file.Path jsonOut = com.studentgui.apphelpers.SessionJsonWriter.writeSessionJson(this.studentNameParam, "CVI", payload, sessionId);
+            if (jsonOut == null) LOG.warn("Unable to save CVI session JSON for sessionId={}", sessionId);
             try {
                 java.nio.file.Path out = com.studentgui.apphelpers.Helpers.APP_HOME.resolve("StudentDataFiles").resolve(com.studentgui.apphelpers.Helpers.safeName(this.studentNameParam)).resolve("plots");
                 java.time.format.DateTimeFormatter df = java.time.format.DateTimeFormatter.ISO_DATE;
@@ -178,29 +176,6 @@ public class CVI extends JPanel {
         }
     }
 
-    /**
-     * Fetch recent CVI assessment sessions and update the shared graph view.
-     */
-    private void plot() {
-        try {
-            var data = com.studentgui.apphelpers.Database.fetchLatestAssessmentResults(studentNameParam, "CVI", 20);
-            if (data != null && !data.isEmpty()) graph.updateWithData(data);
-            else LOG.info("No CVI data to plot for {}", studentNameParam);
-            if (data != null && !data.isEmpty() && this.studentNameParam != null && !this.studentNameParam.trim().isEmpty()) {
-                try {
-                    java.nio.file.Path out = com.studentgui.apphelpers.Helpers.APP_HOME.resolve("StudentDataFiles").resolve(com.studentgui.apphelpers.Helpers.safeName(this.studentNameParam)).resolve("plots");
-                    java.nio.file.Files.createDirectories(out);
-                    java.time.format.DateTimeFormatter df = java.time.format.DateTimeFormatter.ISO_DATE;
-                    String dateStr = (this.dateParam != null ? this.dateParam.format(df) : java.time.LocalDate.now().toString());
-                    java.nio.file.Path file = out.resolve("CVI-" + dateStr + ".png");
-                    graph.saveChart(file, 800, 400);
-                    LOG.info("Saved CVI plot to {}", file);
-                    try { java.awt.Desktop.getDesktop().open(file.toFile()); } catch (java.io.IOException | UnsupportedOperationException | SecurityException ex) { LOG.debug("Could not open CVI plot file: {}", ex.toString()); }
-                    com.studentgui.apphelpers.UiNotifier.show("CVI plot saved to " + file.toString());
-                } catch (java.io.IOException ex) {
-                    LOG.warn("Unable to save CVI plot image: {}", ex.toString());
-                }
-            }
-        } catch (SQLException ex) { LOG.error("Error fetching CVI data", ex); }
-    }
+    // Plotting is handled as part of save(): the submit action updates the shared
+    // graph and writes a static PNG into the student's plots folder.
 }

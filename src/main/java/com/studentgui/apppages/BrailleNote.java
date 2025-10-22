@@ -203,6 +203,9 @@ public class BrailleNote extends JPanel {
             com.studentgui.apphelpers.Database.insertAssessmentResults(sessionId, ptId, codes, scores);
             LOG.info("Data submitted successfully via normalized schema.");
             com.studentgui.apphelpers.UiNotifier.show("BrailleNote data saved.");
+            com.studentgui.apphelpers.dto.AssessmentPayload payload = new com.studentgui.apphelpers.dto.AssessmentPayload(sessionId, codes, scores);
+            java.nio.file.Path jsonOut = com.studentgui.apphelpers.SessionJsonWriter.writeSessionJson(this.studentNameParam, "BrailleNote", payload, sessionId);
+            if (jsonOut == null) LOG.warn("Unable to save BrailleNote session JSON for sessionId={}", sessionId);
         } catch (SQLException e) {
             LOG.error("SQL error saving braille note data", e);
             JOptionPane.showMessageDialog(this, "Database error saving BrailleNote data: " + e.getMessage(), "Database error", JOptionPane.ERROR_MESSAGE);

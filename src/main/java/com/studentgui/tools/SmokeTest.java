@@ -11,8 +11,18 @@ import com.studentgui.apppages.JLineGraph;
 
 /**
  * Minimal smoke test to exercise the chart rendering and file export.
+ * <p>
+ * Generates deterministic sample data, renders it via {@code JLineGraph}
+ * and writes a PNG under the app_home plots directory.
+ * </p>
  */
 public class SmokeTest {
+    /**
+     * Entry point for the smoke test.
+     *
+     * @param args ignored
+     * @throws Exception on IO or chart errors
+     */
     public static void main(String[] args) throws Exception {
         Helpers.createFolderHierarchy();
         JLineGraph graph = new JLineGraph();
@@ -34,5 +44,12 @@ public class SmokeTest {
         graph.saveChart(outFile, 800, 400);
         System.out.println("Smoke test wrote chart to: " + outFile.toAbsolutePath());
         System.out.println("Exists: " + java.nio.file.Files.exists(outFile));
+    }
+
+    /**
+     * Private constructor to prevent instantiation of this utility test class.
+     */
+    private SmokeTest() {
+        // no instances
     }
 }

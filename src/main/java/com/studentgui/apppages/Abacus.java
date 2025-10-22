@@ -35,6 +35,7 @@ public class Abacus extends JPanel {
 
     /** Array of input components for each skill. */
     private final com.studentgui.uicomp.PhaseScoreField[] skillFields;
+    /** Canonical list of abacus assessment parts: code and display label. */
     private final String[][] parts;
     /** Shared graph component used to visualize recent results. */
     private final JLineGraph lineGraph; // Reference to the JLineGraph instance
@@ -205,6 +206,10 @@ public class Abacus extends JPanel {
             com.studentgui.apphelpers.Database.insertAssessmentResults(sessionId, ptId, codes, scores);
             LOG.info("Data submitted successfully via normalized schema.");
             com.studentgui.apphelpers.UiNotifier.show("Abacus data saved.");
+            // Also persist this session as a JSON file in the student's folder (timestamped per-session)
+            com.studentgui.apphelpers.dto.AssessmentPayload payload = new com.studentgui.apphelpers.dto.AssessmentPayload(sessionId, codes, scores);
+            java.nio.file.Path jsonOut = com.studentgui.apphelpers.SessionJsonWriter.writeSessionJson(this.studentNameParam, "Abacus", payload, sessionId);
+            if (jsonOut == null) LOG.warn("Unable to save Abacus session JSON for sessionId={}", sessionId);
         } catch (SQLException e) {
             LOG.error("SQL error in submitData", e);
             JOptionPane.showMessageDialog(this, "Database error saving Abacus data: " + e.getMessage(), "Database error", JOptionPane.ERROR_MESSAGE);
