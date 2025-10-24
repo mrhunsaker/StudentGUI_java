@@ -284,6 +284,83 @@ public class Database {
     }
 
     /**
+     * Simple holder for the result rows and their corresponding session dates.
+     */
+    public static class ResultsWithDates {
+        public final java.util.List<java.time.LocalDate> dates;
+        public final java.util.List<java.util.List<Integer>> rows;
+        public ResultsWithDates(java.util.List<java.time.LocalDate> dates, java.util.List<java.util.List<Integer>> rows) {
+            this.dates = dates;
+            this.rows = rows;
+        }
+    }
+
+    /**
+     * Fetch the latest assessment rows along with their session dates.
+     * Rows and dates are ordered oldest-first to facilitate time series plotting.
+     */
+    public static ResultsWithDates fetchLatestAssessmentResultsWithDates(String studentName, String progressTypeName, int limit) throws SQLException {
+        java.util.List<java.util.List<Integer>> result = new ArrayList<>();
+        java.util.List<java.time.LocalDate> dates = new ArrayList<>();
+        try (Connection c = getConnection()) {
+            Integer studentId = null;
+            try (PreparedStatement ps = c.prepareStatement("SELECT id FROM Student WHERE name = ?")) {
+                ps.setString(1, studentName);
+                try (ResultSet rs = ps.executeQuery()) { if (rs.next()) studentId = rs.getInt(1); }
+            }
+            if (studentId == null) return new ResultsWithDates(dates, result);
+
+            Integer progressTypeId = null;
+            try (PreparedStatement ps = c.prepareStatement("SELECT id FROM ProgressType WHERE name = ?")) {
+                ps.setString(1, progressTypeName);
+                try (ResultSet rs = ps.executeQuery()) { if (rs.next()) progressTypeId = rs.getInt(1); }
+            }
+            if (progressTypeId == null) return new ResultsWithDates(dates, result);
+
+            // get parts in canonical order (by id)
+            java.util.List<Integer> partIds = new ArrayList<>();
+            try (PreparedStatement ps = c.prepareStatement("SELECT id, code FROM AssessmentPart WHERE progress_type_id = ? ORDER BY id ASC")) {
+                ps.setInt(1, progressTypeId);
+                try (ResultSet rs = ps.executeQuery()) { while (rs.next()) partIds.add(rs.getInt("id")); }
+            }
+
+            // get latest session ids and dates for this student and progress type
+            java.util.List<java.lang.Integer> sessionIds = new ArrayList<>();
+            java.util.List<java.time.LocalDate> sessionDates = new ArrayList<>();
+            try (PreparedStatement ps = c.prepareStatement("SELECT id, date FROM ProgressSession WHERE student_id = ? AND progress_type_id = ? ORDER BY id DESC LIMIT ?")) {
+                ps.setInt(1, studentId); ps.setInt(2, progressTypeId); ps.setInt(3, limit);
+                try (ResultSet rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        sessionIds.add(rs.getInt("id"));
+                        sessionDates.add(java.time.LocalDate.parse(rs.getString("date")));
+                    }
+                }
+            }
+
+            // We want chronological order (oldest first)
+            java.util.Collections.reverse(sessionIds);
+            java.util.Collections.reverse(sessionDates);
+
+            // For each session, fetch scores mapped to parts and append row
+            for (Integer sid : sessionIds) {
+                Map<Integer, Integer> scoreByPart = new HashMap<>();
+                try (PreparedStatement ps = c.prepareStatement("SELECT part_id, score FROM AssessmentResult WHERE session_id = ?")) {
+                    ps.setInt(1, sid);
+                    try (ResultSet rs = ps.executeQuery()) { while (rs.next()) scoreByPart.put(rs.getInt("part_id"), rs.getInt("score")); }
+                }
+                java.util.List<Integer> row = new ArrayList<>();
+                for (Integer pid : partIds) {
+                    Integer s = scoreByPart.get(pid);
+                    row.add(s == null ? 0 : s);
+                }
+                result.add(row);
+            }
+            dates.addAll(sessionDates);
+        }
+        return new ResultsWithDates(dates, result);
+    }
+
+    /**
      * Insert a keyboarding-specific result linked to a ProgressSession.
      *
      * @param sessionId existing session id

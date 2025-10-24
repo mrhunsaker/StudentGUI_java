@@ -147,6 +147,46 @@ public class Keyboarding extends JPanel {
             com.studentgui.apphelpers.dto.KeyboardingPayload payload = new com.studentgui.apphelpers.dto.KeyboardingPayload(sessionId, program, topic, speed, accuracy);
             java.nio.file.Path jsonOut = com.studentgui.apphelpers.SessionJsonWriter.writeSessionJson(this.studentNameParam, "Keyboarding", payload, sessionId);
             if (jsonOut == null) LOG.warn("Unable to save Keyboarding session JSON for sessionId={}", sessionId);
+            try {
+                java.nio.file.Path out = com.studentgui.apphelpers.Helpers.APP_HOME.resolve("StudentDataFiles").resolve(com.studentgui.apphelpers.Helpers.safeName(this.studentNameParam)).resolve("plots");
+                java.nio.file.Files.createDirectories(out);
+                java.time.format.DateTimeFormatter df = java.time.format.DateTimeFormatter.ISO_DATE;
+                String dateStr = this.dateParam != null ? this.dateParam.format(df) : java.time.LocalDate.now().toString();
+                String baseName = "Keyboarding-" + sessionId + "-" + dateStr;
+
+                // Keyboarding doesn't have grouped codes; produce a small HTML/MD with metadata
+                StringBuilder md = new StringBuilder();
+                md.append("# ").append(this.studentNameParam == null ? "Unknown Student" : this.studentNameParam).append(" - ").append(dateStr).append("\n\n");
+                md.append("**Program:** ").append(program == null || program.isEmpty() ? "(none)" : program).append("  \n\n");
+                md.append("**Topic:** ").append(topic == null || topic.isEmpty() ? "(none)" : topic).append("  \n\n");
+                md.append("**Speed (WPM):** ").append(String.valueOf(speed)).append("  \n\n");
+                md.append("**Accuracy (%):** ").append(String.valueOf(accuracy)).append("  \n\n");
+                java.nio.file.Path mdFile = out.resolve(baseName + ".md");
+                java.nio.file.Files.writeString(mdFile, md.toString(), java.nio.charset.StandardCharsets.UTF_8);
+
+                try {
+                    StringBuilder html = new StringBuilder();
+                    html.append("<!doctype html><html><head><meta charset=\"utf-8\"><title>");
+                    html.append(this.studentNameParam == null ? "Student Report" : this.studentNameParam).append(" - ").append(dateStr).append("</title>");
+                    html.append("<style>body{font-family:sans-serif;margin:20px;} .meta{margin-bottom:12px;} .swatch{width:18px;height:12px;border:1px solid #333;display:inline-block;vertical-align:middle;margin-right:8px;}</style>");
+                    html.append("</head><body>");
+                    html.append("<h1>").append(this.studentNameParam == null ? "Unknown Student" : this.studentNameParam).append(" - ").append(dateStr).append("</h1>");
+                    html.append("<div class=\"meta\">\n");
+                    html.append("<p><strong>Program:</strong> ").append(program == null || program.isEmpty() ? "(none)" : program).append("</p>");
+                    html.append("<p><strong>Topic:</strong> ").append(topic == null || topic.isEmpty() ? "(none)" : topic).append("</p>");
+                    html.append("<p><strong>Speed (WPM):</strong> ").append(String.valueOf(speed)).append("</p>");
+                    html.append("<p><strong>Accuracy (%):</strong> ").append(String.valueOf(accuracy)).append("</p>");
+                    html.append("</div>");
+                    html.append("</body></html>");
+                    java.nio.file.Path htmlFile = out.resolve(baseName + ".html");
+                    java.nio.file.Files.writeString(htmlFile, html.toString(), java.nio.charset.StandardCharsets.UTF_8);
+                    LOG.info("Wrote Keyboarding session report {}", htmlFile);
+                } catch (java.io.IOException ioex) {
+                    LOG.warn("Unable to write Keyboarding HTML report: {}", ioex.toString());
+                }
+            } catch (java.io.IOException ioe) {
+                LOG.warn("Unable to save Keyboarding report: {}", ioe.toString());
+            }
         } catch (SQLException ex) {
             LOG.error("DB error saving keyboarding data", ex);
             JOptionPane.showMessageDialog(this, "Database error saving keyboarding data: " + ex.getMessage(), "Database error", JOptionPane.ERROR_MESSAGE);

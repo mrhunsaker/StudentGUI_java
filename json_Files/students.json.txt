@@ -1,0 +1,30 @@
+{
+    "students": [
+        "Aaron A Aaronsson",
+        "Baron B Baronsson",
+        "Cecilia C Cecilsson",
+        "Derek D Dereksson",
+        "Eva E Evasson"
+        "Fiona F Fionasson",
+        "George G Georgesson",
+        "Hannah H Hannahsson",
+        "Ian I Iansson",
+        "Jenna J Jennasson"
+        "Kevin K Kevansson",
+        "Luna L Lunasson",
+        "Mason M Masonsson",
+        "Nina N Ninasson",
+        "Owen O Owensson",
+        "Paula P Paulasson",
+        "Quinn Q Quinnsson",
+        "Riley R Rileysson",
+        "Sophia S Sophiasson",
+        "Tyler T Tylersson",
+        "Uma U Umasson",
+        "Violet V Violetsson",
+        "William W Williamsson",
+        "Xander X Xandersson",
+        "Yara Y Yarasson",
+        "Zane Z Zanesson"
+    ]
+}

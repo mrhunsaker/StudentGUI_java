@@ -9,7 +9,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -217,6 +216,101 @@ public class Abacus extends JPanel {
             com.studentgui.apphelpers.dto.AssessmentPayload payload = new com.studentgui.apphelpers.dto.AssessmentPayload(sessionId, codes, scores);
             java.nio.file.Path jsonOut = com.studentgui.apphelpers.SessionJsonWriter.writeSessionJson(this.studentNameParam, "Abacus", payload, sessionId);
             if (jsonOut == null) LOG.warn("Unable to save Abacus session JSON for sessionId={}", sessionId);
+            // Generate per-phase PNGs (time-series) and a markdown report for this session
+            try {
+                java.nio.file.Path out = com.studentgui.apphelpers.Helpers.APP_HOME.resolve("StudentDataFiles").resolve(com.studentgui.apphelpers.Helpers.safeName(this.studentNameParam)).resolve("plots");
+                java.nio.file.Files.createDirectories(out);
+                java.time.format.DateTimeFormatter df = java.time.format.DateTimeFormatter.ISO_DATE;
+                String dateStr = (this.dateParam != null ? this.dateParam.format(df) : java.time.LocalDate.now().toString());
+                String baseName = "Abacus-" + sessionId + "-" + dateStr;
+
+                // Fetch recent dated sessions (oldest first) to build time-series plots.
+                com.studentgui.apphelpers.Database.ResultsWithDates rwd = com.studentgui.apphelpers.Database.fetchLatestAssessmentResultsWithDates(this.studentNameParam, "Abacus", Integer.MAX_VALUE);
+
+                java.util.Map<String, java.nio.file.Path> groups = null;
+                if (rwd != null && rwd.rows != null && !rwd.rows.isEmpty()) {
+                        // Build human-friendly labels from this.parts and render time-series grouped charts
+                        String[] labels = new String[this.parts.length];
+                        for (int i = 0; i < this.parts.length; i++) labels[i] = this.parts[i][1];
+                        lineGraph.updateWithGroupedDataByDate(rwd.dates, rwd.rows, codes, labels);
+                    // Persist each group as a PNG (time-series image)
+                    groups = lineGraph.saveGroupedCharts(out, baseName, 1000, 240);
+                    // Use the most-recent session date for the report header if available
+                    java.time.LocalDate headerDate = rwd.dates.get(rwd.dates.size() - 1);
+                    dateStr = headerDate.format(df);
+                } else {
+                    // Fallback: render only the latest session snapshot
+                    java.util.List<java.util.List<Integer>> rows = new java.util.ArrayList<>();
+                    java.util.List<Integer> latest = new java.util.ArrayList<>();
+                    for (int v : scores) latest.add(v);
+                    rows.add(latest);
+                    lineGraph.updateWithGroupedData(rows, codes);
+                    groups = lineGraph.saveGroupedCharts(out, baseName, 1000, 240);
+                }
+
+                // Generate markdown report
+                if (groups == null) groups = new java.util.LinkedHashMap<>();
+                StringBuilder md = new StringBuilder();
+                md.append("# ").append(this.studentNameParam == null ? "Unknown Student" : this.studentNameParam).append(" - ").append(dateStr).append("\n\n");
+                for (java.util.Map.Entry<String, java.nio.file.Path> e : groups.entrySet()) {
+                    md.append("## ").append(e.getKey()).append("\n\n");
+                    md.append("![](./").append(e.getValue().getFileName().toString()).append(")\n\n");
+                }
+                java.nio.file.Path mdFile = out.resolve(baseName + ".md");
+                java.nio.file.Files.writeString(mdFile, md.toString(), java.nio.charset.StandardCharsets.UTF_8);
+                LOG.info("Wrote Abacus session report {} with {} group images", mdFile, groups.size());
+                // Also produce a simple HTML report that embeds the PNGs and
+                // shows a scrollable legend under each plot.
+                try {
+                    String[] palette = new String[] {"#1b9e77","#d95f02","#7570b3","#e7298a","#66a61e","#e6ab02","#a6761d","#666666"};
+
+                    // Build a map of group -> list of part indexes to recreate legend order
+                    java.util.LinkedHashMap<String, java.util.List<Integer>> groupsIdx = new java.util.LinkedHashMap<>();
+                    for (int i = 0; i < codes.length; i++) {
+                        String code = codes[i];
+                        String grp = code != null && code.contains("_") ? code.split("_")[0] : code;
+                        groupsIdx.computeIfAbsent(grp, k -> new java.util.ArrayList<>()).add(i);
+                    }
+
+                    StringBuilder html = new StringBuilder();
+                    html.append("<!doctype html>\n<html><head><meta charset=\"utf-8\"><title>");
+                    html.append(this.studentNameParam == null ? "Student Report" : this.studentNameParam).append(" - ").append(dateStr);
+                    html.append("</title>");
+                    html.append("<style>body{font-family:sans-serif;margin:20px;} img{max-width:100%;height:auto;border:1px solid #ccc;margin-bottom:8px;} .legend{max-height:160px;overflow:auto;border:1px solid #ddd;padding:8px;margin-bottom:24px;} .legend-item{display:flex;align-items:center;gap:8px;padding:4px 0;} .swatch{width:18px;height:12px;border:1px solid #333;display:inline-block}</style>");
+                    html.append("</head><body>");
+                    html.append("<h1>").append(this.studentNameParam == null ? "Unknown Student" : this.studentNameParam).append(" - ").append(dateStr).append("</h1>");
+
+                    for (java.util.Map.Entry<String, java.nio.file.Path> e2 : groups.entrySet()) {
+                        String grp = e2.getKey();
+                        String imgName = e2.getValue().getFileName().toString();
+                        html.append("<h2>").append(grp).append("</h2>");
+                        html.append("<div class=\"plot\"><img src=\"./").append(imgName).append("\" alt=\"").append(grp).append("\"></div>");
+
+                        // legend for this group
+                        java.util.List<Integer> idxs = groupsIdx.getOrDefault(grp, new java.util.ArrayList<>());
+                        html.append("<div class=\"legend\">");
+                        for (int s = 0; s < idxs.size(); s++) {
+                            int idx = idxs.get(s);
+                            String code = codes[idx];
+                            String human = this.parts[idx][1];
+                            String seriesName = code + " - " + human;
+                            String color = palette[s % palette.length];
+                            html.append("<div class=\"legend-item\"><span class=\"swatch\" style=\"background:" + color + ";\"></span>");
+                            html.append("<div>").append(seriesName).append("</div></div>");
+                        }
+                        html.append("</div>");
+                    }
+
+                    html.append("</body></html>");
+                    java.nio.file.Path htmlFile = out.resolve(baseName + ".html");
+                    java.nio.file.Files.writeString(htmlFile, html.toString(), java.nio.charset.StandardCharsets.UTF_8);
+                    LOG.info("Wrote Abacus HTML session report {}", htmlFile);
+                } catch (java.io.IOException ioex) {
+                    LOG.warn("Unable to write HTML report: {}", ioex.toString());
+                }
+            } catch (java.io.IOException | SQLException ex) {
+                LOG.warn("Unable to save Abacus per-phase plots or markdown report: {}", ex.toString());
+            }
         } catch (SQLException e) {
             LOG.error("SQL error in submitData", e);
             JOptionPane.showMessageDialog(this, "Database error saving Abacus data: " + e.getMessage(), "Database error", JOptionPane.ERROR_MESSAGE);
@@ -229,30 +323,19 @@ public class Abacus extends JPanel {
      */
     private void refreshGraph() {
         try {
-            List<List<Integer>> allSkillValues = com.studentgui.apphelpers.Database.fetchLatestAssessmentResults(studentNameParam, "Abacus", 5);
-            if (allSkillValues != null && !allSkillValues.isEmpty()) {
-                // Group plots by part prefix (P1_, P2_, ...)
-                String[] codes = new String[this.parts.length];
-                for (int i = 0; i < this.parts.length; i++) codes[i] = this.parts[i][0];
-                lineGraph.updateWithGroupedData(allSkillValues, codes);
-                LOG.debug("Graph updated with data: {}", allSkillValues);
-                if (this.studentNameParam != null && !this.studentNameParam.trim().isEmpty()) {
-                    try {
-                        java.nio.file.Path out = com.studentgui.apphelpers.Helpers.APP_HOME.resolve("StudentDataFiles").resolve(com.studentgui.apphelpers.Helpers.safeName(this.studentNameParam)).resolve("plots");
-                        java.nio.file.Files.createDirectories(out);
-                        java.time.format.DateTimeFormatter df = java.time.format.DateTimeFormatter.ISO_DATE;
-                        String dateStr = (this.dateParam != null ? this.dateParam.format(df) : java.time.LocalDate.now().toString());
-                        java.nio.file.Path file = out.resolve("Abacus-" + dateStr + ".png");
-                        lineGraph.saveChart(file, 800, 400);
-                        LOG.info("Saved Abacus plot to {}", file);
-                        try { java.awt.Desktop.getDesktop().open(file.toFile()); } catch (java.io.IOException | UnsupportedOperationException | SecurityException ex) { LOG.debug("Could not open Abacus plot file: {}", ex.toString()); }
-                        com.studentgui.apphelpers.UiNotifier.show("Abacus plot saved to " + file.toString());
-                    } catch (java.io.IOException ex) {
-                        LOG.warn("Unable to save Abacus plot image: {}", ex.toString());
-                    }
-                }
+            com.studentgui.apphelpers.Database.ResultsWithDates rwd = com.studentgui.apphelpers.Database.fetchLatestAssessmentResultsWithDates(studentNameParam, "Abacus", Integer.MAX_VALUE);
+            String[] codes = new String[this.parts.length];
+            for (int i = 0; i < this.parts.length; i++) codes[i] = this.parts[i][0];
+            if (rwd != null && rwd.rows != null && !rwd.rows.isEmpty()) {
+                // Use the date-aware grouped plotter so X axis is dates and each
+                // skill within a phase is a separate line series.
+                String[] labels = new String[this.parts.length];
+                for (int i = 0; i < this.parts.length; i++) labels[i] = this.parts[i][1];
+                lineGraph.updateWithGroupedDataByDate(rwd.dates, rwd.rows, codes, labels);
+                LOG.debug("Graph updated with {} dated sessions", rwd.rows.size());
             } else {
-                LOG.info("No data to plot.");
+                LOG.info("No data to plot; showing grouped placeholders.");
+                lineGraph.showEmptyGrouped(codes);
             }
         } catch (SQLException e) {
             LOG.error("SQL error refreshing graph", e);

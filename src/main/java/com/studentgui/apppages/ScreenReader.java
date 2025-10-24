@@ -105,27 +105,30 @@ public class ScreenReader extends JPanel {
             dataEntryPanel.add(f, gbc);
         }
 
-    // Two side-by-side buttons: Submit Data + Open Latest Plot (match IOS styling)
-    gbc.gridy = this.parts.length + 2; gbc.gridx = 0; gbc.gridwidth = GridBagConstraints.REMAINDER; gbc.anchor = GridBagConstraints.WEST;
-    javax.swing.JPanel buttonRow = new javax.swing.JPanel(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT, 8, 0));
-    buttonRow.setOpaque(false);
-
+    gbc.gridy = this.parts.length + 2;
+    gbc.weighty = 0.0;
+    gbc.gridx = 0;
+    gbc.gridwidth = 1;
+    gbc.anchor = GridBagConstraints.WEST;
     JButton submit = new JButton("Submit Data");
     submit.setPreferredSize(new java.awt.Dimension(0, 32));
     submit.addActionListener((ActionEvent e) -> { submitData(); refreshGraph(); });
     submit.setMnemonic(KeyEvent.VK_S);
     submit.setToolTipText("Save ScreenReader scores for the selected student (Alt+S)");
     submit.getAccessibleContext().setAccessibleName("Submit ScreenReader Data");
-    buttonRow.add(submit);
+    dataEntryPanel.add(submit, gbc);
 
+    gbc.gridx = 1;
     JButton openLatest = new JButton("Open Latest Plot");
     openLatest.setPreferredSize(new java.awt.Dimension(0, 32));
     openLatest.addActionListener((ActionEvent e) -> openLatestPlot());
     openLatest.setToolTipText("Open the most recently saved ScreenReader plot for this student");
-    buttonRow.add(openLatest);
+    openLatest.getAccessibleContext().setAccessibleName("Open Latest ScreenReader Plot");
+    dataEntryPanel.add(openLatest, gbc);
 
-    dataEntryPanel.add(buttonRow, gbc);
-    gbc.gridwidth = 1;
+    // consume remaining columns so layout stays compact and buttons are not clipped
+    gbc.gridx = 2; gbc.gridwidth = GridBagConstraints.REMAINDER; gbc.anchor = GridBagConstraints.WEST;
+    dataEntryPanel.add(new JPanel(), gbc);
 
     scroll.getAccessibleContext().setAccessibleName("ScreenReader data entry scroll pane");
     add(scroll, BorderLayout.CENTER);
@@ -140,7 +143,9 @@ public class ScreenReader extends JPanel {
 
         com.studentgui.apphelpers.Helpers.createFolderHierarchy();
         initDatabase();
-        refreshGraph();
+        // Do not refresh or save graphs automatically on construction to avoid
+        // writing files or opening images during application startup.
+        // refreshGraph();
     }
 
     /**
@@ -189,12 +194,88 @@ public class ScreenReader extends JPanel {
             if (jsonOut == null) LOG.warn("Unable to save ScreenReader session JSON for sessionId={}", sessionId);
             try {
                 java.nio.file.Path out = com.studentgui.apphelpers.Helpers.APP_HOME.resolve("StudentDataFiles").resolve(com.studentgui.apphelpers.Helpers.safeName(this.studentNameParam)).resolve("plots");
+                java.nio.file.Files.createDirectories(out);
                 java.time.format.DateTimeFormatter df = java.time.format.DateTimeFormatter.ISO_DATE;
-                java.nio.file.Path file = out.resolve("ScreenReader-" + this.dateParam.format(df) + ".png");
-                lineGraph.saveChart(file, 800, 400);
-                LOG.info("Saved ScreenReader plot to {}", file);
-            } catch (java.io.IOException ex) {
-                LOG.warn("Unable to save ScreenReader plot image: {}", ex.toString());
+                String dateStr = this.dateParam != null ? this.dateParam.format(df) : java.time.LocalDate.now().toString();
+                String baseName = "ScreenReader-" + sessionId + "-" + dateStr;
+
+                com.studentgui.apphelpers.Database.ResultsWithDates rwd = com.studentgui.apphelpers.Database.fetchLatestAssessmentResultsWithDates(this.studentNameParam, "ScreenReader", Integer.MAX_VALUE);
+                java.util.Map<String, java.nio.file.Path> groups = new java.util.LinkedHashMap<>();
+                String[] labels = new String[this.parts.length];
+                for (int i = 0; i < this.parts.length; i++) labels[i] = this.parts[i][1];
+                if (rwd != null && rwd.rows != null && !rwd.rows.isEmpty()) {
+                    lineGraph.updateWithGroupedDataByDate(rwd.dates, rwd.rows, codes, labels);
+                    groups = lineGraph.saveGroupedCharts(out, baseName, 1000, 240);
+                    java.time.LocalDate headerDate = rwd.dates.get(rwd.dates.size() - 1);
+                    dateStr = headerDate.format(df);
+                } else {
+                    java.util.List<java.util.List<Integer>> rowsList = new java.util.ArrayList<>();
+                    java.util.List<Integer> latest = new java.util.ArrayList<>();
+                    for (int v : scores) latest.add(v);
+                    rowsList.add(latest);
+                    lineGraph.updateWithGroupedData(rowsList, codes);
+                    groups = lineGraph.saveGroupedCharts(out, baseName, 1000, 240);
+                }
+
+                if (groups == null) groups = new java.util.LinkedHashMap<>();
+                StringBuilder md = new StringBuilder();
+                md.append("# ").append(this.studentNameParam == null ? "Unknown Student" : this.studentNameParam).append(" - ").append(dateStr).append("\n\n");
+                for (java.util.Map.Entry<String, java.nio.file.Path> e : groups.entrySet()) {
+                    md.append("## ").append(e.getKey()).append("\n\n");
+                    md.append("![](./").append(e.getValue().getFileName().toString()).append(")\n\n");
+                }
+                java.nio.file.Path mdFile = out.resolve(baseName + ".md");
+                java.nio.file.Files.writeString(mdFile, md.toString(), java.nio.charset.StandardCharsets.UTF_8);
+
+                // HTML using shared palette
+                try {
+                    String[] palette = JLineGraph.PALETTE_HEX;
+                    java.util.LinkedHashMap<String, java.util.List<Integer>> groupsIdx = new java.util.LinkedHashMap<>();
+                    for (int i = 0; i < codes.length; i++) {
+                        String code = codes[i];
+                        String grp = code != null && code.contains("_") ? code.split("_")[0] : code;
+                        groupsIdx.computeIfAbsent(grp, k -> new java.util.ArrayList<>()).add(i);
+                    }
+                    StringBuilder html = new StringBuilder();
+                    html.append("<!doctype html><html><head><meta charset=\"utf-8\"><title>");
+                    html.append(this.studentNameParam == null ? "Student Report" : this.studentNameParam).append(" - ").append(dateStr).append("</title>");
+                    html.append("<style>body{font-family:sans-serif;margin:20px;} img{max-width:100%;height:auto;border:1px solid #ccc;margin-bottom:8px;} .legend{max-height:160px;overflow:auto;border:1px solid #ddd;padding:8px;margin-bottom:24px;} .legend-item{display:flex;align-items:center;gap:8px;padding:4px 0;} .swatch{width:18px;height:12px;border:1px solid #333;display:inline-block}</style>");
+                    html.append("</head><body>");
+                    html.append("<h1>").append(this.studentNameParam == null ? "Unknown Student" : this.studentNameParam).append(" - ").append(dateStr).append("</h1>");
+                    for (java.util.Map.Entry<String, java.nio.file.Path> e2 : groups.entrySet()) {
+                        String grp = e2.getKey();
+                        String imgName = e2.getValue().getFileName().toString();
+                        html.append("<h2>").append(grp).append("</h2>");
+                        html.append("<div class=\"plot\"><img src=\"./").append(imgName).append("\" alt=\"").append(grp).append("\"></div>");
+                        java.util.List<Integer> idxs = groupsIdx.getOrDefault(grp, new java.util.ArrayList<>());
+                        html.append("<div class=\"legend\">");
+                        for (int s = 0; s < idxs.size(); s++) {
+                            int idx = idxs.get(s);
+                            String code = codes[idx];
+                            String human = this.parts[idx][1];
+                            String seriesName = code + " - " + human;
+                            String color = palette[s % palette.length];
+                            html.append("<div class=\"legend-item\">");
+                            html.append("<span class=\"swatch\" style=\"background:");
+                            html.append(color);
+                            html.append(";\"></span>");
+                            html.append("<div>");
+                            html.append(seriesName);
+                            html.append("</div></div>");
+                        }
+                        html.append("</div>");
+                    }
+                    html.append("</body></html>");
+                    java.nio.file.Path htmlFile = out.resolve(baseName + ".html");
+                    java.nio.file.Files.writeString(htmlFile, html.toString(), java.nio.charset.StandardCharsets.UTF_8);
+                    LOG.info("Wrote ScreenReader HTML session report {}", htmlFile);
+                } catch (java.io.IOException ioex) {
+                    LOG.warn("Unable to write ScreenReader HTML report: {}", ioex.toString());
+                }
+
+                LOG.info("Wrote ScreenReader session report {} with {} group images", mdFile, groups.size());
+            } catch (java.io.IOException | SQLException ex) {
+                LOG.warn("Unable to save ScreenReader per-phase plots or markdown report: {}", ex.toString());
             }
         } catch (NumberFormatException ex) {
             LOG.warn("Invalid number in skill fields", ex);
@@ -223,20 +304,8 @@ public class ScreenReader extends JPanel {
             LOG.error("Error fetching ScreenReader data", ex);
         }
 
-        // Persist the current chart as a static PNG into the student's plots folder
-        try {
-            if (this.studentNameParam != null && !this.studentNameParam.trim().isEmpty()) {
-                java.nio.file.Path out = com.studentgui.apphelpers.Helpers.APP_HOME.resolve("StudentDataFiles").resolve(com.studentgui.apphelpers.Helpers.safeName(this.studentNameParam)).resolve("plots");
-                java.nio.file.Files.createDirectories(out);
-                java.time.format.DateTimeFormatter df = java.time.format.DateTimeFormatter.ISO_DATE;
-                java.nio.file.Path file = out.resolve("ScreenReader-" + (this.dateParam != null ? this.dateParam.format(df) : java.time.LocalDate.now().toString()) + ".png");
-                lineGraph.saveChart(file, 800, 400);
-                LOG.info("Saved ScreenReader plot to {}", file);
-                com.studentgui.apphelpers.UiNotifier.show("ScreenReader plot saved: " + file.getFileName().toString());
-            }
-        } catch (java.io.IOException ex) {
-            LOG.warn("Unable to save ScreenReader plot image: {}", ex.toString());
-        }
+        // Do not save chart images during refresh to avoid creating files on app startup.
+        LOG.debug("Skipping auto-save of ScreenReader chart during refresh for student={}", this.studentNameParam);
     }
 
     private void openLatestPlot() {

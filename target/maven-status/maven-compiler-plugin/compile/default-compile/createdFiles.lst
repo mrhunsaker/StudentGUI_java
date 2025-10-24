@@ -2,12 +2,14 @@ com\studentgui\apppages\ScreenReader.class
 com\studentgui\apptheming\Theme.class
 com\studentgui\apppages\BrailleNote.class
 com\studentgui\apphelpers\Settings.class
+com\studentgui\tools\RenderStudentProgress.class
 com\studentgui\apptheming\Theme$14.class
 com\studentgui\apppages\SessionNotes.class
 com\studentgui\apphelpers\SessionJsonWriter.class
 com\studentgui\apptheming\Theme$6.class
 com\studentgui\uicomp\PhaseScoreField.class
 com\studentgui\apppages\JLineGraph$1.class
+com\studentgui\tools\GroupedSmoke.class
 com\studentgui\app\Main.class
 com\studentgui\apptheming\Theme$3.class
 PlaceholderMain.class
@@ -16,6 +18,7 @@ com\studentgui\apppages\Observations.class
 com\studentgui\apphelpers\dto\ContactPayload.class
 com\studentgui\apptheming\Theme$13.class
 com\studentgui\test\BrailleSmokeTest.class
+com\studentgui\tools\QueryStudentData.class
 com\studentgui\apppages\Homepage.class
 com\studentgui\apphelpers\SqlGenerate.class
 com\studentgui\apphelpers\UiNotifier.class
@@ -38,6 +41,7 @@ com\studentgui\apptheming\Theme$8.class
 com\studentgui\apptheming\Theme$2.class
 com\studentgui\apptheming\Theme$15.class
 com\studentgui\apppages\ContactLog.class
+com\studentgui\apphelpers\Database$ResultsWithDates.class
 com\studentgui\apphelpers\dto\AssessmentPayload.class
 com\studentgui\apphelpers\Database.class
 com\studentgui\apptheming\Theme$9.class

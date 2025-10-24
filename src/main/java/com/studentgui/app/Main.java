@@ -266,7 +266,7 @@ public class Main {
     contentPanel.add(new CVI(student, date, sharedGraph), "cvi");
     contentPanel.add(new IOS(student, date, sharedGraph), "ios");
     contentPanel.add(new Keyboarding(student, date, sharedGraph), "keyboarding");
-    contentPanel.add(new Observations(student, date, sharedGraph), "observations");
+    contentPanel.add(new Observations(student, date), "observations");
     contentPanel.add(new ScreenReader(student, date, sharedGraph), "screenreader");
     contentPanel.add(new SessionNotes(student, date, sharedGraph), "sessionnotes");
     contentPanel.add(new ContactLog(student, date, sharedGraph), "contactlog");

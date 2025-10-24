@@ -29,17 +29,32 @@ public class JLineGraph extends JPanel {
     private static final long serialVersionUID = 1L;
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(JLineGraph.class);
     /** The dataset containing XY series for historical and latest sessions. */
-    private XYSeriesCollection lineDataset;
+    private final XYSeriesCollection lineDataset;
     /** The JFreeChart instance used to render the plot. */
-    private JFreeChart chart;
+    private final JFreeChart chart;
     /** Panel that embeds the chart and provides UI features. */
-    private ChartPanel chartPanel;
+    private final ChartPanel chartPanel;
     /** When rendering grouped charts we place multiple ChartPanels in this container. */
     private javax.swing.JPanel multiChartContainer;
     /** Domain axis used to customise X-axis labels and range. */
-    private NumberAxis xAxis;
+    private final NumberAxis xAxis;
     /** Expected number of skill columns per session. */
     private static final int NUMBER_OF_SKILLS = 28; // Adjust as needed
+    /** Public color palette (hex) for HTML legends and consistency across pages. */
+    public static final String[] PALETTE_HEX = new String[] {
+        "#1b9e77","#d95f02","#7570b3","#e7298a","#66a61e","#e6ab02","#a6761d","#666666"
+    };
+    /** Public color palette as AWT Color objects for chart rendering. */
+    public static final java.awt.Color[] PALETTE = new java.awt.Color[] {
+        new java.awt.Color(0x1b9e77),
+        new java.awt.Color(0xd95f02),
+        new java.awt.Color(0x7570b3),
+        new java.awt.Color(0xe7298a),
+        new java.awt.Color(0x66a61e),
+        new java.awt.Color(0xe6ab02),
+        new java.awt.Color(0xa6761d),
+        new java.awt.Color(0x666666)
+    };
 
     /**
      * Create a new JLineGraph with default styling and an empty dataset.
@@ -120,6 +135,7 @@ public class JLineGraph extends JPanel {
      */
     public void updateWithData(List<List<Integer>> allSkillValues) {
         LOG.debug("updateWithData called with {} rows", allSkillValues == null ? 0 : allSkillValues.size());
+        if (allSkillValues == null || allSkillValues.isEmpty()) return;
         // Fallback to existing single-chart behavior
         lineDataset.removeAllSeries();
         XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer();
@@ -128,7 +144,12 @@ public class JLineGraph extends JPanel {
         for (int s = 0; s < allSkillValues.size() - 1; s++) {
             XYSeries hs = new XYSeries("S" + s);
             List<Integer> skillValues = allSkillValues.get(s);
-            for (int j = 0; j < skillValues.size(); j++) hs.add(j + 1, skillValues.get(j));
+            if (skillValues == null) continue;
+            for (int j = 0; j < skillValues.size(); j++) {
+                Integer v = skillValues.get(j);
+                int y = v == null ? 0 : v;
+                hs.add(j + 1, y);
+            }
             lineDataset.addSeries(hs);
             renderer.setSeriesPaint(s, Color.GRAY);
             renderer.setSeriesStroke(s, new BasicStroke(2.0f));
@@ -138,7 +159,13 @@ public class JLineGraph extends JPanel {
         // Latest session
         XYSeries latestSeries = new XYSeries("Latest");
         List<Integer> latestSkillValues = allSkillValues.get(allSkillValues.size() - 1);
-        for (int i = 0; i < latestSkillValues.size(); i++) latestSeries.add(i + 1, latestSkillValues.get(i));
+        if (latestSkillValues != null) {
+            for (int i = 0; i < latestSkillValues.size(); i++) {
+                Integer v = latestSkillValues.get(i);
+                int y = v == null ? 0 : v;
+                latestSeries.add(i + 1, y);
+            }
+        }
         lineDataset.addSeries(latestSeries);
         int latestIndex = lineDataset.getSeriesCount() - 1;
         renderer.setSeriesPaint(latestIndex, Color.BLACK);
@@ -148,6 +175,14 @@ public class JLineGraph extends JPanel {
 
         chart.getXYPlot().setDataset(lineDataset);
         chart.getXYPlot().setRenderer(renderer);
+        // Ensure Y axis range and ticks are consistent across charts
+        try {
+            NumberAxis y = (NumberAxis) chart.getXYPlot().getRangeAxis();
+            y.setRange(-0.25, 4.0);
+            y.setTickUnit(new org.jfree.chart.axis.NumberTickUnit(1));
+        } catch (ClassCastException ignored) {
+            // if range axis isn't a NumberAxis, ignore
+        }
         chart.fireChartChanged();
         chartPanel.repaint();
     }
@@ -191,7 +226,8 @@ public class JLineGraph extends JPanel {
                 for (int k = 0; k < idxs.size(); k++) {
                     int colIndex = idxs.get(k);
                     int x = k + 1;
-                    int y = (colIndex < sessionRow.size() ? sessionRow.get(colIndex) : 0);
+                    Integer vv = (colIndex < sessionRow.size() ? sessionRow.get(colIndex) : null);
+                    int y = vv == null ? 0 : vv;
                     series.add(x, y);
                 }
                 dataset.addSeries(series);
@@ -223,10 +259,25 @@ public class JLineGraph extends JPanel {
                 }
             }
             plot.setRenderer(renderer);
+            // Ensure Y axis range and ticks show 0..3 grid with a small lower padding for x-axis visibility
+            try {
+                NumberAxis yAxis = (NumberAxis) plot.getRangeAxis();
+                yAxis.setRange(-0.25, 4.0);
+                yAxis.setTickUnit(new org.jfree.chart.axis.NumberTickUnit(1));
+            } catch (ClassCastException cce) {
+                LOG.debug("Range axis is not a NumberAxis: {}", cce.toString());
+            }
             NumberAxis domain = (NumberAxis) plot.getDomainAxis();
-            domain.setRange(1, Math.max(1, idxs.size()));
+            if (idxs.size() <= 1) {
+                // single-point chart: give a small visual range around the point
+                domain.setRange(0.5, 1.5);
+            } else {
+                domain.setRange(1, idxs.size());
+            }
 
             ChartPanel cp = new ChartPanel(subchart);
+            // Store the group id on the panel so callers can name files per-group
+            cp.setName(grp);
             cp.setPreferredSize(new Dimension(800, Math.max(100, 40 * idxs.size())));
             cp.setMaximumSize(new Dimension(Integer.MAX_VALUE, cp.getPreferredSize().height));
             multiChartContainer.add(cp);
@@ -235,6 +286,243 @@ public class JLineGraph extends JPanel {
         add(new javax.swing.JScrollPane(multiChartContainer), BorderLayout.CENTER);
         revalidate();
         repaint();
+    }
+
+    /**
+     * Plot grouped data over time. Dates are used as the X axis (oldest first).
+     * Each skill within a group is drawn as its own line (one series per skill)
+     * with point markers and a color-blind friendly palette. Legend placed
+     * in the upper-right corner.
+     *
+     * @param dates chronological list of session dates (oldest first)
+     * @param rows list of session rows where each row is a list of integer scores
+     * @param partCodes array of part codes aligned with the columns in each row
+     */
+    public void updateWithGroupedDataByDate(java.util.List<java.time.LocalDate> dates, java.util.List<java.util.List<Integer>> rows, String[] partCodes) {
+        // Backwards-compatible wrapper: use code strings as labels if caller didn't provide labels
+        String[] labels = partCodes == null ? null : partCodes.clone();
+        updateWithGroupedDataByDate(dates, rows, partCodes, labels);
+    }
+
+    /**
+     * New overload that accepts human-friendly labels parallel to partCodes.
+     */
+    public void updateWithGroupedDataByDate(java.util.List<java.time.LocalDate> dates, java.util.List<java.util.List<Integer>> rows, String[] partCodes, String[] partLabels) {
+        LOG.debug("updateWithGroupedDataByDate called with dates={} rows={} parts={}", dates == null ? 0 : dates.size(), rows == null ? 0 : rows.size(), partCodes == null ? 0 : partCodes.length);
+        if (dates == null || rows == null || partCodes == null) return;
+        // Build groups preserving order
+        java.util.LinkedHashMap<String, java.util.List<Integer>> groups = new java.util.LinkedHashMap<>();
+        for (int i = 0; i < partCodes.length; i++) {
+            String code = partCodes[i];
+            String grp = code != null && code.contains("_") ? code.split("_")[0] : code;
+            groups.computeIfAbsent(grp, k -> new java.util.ArrayList<>()).add(i);
+        }
+
+        // Remove any single chart mode UI
+        removeAll();
+        multiChartContainer = new javax.swing.JPanel();
+        multiChartContainer.setLayout(new javax.swing.BoxLayout(multiChartContainer, javax.swing.BoxLayout.Y_AXIS));
+
+        // Color-blind friendly palette (ColorBrewer Set2-like)
+        java.awt.Color[] palette = new java.awt.Color[] {
+            new java.awt.Color(0x1b9e77), // green
+            new java.awt.Color(0xd95f02), // orange
+            new java.awt.Color(0x7570b3), // purple
+            new java.awt.Color(0xe7298a), // pink
+            new java.awt.Color(0x66a61e), // olive
+            new java.awt.Color(0xe6ab02), // mustard
+            new java.awt.Color(0xa6761d), // brown
+            new java.awt.Color(0x666666)  // gray
+        };
+
+        for (var entry : groups.entrySet()) {
+            String grp = entry.getKey();
+            java.util.List<Integer> idxs = entry.getValue();
+            org.jfree.data.time.TimeSeriesCollection dataset = new org.jfree.data.time.TimeSeriesCollection();
+
+            // For each skill in the group, build a time series across dates
+            for (int k = 0; k < idxs.size(); k++) {
+                int colIndex = idxs.get(k);
+                String code = partCodes[colIndex];
+                String human = (partLabels != null && partLabels.length > colIndex && partLabels[colIndex] != null) ? partLabels[colIndex] : code;
+                String seriesName = code + " - " + human; // legend shows code plus friendly label
+                org.jfree.data.time.TimeSeries ts = new org.jfree.data.time.TimeSeries(seriesName);
+                for (int r = 0; r < rows.size(); r++) {
+                    java.time.LocalDate d = dates.get(r);
+                    java.util.List<Integer> row = rows.get(r);
+                    Integer vv = (colIndex < row.size()) ? row.get(colIndex) : null;
+                    int val = vv == null ? 0 : vv;
+                    org.jfree.data.time.Day day = new org.jfree.data.time.Day(java.util.Date.from(d.atStartOfDay(java.time.ZoneId.systemDefault()).toInstant()));
+                    ts.addOrUpdate(day, val);
+                }
+                dataset.addSeries(ts);
+            }
+
+            // Title: "Phase N Progression" when grp matches P<digit(s)>
+            String title = (grp != null && grp.startsWith("P") && grp.length() > 1)
+                    ? ("Phase " + grp.substring(1) + " Progression")
+                    : (grp + " progression");
+
+            JFreeChart subchart = ChartFactory.createTimeSeriesChart(
+                    title,
+                    "Date",
+                    "Value",
+                    dataset,
+                    true,
+                    true,
+                    false
+            );
+
+            XYPlot plot = subchart.getXYPlot();
+            plot.setBackgroundPaint(java.awt.Color.WHITE);
+            // Add colored horizontal bands behind the data using polygon annotations
+            try {
+                // Compute domain lower/upper bounds in millis for the current dataset if available
+                long domainLower = Long.MIN_VALUE;
+                long domainUpper = Long.MAX_VALUE;
+                if (!dates.isEmpty()) {
+                    java.time.ZoneId zid = java.time.ZoneId.systemDefault();
+                    java.time.LocalDate first = dates.get(0);
+                    java.time.LocalDate last = dates.get(dates.size() - 1).plusDays(4);
+                    domainLower = java.util.Date.from(first.atStartOfDay(zid).toInstant()).getTime();
+                    domainUpper = java.util.Date.from(last.atStartOfDay(zid).toInstant()).getTime();
+                }
+                double left = domainLower == Long.MIN_VALUE ? plot.getDomainAxis().getRange().getLowerBound() : domainLower;
+                double right = domainUpper == Long.MAX_VALUE ? plot.getDomainAxis().getRange().getUpperBound() : domainUpper;
+                // band 0..1 (red)
+                {
+                    double[] coords = new double[] { left, 0.0, right, 0.0, right, 1.0, left, 1.0 };
+                    plot.addAnnotation(new XYPolygonAnnotation(coords, null, null, new java.awt.Color(255, 0, 0, 40)));
+                }
+                // band 1..2 (orange)
+                {
+                    double[] coords = new double[] { left, 1.0, right, 1.0, right, 2.0, left, 2.0 };
+                    plot.addAnnotation(new XYPolygonAnnotation(coords, null, null, new java.awt.Color(255, 165, 0, 40)));
+                }
+                // band 2..3 (yellow)
+                {
+                    double[] coords = new double[] { left, 2.0, right, 2.0, right, 3.0, left, 3.0 };
+                    plot.addAnnotation(new XYPolygonAnnotation(coords, null, null, new java.awt.Color(255, 255, 0, 40)));
+                }
+                // band 3..4 (green)
+                {
+                    double[] coords = new double[] { left, 3.0, right, 3.0, right, 4.0, left, 4.0 };
+                    plot.addAnnotation(new XYPolygonAnnotation(coords, null, null, new java.awt.Color(0, 255, 0, 40)));
+                }
+            } catch (Throwable t) {
+                LOG.debug("Unable to add background bands as annotations: {}", t.toString());
+            }
+            org.jfree.chart.renderer.xy.XYLineAndShapeRenderer renderer = new org.jfree.chart.renderer.xy.XYLineAndShapeRenderer(true, true);
+            // assign colors and markers
+            for (int s = 0; s < dataset.getSeriesCount(); s++) {
+                java.awt.Color c = palette[s % palette.length];
+                renderer.setSeriesPaint(s, c);
+                renderer.setSeriesStroke(s, new java.awt.BasicStroke(2.0f));
+                renderer.setSeriesShapesVisible(s, true);
+                renderer.setSeriesShape(s, new java.awt.geom.Ellipse2D.Double(-3, -3, 6, 6));
+            }
+            plot.setRenderer(renderer);
+
+            // Ensure Y axis range and ticks show 0..3 grid with a small lower padding for x-axis visibility
+            try {
+                NumberAxis yAxis = (NumberAxis) plot.getRangeAxis();
+                yAxis.setRange(-0.25, 4.0);
+                yAxis.setTickUnit(new org.jfree.chart.axis.NumberTickUnit(1));
+            } catch (ClassCastException cce) {
+                LOG.debug("Range axis is not a NumberAxis: {}", cce.toString());
+            }
+
+            // Ensure Y axis range and ticks show 0..3 grid with a small lower padding for x-axis visibility
+            try {
+                org.jfree.chart.axis.DateAxis dateAxis = (org.jfree.chart.axis.DateAxis) plot.getDomainAxis();
+                java.text.SimpleDateFormat fmt = new java.text.SimpleDateFormat("yyyyMMdd");
+                dateAxis.setDateFormatOverride(fmt);
+                // Use the provided dates list to determine bounds (oldest first)
+                if (!dates.isEmpty()) {
+                    java.time.ZoneId zid = java.time.ZoneId.systemDefault();
+                    java.time.LocalDate firstDate = dates.get(0);
+                    java.time.LocalDate lastDate = dates.get(dates.size() - 1);
+                    // pad 4 days on the right to provide visual breathing room
+                    java.time.LocalDate paddedUpper = lastDate.plusDays(4);
+                    java.util.Date lower = java.util.Date.from(firstDate.atStartOfDay(zid).toInstant());
+                    java.util.Date upper = java.util.Date.from(paddedUpper.atStartOfDay(zid).toInstant());
+                    dateAxis.setRange(lower, upper);
+                    // one-day tick units so each datapoint maps to a single label
+                    dateAxis.setTickUnit(new org.jfree.chart.axis.DateTickUnit(org.jfree.chart.axis.DateTickUnitType.DAY, 1));
+                }
+            } catch (ClassCastException cce) {
+                LOG.debug("Domain axis is not a DateAxis: {}", cce.toString());
+            }
+
+            // Place legend below the plot for clarity and allow it to show codes+labels
+            if (subchart.getLegend() != null) subchart.getLegend().setPosition(org.jfree.chart.ui.RectangleEdge.BOTTOM);
+
+            ChartPanel cp = new ChartPanel(subchart);
+            cp.setName(grp);
+            cp.setPreferredSize(new Dimension(1000, Math.max(180, 40 * idxs.size())));
+            cp.setMaximumSize(new Dimension(Integer.MAX_VALUE, cp.getPreferredSize().height));
+            multiChartContainer.add(cp);
+        }
+
+        add(new javax.swing.JScrollPane(multiChartContainer), BorderLayout.CENTER);
+        revalidate();
+        repaint();
+    }
+
+    /**
+     * Save each grouped subchart as an individual PNG file. The method writes
+     * files named {baseName}-{group}.png into the provided directory and
+     * returns a map of group -> written path. Caller must ensure grouped data
+     * has been rendered (updateWithGroupedData called) prior to invoking this.
+     *
+     * @param dir directory to write files into
+     * @param baseName base filename (no extension) to prefix each file
+     * @param width image width in pixels
+     * @param heightPerGroup per-group image height in pixels
+     * @return ordered map of group id to written file path
+     * @throws java.io.IOException on I/O error
+     */
+    public java.util.Map<String, java.nio.file.Path> saveGroupedCharts(java.nio.file.Path dir, String baseName, int width, int heightPerGroup) throws java.io.IOException {
+        java.util.Map<String, java.nio.file.Path> out = new java.util.LinkedHashMap<>();
+        if (dir == null) throw new java.io.IOException("output dir is null");
+        java.nio.file.Files.createDirectories(dir);
+        if (multiChartContainer == null || multiChartContainer.getComponentCount() == 0) {
+            return out;
+        }
+        for (int i = 0; i < multiChartContainer.getComponentCount(); i++) {
+            java.awt.Component c = multiChartContainer.getComponent(i);
+            String grp = c.getName() != null ? c.getName() : String.valueOf(i+1);
+            int h = Math.max(100, heightPerGroup);
+            c.setSize(width, h);
+            c.doLayout();
+            java.awt.image.BufferedImage img = new java.awt.image.BufferedImage(width, h, java.awt.image.BufferedImage.TYPE_INT_ARGB);
+            java.awt.Graphics2D g = img.createGraphics();
+            g.setColor(java.awt.Color.WHITE);
+            g.fillRect(0, 0, width, h);
+            c.paint(g);
+            g.dispose();
+            java.nio.file.Path file = dir.resolve(baseName + "-" + grp + ".png");
+            try (java.io.OutputStream os = java.nio.file.Files.newOutputStream(file);
+                 javax.imageio.stream.ImageOutputStream ios = javax.imageio.ImageIO.createImageOutputStream(os)) {
+                boolean written = javax.imageio.ImageIO.write(img, "png", ios);
+                if (!written) throw new java.io.IOException("No ImageWriter for png");
+            }
+            out.put(grp, file);
+        }
+        return out;
+    }
+
+    /**
+     * Show an empty grouped chart using the provided part codes. This will
+     * render one row of zeros sized to the number of parts so the UI shows
+     * grouped axes and placeholders even when no session data exists yet.
+     */
+    public void showEmptyGrouped(String[] partCodes) {
+        if (partCodes == null) return;
+    List<Integer> zeros = new java.util.ArrayList<>(java.util.Collections.nCopies(partCodes.length, 0));
+        List<List<Integer>> rows = new java.util.ArrayList<>();
+        rows.add(zeros);
+        updateWithGroupedData(rows, partCodes);
     }
 
     /**
