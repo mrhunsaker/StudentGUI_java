@@ -154,7 +154,10 @@ public class IOS extends JPanel {
             int ptId = com.studentgui.apphelpers.Database.getOrCreateProgressType("iOS");
             java.util.Set<String> keys = inputs.keySet();
             String[] codes = new String[keys.size()];
-            int idx = 0; for (String k: keys) codes[idx++] = k;
+            int idx = 0;
+            for (String k: keys) {
+                codes[idx++] = k;
+            }
             com.studentgui.apphelpers.Database.ensureAssessmentParts(ptId, codes);
         } catch (SQLException ex) {
             LOG.error("Error ensuring iOS assessment parts", ex);
@@ -195,9 +198,11 @@ public class IOS extends JPanel {
                 String baseName = "iOS-" + sessionId + "-" + dateStr;
 
                 com.studentgui.apphelpers.Database.ResultsWithDates rwd = com.studentgui.apphelpers.Database.fetchLatestAssessmentResultsWithDates(this.studentNameParam, "iOS", Integer.MAX_VALUE);
-                java.util.Map<String, java.nio.file.Path> groups = new java.util.LinkedHashMap<>();
-                String[] labels = new String[codes.length];
-                for (int i = 0; i < codes.length; i++) labels[i] = inputs.get(codes[i]).getLabel();
+                    java.util.Map<String, java.nio.file.Path> groups = null;
+                        String[] labels = new String[codes.length];
+                        for (int i = 0; i < codes.length; i++) {
+                            labels[i] = inputs.get(codes[i]).getLabel();
+                        }
                 // codes already built above as 'codes'
                 if (rwd != null && rwd.rows != null && !rwd.rows.isEmpty()) {
                     graph.updateWithGroupedDataByDate(rwd.dates, rwd.rows, codes, labels);
@@ -207,13 +212,17 @@ public class IOS extends JPanel {
                 } else {
                     java.util.List<java.util.List<Integer>> rowsList = new java.util.ArrayList<>();
                     java.util.List<Integer> latest = new java.util.ArrayList<>();
-                    for (String c : codes) latest.add(inputs.get(c).getValue());
+                    for (String c : codes) {
+                        latest.add(inputs.get(c).getValue());
+                    }
                     rowsList.add(latest);
                     graph.updateWithGroupedData(rowsList, codes);
                     groups = graph.saveGroupedCharts(out, baseName, 1000, 240);
                 }
 
-                if (groups == null) groups = new java.util.LinkedHashMap<>();
+                if (groups == null) {
+                    groups = new java.util.LinkedHashMap<>();
+                }
                 StringBuilder md = new StringBuilder();
                 md.append("# ").append(this.studentNameParam == null ? "Unknown Student" : this.studentNameParam).append(" - ").append(dateStr).append("\n\n");
                 for (java.util.Map.Entry<String, java.nio.file.Path> e : groups.entrySet()) {

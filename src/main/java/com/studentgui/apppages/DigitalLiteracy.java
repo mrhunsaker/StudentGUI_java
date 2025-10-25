@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
  * instance is used to visualize recent assessment sessions.
  * </p>
  */
-public class DigitalLiteracy extends JPanel {
+public class DigitalLiteracy extends JPanel implements com.studentgui.app.DateChangeListener, com.studentgui.app.StudentChangeListener {
     private static final Logger LOG = LoggerFactory.getLogger(DigitalLiteracy.class);
     /** Array of input fields for each digital literacy skill part. */
     private final com.studentgui.uicomp.PhaseScoreField[] skillFields;
@@ -40,10 +40,12 @@ public class DigitalLiteracy extends JPanel {
     private final JLineGraph lineGraph; // Reference to the JLineGraph instance
 
     /** Selected student's display name (may be null) for saving/fetching data. */
-    private final String studentNameParam;
+    private String studentNameParam;
+    private JLabel titleLabel;
+    private final String baseTitle = "Digital Literacy Skills Progression";
 
     /** Session date to associate with persisted digital literacy progress. */
-    private final LocalDate dateParam;
+    private LocalDate dateParam;
 
     /**
      * Construct the Digital Literacy page for the given student and date.
@@ -79,12 +81,12 @@ public class DigitalLiteracy extends JPanel {
         gbc.weightx = 1.0;
         gbc.weighty = 0.0;
 
-    JLabel titleLabel = new JLabel("DigitalLiteracy Skills Progression");
-        titleLabel.setFont(titleLabel.getFont().deriveFont(Font.BOLD, 16));
+    this.titleLabel = new JLabel(baseTitle);
+        this.titleLabel.setFont(this.titleLabel.getFont().deriveFont(Font.BOLD, 16));
         gbc.gridx = 0;
         gbc.gridy = 0;
         gbc.gridwidth = GridBagConstraints.REMAINDER;
-        dataEntryPanel.add(titleLabel, gbc);
+        dataEntryPanel.add(this.titleLabel, gbc);
 
         gbc.gridy = 1;
         gbc.gridwidth = GridBagConstraints.REMAINDER;
@@ -137,8 +139,15 @@ public class DigitalLiteracy extends JPanel {
     openLatestBtn.setPreferredSize(new java.awt.Dimension(0, 32));
     openLatestBtn.addActionListener((ActionEvent e) -> {
         java.nio.file.Path p = com.studentgui.apphelpers.Helpers.latestPlotPath(this.studentNameParam, "DigitalLiteracy");
-        if (p == null) com.studentgui.apphelpers.UiNotifier.show("No DigitalLiteracy plot found for student");
-    else { try { java.awt.Desktop.getDesktop().open(p.toFile()); } catch (java.io.IOException | UnsupportedOperationException | SecurityException ex) { com.studentgui.apphelpers.UiNotifier.show("Unable to open plot: " + p.getFileName().toString()); } }
+        if (p == null) {
+            com.studentgui.apphelpers.UiNotifier.show("No DigitalLiteracy plot found for student");
+        } else {
+            try {
+                java.awt.Desktop.getDesktop().open(p.toFile());
+            } catch (java.io.IOException | UnsupportedOperationException | SecurityException ex) {
+                com.studentgui.apphelpers.UiNotifier.show("Unable to open plot: " + p.getFileName().toString());
+            }
+        }
     });
     dataEntryPanel.add(openLatestBtn, gbc);
 
@@ -154,6 +163,7 @@ public class DigitalLiteracy extends JPanel {
 
         SwingUtilities.invokeLater(() -> {
             dataEntryPanel.setPreferredSize(dataEntryPanel.getPreferredSize());
+            updateTitleDate();
             revalidate();
         });
 
@@ -172,7 +182,9 @@ public class DigitalLiteracy extends JPanel {
             int ptId = com.studentgui.apphelpers.Database.getOrCreateProgressType("DigitalLiteracy");
             // Use canonical part codes from this.parts
             String[] codes = new String[this.parts.length];
-            for (int i = 0; i < this.parts.length; i++) codes[i] = this.parts[i][0];
+            for (int i = 0; i < this.parts.length; i++) {
+                codes[i] = this.parts[i][0];
+            }
             com.studentgui.apphelpers.Database.ensureAssessmentParts(ptId, codes);
         } catch (SQLException e) {
             LOG.error("SQL error ensuring assessment parts for DigitalLiteracy", e);
@@ -214,9 +226,11 @@ public class DigitalLiteracy extends JPanel {
                 String baseName = "DigitalLiteracy-" + sessionId + "-" + dateStr;
 
                 com.studentgui.apphelpers.Database.ResultsWithDates rwd = com.studentgui.apphelpers.Database.fetchLatestAssessmentResultsWithDates(this.studentNameParam, "DigitalLiteracy", Integer.MAX_VALUE);
-                java.util.Map<String, java.nio.file.Path> groups = new java.util.LinkedHashMap<>();
+                java.util.Map<String, java.nio.file.Path> groups = null;
                 String[] labels = new String[this.parts.length];
-                for (int i = 0; i < this.parts.length; i++) labels[i] = this.parts[i][1];
+                for (int i = 0; i < this.parts.length; i++) {
+                    labels[i] = this.parts[i][1];
+                }
                 if (rwd != null && rwd.rows != null && !rwd.rows.isEmpty()) {
                     lineGraph.updateWithGroupedDataByDate(rwd.dates, rwd.rows, codes, labels);
                     groups = lineGraph.saveGroupedCharts(out, baseName, 1000, 240);
@@ -304,7 +318,9 @@ public class DigitalLiteracy extends JPanel {
             if (allSkillValues != null && !allSkillValues.isEmpty()) {
                 // Build canonical codes array in the same order used when ensuring parts
                 String[] codes = new String[this.parts.length];
-                for (int i = 0; i < this.parts.length; i++) codes[i] = this.parts[i][0];
+                for (int i = 0; i < this.parts.length; i++) {
+                    codes[i] = this.parts[i][0];
+                }
                 lineGraph.updateWithGroupedData(allSkillValues, codes);
                 LOG.debug("Graph updated with data: {}", allSkillValues);
                 // Skip automatic saving of DigitalLiteracy plot during refresh to avoid
@@ -315,6 +331,33 @@ public class DigitalLiteracy extends JPanel {
             }
         } catch (SQLException e) {
             LOG.error("SQL error refreshing Digital Literacy graph", e);
+        }
+    }
+
+    @Override
+    public void dateChanged(LocalDate newDate) {
+        this.dateParam = newDate;
+        SwingUtilities.invokeLater(() -> {
+            refreshGraph();
+            updateTitleDate();
+        });
+    }
+
+    @Override
+    public void studentChanged(String newStudent) {
+        this.studentNameParam = newStudent;
+        SwingUtilities.invokeLater(() -> {
+            refreshGraph();
+            updateTitleDate();
+        });
+    }
+
+    private void updateTitleDate() {
+        try {
+            String dateStr = this.dateParam != null ? this.dateParam.toString() : java.time.LocalDate.now().toString();
+            this.titleLabel.setText(baseTitle + " - " + dateStr);
+        } catch (Exception ex) {
+            this.titleLabel.setText(baseTitle);
         }
     }
     

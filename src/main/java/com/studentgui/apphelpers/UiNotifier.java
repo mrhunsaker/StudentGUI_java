@@ -25,7 +25,9 @@ public class UiNotifier {
      */
     public static void show(String message) {
         SwingUtilities.invokeLater(() -> {
-            if (window != null) window.dispose();
+            if (window != null) {
+                window.dispose();
+            }
             window = new JWindow();
             JLabel label = new JLabel(message);
             label.setOpaque(true);

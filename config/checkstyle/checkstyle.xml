@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<!DOCTYPE module PUBLIC
+        "-//Puppy Crawl//DTD Check Configuration 1.3//EN"
+        "https://checkstyle.org/dtds/configuration_1_3.dtd">
+<module name="Checker">
+    <!-- Lightweight, focused Checkstyle configuration used to get a manageable
+         initial violations set. We relax line length to 120 and enable a few
+         high-priority checks (NeedBraces, FinalParameters, HiddenField).
+    -->
+
+    <!-- Enforce maximum line length, but allow longer (120) to reduce noise -->
+    <module name="LineLength">
+        <property name="max" value="120"/>
+        <!-- ignore package/import lines -->
+        <property name="ignorePattern" value="^package\s|^import\s"/>
+    </module>
+
+    <module name="TreeWalker">
+        <!-- Require braces for control structures -->
+        <module name="NeedBraces"/>
+
+        <!-- Encourage final parameters on public API methods (higher-signal) -->
+        <module name="FinalParameters"/>
+
+        <!-- Detect variables that hide fields -->
+        <module name="HiddenField"/>
+    </module>
+
+</module>

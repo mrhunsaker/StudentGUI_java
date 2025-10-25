@@ -24,6 +24,7 @@ com\studentgui\apphelpers\SqlGenerate.class
 com\studentgui\apphelpers\UiNotifier.class
 com\studentgui\apphelpers\dto\SessionPayload.class
 com\studentgui\apptheming\Theme$7.class
+com\studentgui\app\StudentChangeListener.class
 com\studentgui\apptheming\Theme$4.class
 com\studentgui\apppages\IOS.class
 com\studentgui\tools\SmokeTest.class
@@ -34,6 +35,7 @@ com\studentgui\apppages\Keyboarding.class
 com\studentgui\tools\ProgrammaticPageSaveTest.class
 com\studentgui\apptheming\Theme$1.class
 com\studentgui\apppages\Braille.class
+com\studentgui\app\DateChangeListener.class
 com\studentgui\apptheming\Theme$5.class
 com\studentgui\apptheming\Theme$12.class
 com\studentgui\apphelpers\dto\KeyboardingPayload.class

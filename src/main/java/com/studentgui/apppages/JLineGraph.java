@@ -135,7 +135,9 @@ public class JLineGraph extends JPanel {
      */
     public void updateWithData(List<List<Integer>> allSkillValues) {
         LOG.debug("updateWithData called with {} rows", allSkillValues == null ? 0 : allSkillValues.size());
-        if (allSkillValues == null || allSkillValues.isEmpty()) return;
+        if (allSkillValues == null || allSkillValues.isEmpty()) {
+            return;
+        }
         // Fallback to existing single-chart behavior
         lineDataset.removeAllSeries();
         XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer();
@@ -144,7 +146,9 @@ public class JLineGraph extends JPanel {
         for (int s = 0; s < allSkillValues.size() - 1; s++) {
             XYSeries hs = new XYSeries("S" + s);
             List<Integer> skillValues = allSkillValues.get(s);
-            if (skillValues == null) continue;
+            if (skillValues == null) {
+                continue;
+            }
             for (int j = 0; j < skillValues.size(); j++) {
                 Integer v = skillValues.get(j);
                 int y = v == null ? 0 : v;
@@ -198,7 +202,9 @@ public class JLineGraph extends JPanel {
     public void updateWithGroupedData(List<List<Integer>> allSkillValues, String[] partCodes) {
         LOG.debug("updateWithGroupedData called with rows={} partCodes={}", allSkillValues == null ? 0 : allSkillValues.size(), partCodes == null ? 0 : partCodes.length);
         // validate
-        if (partCodes == null || partCodes.length == 0 || allSkillValues == null || allSkillValues.isEmpty()) return;
+        if (partCodes == null || partCodes.length == 0 || allSkillValues == null || allSkillValues.isEmpty()) {
+            return;
+        }
 
         // Build group -> indexes map preserving order of first occurrence
         java.util.LinkedHashMap<String, java.util.List<Integer>> groups = new java.util.LinkedHashMap<>();
@@ -309,7 +315,9 @@ public class JLineGraph extends JPanel {
      */
     public void updateWithGroupedDataByDate(java.util.List<java.time.LocalDate> dates, java.util.List<java.util.List<Integer>> rows, String[] partCodes, String[] partLabels) {
         LOG.debug("updateWithGroupedDataByDate called with dates={} rows={} parts={}", dates == null ? 0 : dates.size(), rows == null ? 0 : rows.size(), partCodes == null ? 0 : partCodes.length);
-        if (dates == null || rows == null || partCodes == null) return;
+        if (dates == null || rows == null || partCodes == null) {
+            return;
+        }
         // Build groups preserving order
         java.util.LinkedHashMap<String, java.util.List<Integer>> groups = new java.util.LinkedHashMap<>();
         for (int i = 0; i < partCodes.length; i++) {
@@ -455,7 +463,9 @@ public class JLineGraph extends JPanel {
             }
 
             // Place legend below the plot for clarity and allow it to show codes+labels
-            if (subchart.getLegend() != null) subchart.getLegend().setPosition(org.jfree.chart.ui.RectangleEdge.BOTTOM);
+            if (subchart.getLegend() != null) {
+                subchart.getLegend().setPosition(org.jfree.chart.ui.RectangleEdge.BOTTOM);
+            }
 
             ChartPanel cp = new ChartPanel(subchart);
             cp.setName(grp);
@@ -484,7 +494,9 @@ public class JLineGraph extends JPanel {
      */
     public java.util.Map<String, java.nio.file.Path> saveGroupedCharts(java.nio.file.Path dir, String baseName, int width, int heightPerGroup) throws java.io.IOException {
         java.util.Map<String, java.nio.file.Path> out = new java.util.LinkedHashMap<>();
-        if (dir == null) throw new java.io.IOException("output dir is null");
+        if (dir == null) {
+            throw new java.io.IOException("output dir is null");
+        }
         java.nio.file.Files.createDirectories(dir);
         if (multiChartContainer == null || multiChartContainer.getComponentCount() == 0) {
             return out;
@@ -505,7 +517,9 @@ public class JLineGraph extends JPanel {
             try (java.io.OutputStream os = java.nio.file.Files.newOutputStream(file);
                  javax.imageio.stream.ImageOutputStream ios = javax.imageio.ImageIO.createImageOutputStream(os)) {
                 boolean written = javax.imageio.ImageIO.write(img, "png", ios);
-                if (!written) throw new java.io.IOException("No ImageWriter for png");
+                if (!written) {
+                    throw new java.io.IOException("No ImageWriter for png");
+                }
             }
             out.put(grp, file);
         }
@@ -518,8 +532,10 @@ public class JLineGraph extends JPanel {
      * grouped axes and placeholders even when no session data exists yet.
      */
     public void showEmptyGrouped(String[] partCodes) {
-        if (partCodes == null) return;
-    List<Integer> zeros = new java.util.ArrayList<>(java.util.Collections.nCopies(partCodes.length, 0));
+        if (partCodes == null) {
+            return;
+        }
+        List<Integer> zeros = new java.util.ArrayList<>(java.util.Collections.nCopies(partCodes.length, 0));
         List<List<Integer>> rows = new java.util.ArrayList<>();
         rows.add(zeros);
         updateWithGroupedData(rows, partCodes);
@@ -535,9 +551,13 @@ public class JLineGraph extends JPanel {
      * @throws java.io.IOException if writing fails
      */
     public void saveChart(java.nio.file.Path outputPath, int width, int height) throws java.io.IOException {
-        if (outputPath == null) throw new java.io.IOException("outputPath is null");
+        if (outputPath == null) {
+            throw new java.io.IOException("outputPath is null");
+        }
         java.nio.file.Path parent = outputPath.getParent();
-        if (parent == null) parent = java.nio.file.Paths.get(".");
+        if (parent == null) {
+            parent = java.nio.file.Paths.get(".");
+        }
         // Ensure parent directory exists
         java.nio.file.Files.createDirectories(parent);
         java.awt.image.BufferedImage img = null;
@@ -564,7 +584,9 @@ public class JLineGraph extends JPanel {
             try (java.io.OutputStream os = java.nio.file.Files.newOutputStream(outputPath);
                  javax.imageio.stream.ImageOutputStream ios = javax.imageio.ImageIO.createImageOutputStream(os)) {
                 boolean written = javax.imageio.ImageIO.write(img, "png", ios);
-                if (!written) throw new java.io.IOException("No ImageWriter available for format 'png'");
+                if (!written) {
+                    throw new java.io.IOException("No ImageWriter available for format 'png'");
+                }
             }
         } catch (java.io.IOException ioe) {
             String diag = String.format("Failed saving chart to %s (parentExists=%b, parentWritable=%b, parentIsDir=%b)",

@@ -142,7 +142,9 @@ public class ContactLog extends JPanel {
             }
             guardianField.setText(p.guardian != null ? p.guardian : "");
             String method = p.method != null ? p.method : "";
-            if (method != null) contactMethodCombo.setSelectedItem(method);
+            if (method != null) {
+                contactMethodCombo.setSelectedItem(method);
+            }
             phoneField.setText(p.phone != null ? p.phone : "");
             emailField.setText(p.email != null ? p.email : "");
             contactResponseField.setText(p.response != null ? p.response : "");

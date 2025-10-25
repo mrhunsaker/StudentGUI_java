@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
  * using the shared {@link JLineGraph} component.
  * </p>
  */
-public class Abacus extends JPanel {
+public class Abacus extends JPanel implements com.studentgui.app.DateChangeListener, com.studentgui.app.StudentChangeListener {
     private static final Logger LOG = LoggerFactory.getLogger(Abacus.class);
 
     /** Array of input components for each skill. */
@@ -39,9 +39,11 @@ public class Abacus extends JPanel {
     /** Shared graph component used to visualize recent results. */
     private final JLineGraph lineGraph; // Reference to the JLineGraph instance
     /** Selected student display name (may be null). */
-    private final String studentNameParam;
+    private String studentNameParam;
     /** Session date associated with persisted progress. */
-    private final LocalDate dateParam;
+    private LocalDate dateParam;
+    private JLabel titleLabel;
+    private final String baseTitle = "Abacus Skills Progression";
 
     /**
      * Construct the Abacus page for the given student and session date.
@@ -85,8 +87,8 @@ public class Abacus extends JPanel {
         gbc.weightx = 1.0;
         gbc.weighty = 0.0;
 
-    JLabel titleLabel = new JLabel("Abacus Skills Progression");
-        titleLabel.setFont(titleLabel.getFont().deriveFont(Font.BOLD, 16));
+    this.titleLabel = new JLabel(baseTitle);
+    this.titleLabel.setFont(this.titleLabel.getFont().deriveFont(Font.BOLD, 16));
         gbc.gridx = 0;
         gbc.gridy = 0;
         gbc.gridwidth = GridBagConstraints.REMAINDER;
@@ -142,8 +144,15 @@ public class Abacus extends JPanel {
     openLatestBtn.setPreferredSize(new java.awt.Dimension(0, 32));
     openLatestBtn.addActionListener((ActionEvent e) -> {
         java.nio.file.Path p = com.studentgui.apphelpers.Helpers.latestPlotPath(this.studentNameParam, "Abacus");
-        if (p == null) com.studentgui.apphelpers.UiNotifier.show("No Abacus plot found for student");
-    else { try { java.awt.Desktop.getDesktop().open(p.toFile()); } catch (java.io.IOException | UnsupportedOperationException | SecurityException ex) { com.studentgui.apphelpers.UiNotifier.show("Unable to open plot: " + p.getFileName().toString()); } }
+        if (p == null) {
+            com.studentgui.apphelpers.UiNotifier.show("No Abacus plot found for student");
+        } else {
+            try {
+                java.awt.Desktop.getDesktop().open(p.toFile());
+            } catch (java.io.IOException | UnsupportedOperationException | SecurityException ex) {
+                com.studentgui.apphelpers.UiNotifier.show("Unable to open plot: " + p.getFileName().toString());
+            }
+        }
     });
     dataEntryPanel.add(openLatestBtn, gbc);
 
@@ -157,6 +166,7 @@ public class Abacus extends JPanel {
 
         SwingUtilities.invokeLater(() -> {
             dataEntryPanel.setPreferredSize(dataEntryPanel.getPreferredSize());
+            updateTitleDate();
             revalidate();
         });
 
@@ -176,7 +186,9 @@ public class Abacus extends JPanel {
             // Use the canonical part codes declared on this page so parts are created
             // with the expected codes like "P1_1", "P1_2", ...
             String[] codes = new String[this.parts.length];
-            for (int i = 0; i < this.parts.length; i++) codes[i] = this.parts[i][0];
+            for (int i = 0; i < this.parts.length; i++) {
+                codes[i] = this.parts[i][0];
+            }
             com.studentgui.apphelpers.Database.ensureAssessmentParts(ptId, codes);
             try {
                 com.studentgui.apphelpers.Database.cleanupAssessmentParts(ptId, codes);
@@ -231,7 +243,9 @@ public class Abacus extends JPanel {
                 if (rwd != null && rwd.rows != null && !rwd.rows.isEmpty()) {
                         // Build human-friendly labels from this.parts and render time-series grouped charts
                         String[] labels = new String[this.parts.length];
-                        for (int i = 0; i < this.parts.length; i++) labels[i] = this.parts[i][1];
+                        for (int i = 0; i < this.parts.length; i++) {
+                            labels[i] = this.parts[i][1];
+                        }
                         lineGraph.updateWithGroupedDataByDate(rwd.dates, rwd.rows, codes, labels);
                     // Persist each group as a PNG (time-series image)
                     groups = lineGraph.saveGroupedCharts(out, baseName, 1000, 240);
@@ -242,7 +256,9 @@ public class Abacus extends JPanel {
                     // Fallback: render only the latest session snapshot
                     java.util.List<java.util.List<Integer>> rows = new java.util.ArrayList<>();
                     java.util.List<Integer> latest = new java.util.ArrayList<>();
-                    for (int v : scores) latest.add(v);
+                    for (int v : scores) {
+                        latest.add(v);
+                    }
                     rows.add(latest);
                     lineGraph.updateWithGroupedData(rows, codes);
                     groups = lineGraph.saveGroupedCharts(out, baseName, 1000, 240);
@@ -325,12 +341,16 @@ public class Abacus extends JPanel {
         try {
             com.studentgui.apphelpers.Database.ResultsWithDates rwd = com.studentgui.apphelpers.Database.fetchLatestAssessmentResultsWithDates(studentNameParam, "Abacus", Integer.MAX_VALUE);
             String[] codes = new String[this.parts.length];
-            for (int i = 0; i < this.parts.length; i++) codes[i] = this.parts[i][0];
+            for (int i = 0; i < this.parts.length; i++) {
+                codes[i] = this.parts[i][0];
+            }
             if (rwd != null && rwd.rows != null && !rwd.rows.isEmpty()) {
                 // Use the date-aware grouped plotter so X axis is dates and each
                 // skill within a phase is a separate line series.
                 String[] labels = new String[this.parts.length];
-                for (int i = 0; i < this.parts.length; i++) labels[i] = this.parts[i][1];
+                for (int i = 0; i < this.parts.length; i++) {
+                    labels[i] = this.parts[i][1];
+                }
                 lineGraph.updateWithGroupedDataByDate(rwd.dates, rwd.rows, codes, labels);
                 LOG.debug("Graph updated with {} dated sessions", rwd.rows.size());
             } else {
@@ -341,6 +361,33 @@ public class Abacus extends JPanel {
             LOG.error("SQL error refreshing graph", e);
         }
     }
+    @Override
+    public void dateChanged(LocalDate newDate) {
+        this.dateParam = newDate;
+        // When the global date changes, update the graph to reflect any
+        // date-related logic (most refreshGraph implementations load
+        // recent sessions independent of the selected session date, but
+        // updating here keeps the saved date in sync for future submits).
+        SwingUtilities.invokeLater(this::refreshGraph);
+    }
+
+    @Override
+    public void studentChanged(String newStudent) {
+        this.studentNameParam = newStudent;
+        SwingUtilities.invokeLater(() -> {
+            refreshGraph();
+            updateTitleDate();
+        });
+    }
+
+        private void updateTitleDate() {
+            try {
+                String dateStr = this.dateParam != null ? this.dateParam.toString() : java.time.LocalDate.now().toString();
+                this.titleLabel.setText(baseTitle + " - " + dateStr);
+            } catch (Exception ex) {
+                this.titleLabel.setText(baseTitle);
+            }
+        }
     
 
 }

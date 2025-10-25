@@ -186,7 +186,9 @@ public class Theme {
         light.setIcon(makeIcon(new Color(0x000000), 12));
         light.getAccessibleContext().setAccessibleName("Light theme");
         light.getAccessibleContext().setAccessibleDescription("Switch to the light theme");
-        if ("light".equalsIgnoreCase(currentTheme) || "flatlightlaf".equalsIgnoreCase(currentTheme)) light.setSelected(true);
+        if ("light".equalsIgnoreCase(currentTheme) || "flatlightlaf".equalsIgnoreCase(currentTheme)) {
+            light.setSelected(true);
+        }
         themeGroup.add(light);
         themesMenu.add(light);
 
@@ -196,7 +198,9 @@ public class Theme {
         dark.setIcon(makeIcon(new Color(0x2C2C2C), 12));
         dark.getAccessibleContext().setAccessibleName("Dark theme");
         dark.getAccessibleContext().setAccessibleDescription("Switch to the dark theme");
-        if ("dark".equalsIgnoreCase(currentTheme) || "flatdarklaf".equalsIgnoreCase(currentTheme)) dark.setSelected(true);
+        if ("dark".equalsIgnoreCase(currentTheme) || "flatdarklaf".equalsIgnoreCase(currentTheme)) {
+            dark.setSelected(true);
+        }
         themeGroup.add(dark);
         themesMenu.add(dark);
 
@@ -206,7 +210,9 @@ public class Theme {
         intellij.setIcon(makeIcon(new Color(0x4A4A4A), 12));
         intellij.getAccessibleContext().setAccessibleName("IntelliJ Darcula");
         intellij.getAccessibleContext().setAccessibleDescription("Switch to the IntelliJ Darcula theme");
-        if ("darcula".equalsIgnoreCase(currentTheme)) intellij.setSelected(true);
+        if ("darcula".equalsIgnoreCase(currentTheme)) {
+            intellij.setSelected(true);
+        }
         themeGroup.add(intellij);
         themesMenu.add(intellij);
         themesMenu.addSeparator();

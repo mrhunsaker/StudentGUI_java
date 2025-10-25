@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
  * recent results.
  * </p>
  */
-public class BrailleNote extends JPanel {
+public class BrailleNote extends JPanel implements com.studentgui.app.DateChangeListener, com.studentgui.app.StudentChangeListener {
     private static final Logger LOG = LoggerFactory.getLogger(BrailleNote.class);
 
     /** Inputs for each BrailleNote skill. */
@@ -39,9 +39,11 @@ public class BrailleNote extends JPanel {
     /** Shared graph component for plotting results. */
     private final JLineGraph lineGraph; // Reference to the JLineGraph instance
     /** Display name of the selected student (may be null). */
-    private final String studentNameParam;
+    private String studentNameParam;
+    private JLabel titleLabel;
+    private final String baseTitle = "BrailleNote Skills Progression";
     /** Session date associated with persisted progress. */
-    private final LocalDate dateParam;
+    private LocalDate dateParam;
 
     /**
      * Create the BrailleNote page for a specific student and date.
@@ -85,12 +87,12 @@ public class BrailleNote extends JPanel {
         gbc.weightx = 1.0;
         gbc.weighty = 0.0;
 
-    JLabel titleLabel = new JLabel("BrailleNote Skills Progression");
-        titleLabel.setFont(titleLabel.getFont().deriveFont(Font.BOLD, 16));
+    this.titleLabel = new JLabel(baseTitle);
+        this.titleLabel.setFont(this.titleLabel.getFont().deriveFont(Font.BOLD, 16));
         gbc.gridx = 0;
         gbc.gridy = 0;
         gbc.gridwidth = GridBagConstraints.REMAINDER;
-        dataEntryPanel.add(titleLabel, gbc);
+        dataEntryPanel.add(this.titleLabel, gbc);
 
         gbc.gridy = 1;
         gbc.gridwidth = GridBagConstraints.REMAINDER;
@@ -143,8 +145,15 @@ public class BrailleNote extends JPanel {
     openLatestBtn.setPreferredSize(new java.awt.Dimension(0, 32));
     openLatestBtn.addActionListener((ActionEvent e) -> {
         java.nio.file.Path p = com.studentgui.apphelpers.Helpers.latestPlotPath(this.studentNameParam, "BrailleNote");
-        if (p == null) com.studentgui.apphelpers.UiNotifier.show("No BrailleNote plot found for student");
-    else { try { java.awt.Desktop.getDesktop().open(p.toFile()); } catch (java.io.IOException | UnsupportedOperationException | SecurityException ex) { com.studentgui.apphelpers.UiNotifier.show("Unable to open plot: " + p.getFileName().toString()); } }
+        if (p == null) {
+            com.studentgui.apphelpers.UiNotifier.show("No BrailleNote plot found for student");
+        } else {
+            try {
+                java.awt.Desktop.getDesktop().open(p.toFile());
+            } catch (java.io.IOException | UnsupportedOperationException | SecurityException ex) {
+                com.studentgui.apphelpers.UiNotifier.show("Unable to open plot: " + p.getFileName().toString());
+            }
+        }
     });
     dataEntryPanel.add(openLatestBtn, gbc);
 
@@ -155,6 +164,7 @@ public class BrailleNote extends JPanel {
 
         SwingUtilities.invokeLater(() -> {
             dataEntryPanel.setPreferredSize(dataEntryPanel.getPreferredSize());
+            updateTitleDate();
             revalidate();
         });
 
@@ -172,7 +182,9 @@ public class BrailleNote extends JPanel {
         try {
             int ptId = com.studentgui.apphelpers.Database.getOrCreateProgressType("BrailleNote");
             String[] codes = new String[this.parts.length];
-            for (int i = 0; i < this.parts.length; i++) codes[i] = this.parts[i][0];
+            for (int i = 0; i < this.parts.length; i++) {
+                codes[i] = this.parts[i][0];
+            }
             com.studentgui.apphelpers.Database.ensureAssessmentParts(ptId, codes);
         } catch (SQLException e) {
             LOG.error("SQL error initializing braille note parts", e);
@@ -205,7 +217,9 @@ public class BrailleNote extends JPanel {
             com.studentgui.apphelpers.UiNotifier.show("BrailleNote data saved.");
             com.studentgui.apphelpers.dto.AssessmentPayload payload = new com.studentgui.apphelpers.dto.AssessmentPayload(sessionId, codes, scores);
             java.nio.file.Path jsonOut = com.studentgui.apphelpers.SessionJsonWriter.writeSessionJson(this.studentNameParam, "BrailleNote", payload, sessionId);
-            if (jsonOut == null) LOG.warn("Unable to save BrailleNote session JSON for sessionId={}", sessionId);
+            if (jsonOut == null) {
+                LOG.warn("Unable to save BrailleNote session JSON for sessionId={}", sessionId);
+            }
             try {
                 java.nio.file.Path out = com.studentgui.apphelpers.Helpers.APP_HOME.resolve("StudentDataFiles").resolve(com.studentgui.apphelpers.Helpers.safeName(this.studentNameParam)).resolve("plots");
                 java.nio.file.Files.createDirectories(out);
@@ -214,9 +228,11 @@ public class BrailleNote extends JPanel {
                 String baseName = "BrailleNote-" + sessionId + "-" + dateStr;
 
                 com.studentgui.apphelpers.Database.ResultsWithDates rwd = com.studentgui.apphelpers.Database.fetchLatestAssessmentResultsWithDates(this.studentNameParam, "BrailleNote", Integer.MAX_VALUE);
-                java.util.Map<String, java.nio.file.Path> groups = new java.util.LinkedHashMap<>();
+                java.util.Map<String, java.nio.file.Path> groups = null;
                 String[] labels = new String[this.parts.length];
-                for (int i = 0; i < this.parts.length; i++) labels[i] = this.parts[i][1];
+                for (int i = 0; i < this.parts.length; i++) {
+                    labels[i] = this.parts[i][1];
+                }
                 if (rwd != null && rwd.rows != null && !rwd.rows.isEmpty()) {
                     lineGraph.updateWithGroupedDataByDate(rwd.dates, rwd.rows, codes, labels);
                     groups = lineGraph.saveGroupedCharts(out, baseName, 1000, 240);
@@ -225,13 +241,17 @@ public class BrailleNote extends JPanel {
                 } else {
                     java.util.List<java.util.List<Integer>> rowsList = new java.util.ArrayList<>();
                     java.util.List<Integer> latest = new java.util.ArrayList<>();
-                    for (int v : scores) latest.add(v);
+                    for (int v : scores) {
+                        latest.add(v);
+                    }
                     rowsList.add(latest);
                     lineGraph.updateWithGroupedData(rowsList, codes);
                     groups = lineGraph.saveGroupedCharts(out, baseName, 1000, 240);
                 }
 
-                if (groups == null) groups = new java.util.LinkedHashMap<>();
+                if (groups == null) {
+                    groups = new java.util.LinkedHashMap<>();
+                }
                 StringBuilder md = new StringBuilder();
                 md.append("# ").append(this.studentNameParam == null ? "Unknown Student" : this.studentNameParam).append(" - ").append(dateStr).append("\n\n");
                 for (java.util.Map.Entry<String, java.nio.file.Path> e : groups.entrySet()) {
@@ -303,7 +323,9 @@ public class BrailleNote extends JPanel {
             List<List<Integer>> allSkillValues = com.studentgui.apphelpers.Database.fetchLatestAssessmentResults(studentNameParam, "BrailleNote", 5);
             if (allSkillValues != null && !allSkillValues.isEmpty()) {
                 String[] codes = new String[this.parts.length];
-                for (int i = 0; i < this.parts.length; i++) codes[i] = this.parts[i][0];
+                for (int i = 0; i < this.parts.length; i++) {
+                    codes[i] = this.parts[i][0];
+                }
                 lineGraph.updateWithGroupedData(allSkillValues, codes);
                 LOG.debug("Graph updated with data: {}", allSkillValues);
                 // Skip automatic saving of BrailleNote plot during refresh to avoid
@@ -315,11 +337,40 @@ public class BrailleNote extends JPanel {
                 // canonical assessment part ordering so the UI displays
                 // one subchart per P# prefix even with no sessions.
                 String[] codes = new String[this.parts.length];
-                for (int i = 0; i < this.parts.length; i++) codes[i] = this.parts[i][0];
+                for (int i = 0; i < this.parts.length; i++) {
+                    codes[i] = this.parts[i][0];
+                }
                 lineGraph.showEmptyGrouped(codes);
             }
         } catch (SQLException e) {
             LOG.error("SQL error refreshing braille note graph", e);
+        }
+    }
+
+    @Override
+    public void dateChanged(LocalDate newDate) {
+        this.dateParam = newDate;
+        SwingUtilities.invokeLater(() -> {
+            refreshGraph();
+            updateTitleDate();
+        });
+    }
+
+    @Override
+    public void studentChanged(String newStudent) {
+        this.studentNameParam = newStudent;
+        SwingUtilities.invokeLater(() -> {
+            refreshGraph();
+            updateTitleDate();
+        });
+    }
+
+    private void updateTitleDate() {
+        try {
+            String dateStr = this.dateParam != null ? this.dateParam.toString() : java.time.LocalDate.now().toString();
+            this.titleLabel.setText(baseTitle + " - " + dateStr);
+        } catch (Exception ex) {
+            this.titleLabel.setText(baseTitle);
         }
     }
     

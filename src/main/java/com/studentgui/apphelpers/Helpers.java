@@ -138,7 +138,9 @@ public class Helpers {
      * characters.
      */
     private static String sanitize(String s) {
-        if (s == null) return "";
+        if (s == null) {
+            return "";
+        }
         String t = s.trim();
         // remove control characters (newline, carriage return, etc.)
         t = t.replaceAll("[\\p{Cntrl}]", "");
@@ -150,7 +152,9 @@ public class Helpers {
         // collapse runs of whitespace into single space
         t = t.replaceAll("\\s+", " ").trim();
         // prevent names that are just dots
-        if (t.matches("^[.]+$")) t = "_";
+        if (t.matches("^[.]+$")) {
+            t = "_";
+        }
         return t;
     }
 
@@ -162,7 +166,9 @@ public class Helpers {
      * @return sanitized filesystem-safe name (never null)
      */
     public static String safeName(String s) {
-        if (s == null) return "";
+        if (s == null) {
+            return "";
+        }
         return sanitize(s);
     }
 
@@ -175,15 +181,20 @@ public class Helpers {
     * @return path to the most recently modified matching PNG, or null
      */
     public static java.nio.file.Path latestPlotPath(String studentName, String prefix) {
-        if (studentName == null || studentName.trim().isEmpty()) return null;
+        if (studentName == null || studentName.trim().isEmpty()) {
+            return null;
+        }
         java.nio.file.Path dir = APP_HOME.resolve("StudentDataFiles").resolve(safeName(studentName)).resolve("plots");
-        if (!java.nio.file.Files.exists(dir)) return null;
+        if (!java.nio.file.Files.exists(dir)) {
+            return null;
+        }
         java.nio.file.Path latest = null;
         try (java.nio.file.DirectoryStream<java.nio.file.Path> ds = java.nio.file.Files.newDirectoryStream(dir, prefix + "-*.png")) {
             for (java.nio.file.Path p : ds) {
                 try {
-                    if (latest == null) latest = p;
-                    else {
+                    if (latest == null) {
+                        latest = p;
+                    } else {
                         java.nio.file.attribute.FileTime t1 = java.nio.file.Files.getLastModifiedTime(p);
                         java.nio.file.attribute.FileTime t2 = java.nio.file.Files.getLastModifiedTime(latest);
                         if (t1.compareTo(t2) > 0) latest = p;

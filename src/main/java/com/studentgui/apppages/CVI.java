@@ -126,7 +126,9 @@ public class CVI extends JPanel {
             java.util.Set<String> keys = inputs.keySet();
             String[] codes = new String[keys.size()];
             int kidx = 0;
-            for (String k : keys) codes[kidx++] = k;
+            for (String k : keys) {
+                codes[kidx++] = k;
+            }
             com.studentgui.apphelpers.Database.ensureAssessmentParts(ptId, codes);
         } catch (SQLException ex) {
             LOG.error("Error ensuring CVI parts", ex);
@@ -169,7 +171,7 @@ public class CVI extends JPanel {
                 String baseName = "CVI-" + sessionId + "-" + dateStr;
 
                 com.studentgui.apphelpers.Database.ResultsWithDates rwd = com.studentgui.apphelpers.Database.fetchLatestAssessmentResultsWithDates(this.studentNameParam, "CVI", Integer.MAX_VALUE);
-                java.util.Map<String, java.nio.file.Path> groups = new java.util.LinkedHashMap<>();
+                java.util.Map<String, java.nio.file.Path> groups = null;
                 String[] labels = new String[codes.length];
                 for (int i = 0; i < codes.length; i++) labels[i] = inputs.get(codes[i]).getLabel();
                 if (rwd != null && rwd.rows != null && !rwd.rows.isEmpty()) {
@@ -180,7 +182,9 @@ public class CVI extends JPanel {
                 } else {
                     java.util.List<java.util.List<Integer>> rowsList = new java.util.ArrayList<>();
                     java.util.List<Integer> latest = new java.util.ArrayList<>();
-                    for (String c : codes) latest.add(inputs.get(c).getValue());
+                    for (String c : codes) {
+                        latest.add(inputs.get(c).getValue());
+                    }
                     rowsList.add(latest);
                     graph.updateWithGroupedData(rowsList, codes);
                     groups = graph.saveGroupedCharts(out, baseName, 1000, 240);

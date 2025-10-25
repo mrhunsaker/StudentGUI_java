@@ -32,7 +32,9 @@ public class PythonPlotter {
         if (studentName == null || studentName.trim().isEmpty()) {
             String msg = "No student selected for plot generation";
             LOG.warn(msg);
-            if (onComplete != null) onComplete.accept(msg);
+            if (onComplete != null) {
+                onComplete.accept(msg);
+            }
             return;
         }
 
@@ -56,7 +58,9 @@ public class PythonPlotter {
             } catch (java.io.IOException | InterruptedException e) {
                 LOG.error("Error running python plot runner", e);
                 out.append("Error: ").append(e.toString()).append(System.lineSeparator());
-                if (e instanceof InterruptedException) Thread.currentThread().interrupt();
+                if (e instanceof InterruptedException) {
+                    Thread.currentThread().interrupt();
+                }
             }
             if (onComplete != null) {
                 try {

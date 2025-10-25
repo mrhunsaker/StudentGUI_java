@@ -51,7 +51,9 @@ public final class SessionJsonWriter {
      * @return the path to the written file, or null on failure
      */
     public static Path writeSessionJson(String student, String pageName, Object payload, String explicitSessionId) {
-        if (student == null || student.trim().isEmpty() || pageName == null) return null;
+        if (student == null || student.trim().isEmpty() || pageName == null) {
+            return null;
+        }
         try {
             Path outDir = Helpers.APP_HOME.resolve("StudentDataFiles").resolve(Helpers.safeName(student));
             Files.createDirectories(outDir);
@@ -63,7 +65,9 @@ public final class SessionJsonWriter {
             String sid = explicitSessionId;
             if (sid == null && payload instanceof com.studentgui.apphelpers.dto.SessionPayload) {
                 int s = ((com.studentgui.apphelpers.dto.SessionPayload) payload).getSessionId();
-                if (s != 0) sid = Integer.toString(s);
+                if (s != 0) {
+                    sid = Integer.toString(s);
+                }
             }
 
             String filename = String.format("%s-%d-%s%s.json", pageName, ts, readable, (sid != null ? "-session-" + sid : ""));
@@ -74,7 +78,9 @@ public final class SessionJsonWriter {
             envelope.put("timestamp", ts);
             envelope.put("timestampIso", readable);
             envelope.put("page", pageName);
-            if (sid != null) envelope.put("sessionId", sid);
+            if (sid != null) {
+                envelope.put("sessionId", sid);
+            }
             envelope.put("payload", payload);
 
             byte[] bytes = MAPPER.writerWithDefaultPrettyPrinter().writeValueAsBytes(envelope);

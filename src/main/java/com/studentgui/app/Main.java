@@ -67,6 +67,51 @@ public class Main {
     private static JFrame frame;
     private static JPanel contentPanel;
     private static JLineGraph sharedGraph;
+    // current date used by the top bar (can be updated without recreating pages)
+    private static java.time.LocalDate currentDate;
+    private static String currentStudent;
+    // Listeners to notify when the top-bar date changes
+    private static final java.util.List<DateChangeListener> dateListeners = new java.util.concurrent.CopyOnWriteArrayList<>();
+
+    public static void addDateChangeListener(DateChangeListener l) { 
+        if (l != null) {
+            dateListeners.add(l);
+        }
+    }
+    public static void removeDateChangeListener(DateChangeListener l) { 
+        if (l != null) {
+            dateListeners.remove(l);
+        }
+    }
+    public static void clearDateChangeListeners() { 
+        dateListeners.clear();
+    }
+    private static void notifyDateChanged(java.time.LocalDate d) { for (DateChangeListener l : dateListeners) { try { l.dateChanged(d); } catch (Exception ex) { LOG.warn("DateChangeListener threw: {}", ex.toString()); } } }
+    // Student change listeners
+    private static final java.util.List<StudentChangeListener> studentListeners = new java.util.concurrent.CopyOnWriteArrayList<>();
+    public static void addStudentChangeListener(StudentChangeListener l) {
+        if (l != null) {
+            studentListeners.add(l);
+        }
+    }
+    public static void removeStudentChangeListener(StudentChangeListener l) {
+        if (l != null) {
+            studentListeners.remove(l);
+        }
+    }
+    public static void clearStudentChangeListeners() {
+        studentListeners.clear();
+    }
+    private static void notifyStudentChanged(String s) {
+        currentStudent = s;
+        for (StudentChangeListener l : studentListeners) {
+            try {
+                l.studentChanged(s);
+            } catch (Exception ex) {
+                LOG.warn("StudentChangeListener threw: {}", ex.toString());
+            }
+        }
+    }
 
     /**
      * Application entry point. Initializes helpers, database, and launches the
@@ -94,12 +139,16 @@ public class Main {
 
             // Menu bar: obtain the app menu bar from Theme, insert a File->Exit menu at the far left
             javax.swing.JMenuBar themeBar = Theme.createMenuBar();
-            if (themeBar == null) themeBar = new javax.swing.JMenuBar();
+            if (themeBar == null) {
+                themeBar = new javax.swing.JMenuBar();
+            }
             javax.swing.JMenu fileMenu = new javax.swing.JMenu("File");
             javax.swing.JMenuItem exitItem = new javax.swing.JMenuItem("Exit");
             exitItem.addActionListener(e -> {
                 LOG.info("Exit requested via File->Exit");
-                if (frame != null) frame.dispose();
+                if (frame != null) {
+                    frame.dispose();
+                }
                 System.exit(0);
             });
             fileMenu.add(exitItem);
@@ -131,6 +180,7 @@ public class Main {
             List<String> students = Helpers.getStudents();
             String demoStudent = students.isEmpty() ? "Demo Student" : students.get(0);
             LocalDate today = LocalDate.now();
+            currentDate = today;
             recreatePages(demoStudent, today);
 
             frame.setVisible(true);
@@ -232,7 +282,16 @@ public class Main {
             } catch (DateTimeParseException ex) {
                 // keep today
             }
-            recreatePages(selected, date);
+            // Update the app's current date and selected student without recreating pages; show a confirmation dialog.
+            currentDate = date;
+            currentStudent = selected;
+            javax.swing.JOptionPane.showMessageDialog(frame,
+                    "The date has been updated to " + date.toString(),
+                    "Date Updated",
+                    javax.swing.JOptionPane.INFORMATION_MESSAGE);
+            // Notify registered pages so they can update any internal state
+            notifyDateChanged(date);
+            notifyStudentChanged(selected);
         });
 
     // Navigation buttons removed from top bar per UI request; pages can still be selected via menu
@@ -253,24 +312,92 @@ public class Main {
      */
     private static void recreatePages(String student, LocalDate date) {
         // recreate the pages with a fresh sharedGraph so the graph is reset for the selected student/date
-        if (sharedGraph == null) sharedGraph = new JLineGraph();
-        else sharedGraph = new JLineGraph();
+        if (sharedGraph == null) {
+            sharedGraph = new JLineGraph();
+        } else {
+            sharedGraph = new JLineGraph();
+        }
+
+    // Clear any previous listeners to avoid stale references
+    clearDateChangeListeners();
+    clearStudentChangeListeners();
 
         contentPanel.removeAll();
         contentPanel.add(Homepage.create(), "homepage");
-        contentPanel.add(new Braille(student, date, sharedGraph), "braille");
-        contentPanel.add(new Abacus(student, date, sharedGraph), "abacus");
-        contentPanel.add(new BrailleNote(student, date, sharedGraph), "braillenote");
-        contentPanel.add(new DigitalLiteracy(student, date, sharedGraph), "digitalliteracy");
-    contentPanel.add(new BrailleSense(student, date, sharedGraph), "braillesense");
-    contentPanel.add(new CVI(student, date, sharedGraph), "cvi");
-    contentPanel.add(new IOS(student, date, sharedGraph), "ios");
-    contentPanel.add(new Keyboarding(student, date, sharedGraph), "keyboarding");
-    contentPanel.add(new Observations(student, date), "observations");
-    contentPanel.add(new ScreenReader(student, date, sharedGraph), "screenreader");
+
+        // Instantiate pages into locals so we can register listeners if they implement the interface
+        Braille braille = new Braille(student, date, sharedGraph);
+        contentPanel.add(braille, "braille");
+    if (braille instanceof DateChangeListener d) {
+        addDateChangeListener(d);
+    }
+    if (braille instanceof StudentChangeListener s) {
+        addStudentChangeListener(s);
+    }
+
+        Abacus abacus = new Abacus(student, date, sharedGraph);
+        contentPanel.add(abacus, "abacus");
+    if (abacus instanceof DateChangeListener d2) {
+        addDateChangeListener(d2);
+    }
+    if (abacus instanceof StudentChangeListener s2) {
+        addStudentChangeListener(s2);
+    }
+
+        BrailleNote brailleNote = new BrailleNote(student, date, sharedGraph);
+        contentPanel.add(brailleNote, "braillenote");
+    if (brailleNote instanceof DateChangeListener d3) {
+        addDateChangeListener(d3);
+    }
+    if (brailleNote instanceof StudentChangeListener s3) {
+        addStudentChangeListener(s3);
+    }
+
+        DigitalLiteracy dl = new DigitalLiteracy(student, date, sharedGraph);
+        contentPanel.add(dl, "digitalliteracy");
+    if (dl instanceof DateChangeListener d4) {
+        addDateChangeListener(d4);
+    }
+    if (dl instanceof StudentChangeListener s4) {
+        addStudentChangeListener(s4);
+    }
+
+        // pages that don't currently need date-driven updates remain created inline
+        contentPanel.add(new BrailleSense(student, date, sharedGraph), "braillesense");
+        contentPanel.add(new CVI(student, date, sharedGraph), "cvi");
+
+        IOS ios = new IOS(student, date, sharedGraph);
+        contentPanel.add(ios, "ios");
+    if (ios instanceof DateChangeListener d5) {
+        addDateChangeListener(d5);
+    }
+    if (ios instanceof StudentChangeListener s5) {
+        addStudentChangeListener(s5);
+    }
+
+        Keyboarding keyboarding = new Keyboarding(student, date, sharedGraph);
+        contentPanel.add(keyboarding, "keyboarding");
+    if (keyboarding instanceof DateChangeListener d6) {
+        addDateChangeListener(d6);
+    }
+    if (keyboarding instanceof StudentChangeListener s6) {
+        addStudentChangeListener(s6);
+    }
+
+        contentPanel.add(new Observations(student, date), "observations");
+
+        ScreenReader sr = new ScreenReader(student, date, sharedGraph);
+        contentPanel.add(sr, "screenreader");
+    if (sr instanceof DateChangeListener d7) {
+        addDateChangeListener(d7);
+    }
+    if (sr instanceof StudentChangeListener s7) {
+        addStudentChangeListener(s7);
+    }
+
     contentPanel.add(new SessionNotes(student, date, sharedGraph), "sessionnotes");
     contentPanel.add(new ContactLog(student, date, sharedGraph), "contactlog");
-    contentPanel.add(new InstructionalMaterials(), "instructionalmaterials");
+        contentPanel.add(new InstructionalMaterials(), "instructionalmaterials");
 
         contentPanel.revalidate();
         contentPanel.repaint();

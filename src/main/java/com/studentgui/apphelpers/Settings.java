@@ -18,7 +18,9 @@ public final class Settings {
     static {
         // load existing if present
         try (InputStream in = Files.exists(SETTINGS_FILE) ? Files.newInputStream(SETTINGS_FILE) : null) {
-            if (in != null) props.load(in);
+            if (in != null) {
+                props.load(in);
+            }
         } catch (IOException ioe) {
             LOG.debug("Could not load settings from {}", SETTINGS_FILE, ioe);
         }

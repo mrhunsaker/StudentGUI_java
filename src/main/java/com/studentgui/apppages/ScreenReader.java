@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
  * supplied {@link com.studentgui.apppages.JLineGraph} is used to render
  * recent results below the form.
  */
-public class ScreenReader extends JPanel {
+public class ScreenReader extends JPanel implements com.studentgui.app.DateChangeListener, com.studentgui.app.StudentChangeListener {
     private static final Logger LOG = LoggerFactory.getLogger(ScreenReader.class);
     /** Array of input fields corresponding to ScreenReader assessment parts. */
     private final com.studentgui.uicomp.PhaseScoreField[] skillFields;
@@ -40,10 +40,12 @@ public class ScreenReader extends JPanel {
     private final JLineGraph lineGraph;
 
     /** Selected student's display name used for saves and plots (may be null). */
-    private final String studentNameParam;
+    private String studentNameParam;
+    private JLabel titleLabel;
+    private final String baseTitle = "Screen Reader Skills Progression";
 
     /** Session date associated with entries made on this page. */
-    private final LocalDate dateParam;
+    private LocalDate dateParam;
 
     /**
      * Construct a ScreenReader page bound to a student and date.
@@ -79,12 +81,12 @@ public class ScreenReader extends JPanel {
     gbc.anchor = GridBagConstraints.NORTHWEST; // left-align content
     gbc.weightx = 1.0; // allow fields to take available width
 
-    JLabel title = new JLabel("Screen Reader Skills Progression");
-    title.getAccessibleContext().setAccessibleName("Screen Reader Skills Progression Title");
+    this.titleLabel = new JLabel(baseTitle);
+    this.titleLabel.getAccessibleContext().setAccessibleName("Screen Reader Skills Progression Title");
         // explicit title font for LAF-independence
-            title.setFont(new java.awt.Font(java.awt.Font.SANS_SERIF, Font.BOLD, 16));
+            this.titleLabel.setFont(new java.awt.Font(java.awt.Font.SANS_SERIF, Font.BOLD, 16));
         gbc.gridx = 0; gbc.gridy = 0; gbc.gridwidth = GridBagConstraints.REMAINDER;
-        dataEntryPanel.add(title, gbc);
+        dataEntryPanel.add(this.titleLabel, gbc);
 
     // compute label width using the PhaseScoreField label font (12pt) so wrapping is stable across themes
     java.awt.Font labelFont = new java.awt.Font(java.awt.Font.SANS_SERIF, java.awt.Font.PLAIN, 12);
@@ -133,11 +135,13 @@ public class ScreenReader extends JPanel {
     scroll.getAccessibleContext().setAccessibleName("ScreenReader data entry scroll pane");
     add(scroll, BorderLayout.CENTER);
 
-    SwingUtilities.invokeLater(() -> { view.setPreferredSize(view.getPreferredSize()); scroll.getViewport().setViewPosition(new java.awt.Point(0,0)); revalidate(); });
+    SwingUtilities.invokeLater(() -> { view.setPreferredSize(view.getPreferredSize()); scroll.getViewport().setViewPosition(new java.awt.Point(0,0)); updateTitleDate(); revalidate(); });
     // Diagnostic: log spinner positions and actual gap after layout
     SwingUtilities.invokeLater(() -> {
         for (com.studentgui.uicomp.PhaseScoreField f : skillFields) {
-            if (f != null) LOG.debug("ScreenReader field {} labelWidth={} spinnerX={} gap={}", f.getLabel(), f.getLabelWrapWidth(), f.getSpinnerX(), f.getActualGap());
+            if (f != null) {
+                LOG.debug("ScreenReader field {} labelWidth={} spinnerX={} gap={}", f.getLabel(), f.getLabelWrapWidth(), f.getSpinnerX(), f.getActualGap());
+            }
         }
     });
 
@@ -191,7 +195,9 @@ public class ScreenReader extends JPanel {
             com.studentgui.apphelpers.UiNotifier.show("ScreenReader data saved.");
             com.studentgui.apphelpers.dto.AssessmentPayload payload = new com.studentgui.apphelpers.dto.AssessmentPayload(sessionId, codes, scores);
             java.nio.file.Path jsonOut = com.studentgui.apphelpers.SessionJsonWriter.writeSessionJson(this.studentNameParam, "ScreenReader", payload, sessionId);
-            if (jsonOut == null) LOG.warn("Unable to save ScreenReader session JSON for sessionId={}", sessionId);
+                if (jsonOut == null) {
+                    LOG.warn("Unable to save ScreenReader session JSON for sessionId={}", sessionId);
+                }
             try {
                 java.nio.file.Path out = com.studentgui.apphelpers.Helpers.APP_HOME.resolve("StudentDataFiles").resolve(com.studentgui.apphelpers.Helpers.safeName(this.studentNameParam)).resolve("plots");
                 java.nio.file.Files.createDirectories(out);
@@ -200,9 +206,11 @@ public class ScreenReader extends JPanel {
                 String baseName = "ScreenReader-" + sessionId + "-" + dateStr;
 
                 com.studentgui.apphelpers.Database.ResultsWithDates rwd = com.studentgui.apphelpers.Database.fetchLatestAssessmentResultsWithDates(this.studentNameParam, "ScreenReader", Integer.MAX_VALUE);
-                java.util.Map<String, java.nio.file.Path> groups = new java.util.LinkedHashMap<>();
+                java.util.Map<String, java.nio.file.Path> groups = null;
                 String[] labels = new String[this.parts.length];
-                for (int i = 0; i < this.parts.length; i++) labels[i] = this.parts[i][1];
+                for (int i = 0; i < this.parts.length; i++) {
+                    labels[i] = this.parts[i][1];
+                }
                 if (rwd != null && rwd.rows != null && !rwd.rows.isEmpty()) {
                     lineGraph.updateWithGroupedDataByDate(rwd.dates, rwd.rows, codes, labels);
                     groups = lineGraph.saveGroupedCharts(out, baseName, 1000, 240);
@@ -211,13 +219,17 @@ public class ScreenReader extends JPanel {
                 } else {
                     java.util.List<java.util.List<Integer>> rowsList = new java.util.ArrayList<>();
                     java.util.List<Integer> latest = new java.util.ArrayList<>();
-                    for (int v : scores) latest.add(v);
+                    for (int v : scores) {
+                        latest.add(v);
+                    }
                     rowsList.add(latest);
                     lineGraph.updateWithGroupedData(rowsList, codes);
                     groups = lineGraph.saveGroupedCharts(out, baseName, 1000, 240);
                 }
 
-                if (groups == null) groups = new java.util.LinkedHashMap<>();
+                if (groups == null) {
+                    groups = new java.util.LinkedHashMap<>();
+                }
                 StringBuilder md = new StringBuilder();
                 md.append("# ").append(this.studentNameParam == null ? "Unknown Student" : this.studentNameParam).append(" - ").append(dateStr).append("\n\n");
                 for (java.util.Map.Entry<String, java.nio.file.Path> e : groups.entrySet()) {
@@ -306,6 +318,33 @@ public class ScreenReader extends JPanel {
 
         // Do not save chart images during refresh to avoid creating files on app startup.
         LOG.debug("Skipping auto-save of ScreenReader chart during refresh for student={}", this.studentNameParam);
+    }
+
+    @Override
+    public void dateChanged(LocalDate newDate) {
+        this.dateParam = newDate;
+        SwingUtilities.invokeLater(() -> {
+            refreshGraph();
+            updateTitleDate();
+        });
+    }
+
+    @Override
+    public void studentChanged(String newStudent) {
+        this.studentNameParam = newStudent;
+        SwingUtilities.invokeLater(() -> {
+            refreshGraph();
+            updateTitleDate();
+        });
+    }
+
+    private void updateTitleDate() {
+        try {
+            String dateStr = this.dateParam != null ? this.dateParam.toString() : java.time.LocalDate.now().toString();
+            this.titleLabel.setText(baseTitle + " - " + dateStr);
+        } catch (Exception ex) {
+            this.titleLabel.setText(baseTitle);
+        }
     }
 
     private void openLatestPlot() {
