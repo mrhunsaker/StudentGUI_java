@@ -213,6 +213,9 @@ public class Helpers {
 
     /**
      * Return the per-student plots directory path (APP_HOME/StudentDataFiles/{safeName}/plots).
+     *
+     * @param studentName display name of the student
+     * @return path to the student's plots directory (never null)
      */
     public static java.nio.file.Path studentPlotsDir(final String studentName) {
         return APP_HOME.resolve("StudentDataFiles").resolve(safeName(studentName)).resolve("plots");
@@ -220,6 +223,9 @@ public class Helpers {
 
     /**
      * Return the per-student reports directory path (APP_HOME/StudentDataFiles/{safeName}/reports).
+     *
+     * @param studentName display name of the student
+     * @return path to the student's reports directory (never null)
      */
     public static java.nio.file.Path studentReportsDir(final String studentName) {
         return APP_HOME.resolve("StudentDataFiles").resolve(safeName(studentName)).resolve("reports");
@@ -227,6 +233,9 @@ public class Helpers {
 
     /**
      * Return the per-student collected data directory path (APP_HOME/StudentDataFiles/{safeName}/collected_data).
+     *
+     * @param studentName display name of the student
+     * @return path to the student's collected data directory (never null)
      */
     public static java.nio.file.Path studentCollectedDataDir(final String studentName) {
         return APP_HOME.resolve("StudentDataFiles").resolve(safeName(studentName)).resolve("collected_data");
@@ -276,6 +285,11 @@ public class Helpers {
      * @return display name of the default student (never null)
      */
     public static String defaultStudent() {
+        /**
+         * Note: UI pages use this helper to provide a non-null default student
+         * when constructed with a null/empty student name so that charts and
+         * page logic can operate without requiring an immediate user selection.
+         */
         List<String> s = getStudents();
         if (s == null || s.isEmpty()) {
             return "Demo Student";

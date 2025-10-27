@@ -73,19 +73,40 @@ public class Main {
     // Listeners to notify when the top-bar date changes
     private static final java.util.List<DateChangeListener> dateListeners = new java.util.concurrent.CopyOnWriteArrayList<>();
 
+    /**
+     * Register a listener to be notified when the application date is changed via the top bar.
+     *
+     * @param l listener to register (ignored when null)
+     */
     public static void addDateChangeListener(final DateChangeListener l) { 
         if (l != null) {
             dateListeners.add(l);
         }
     }
+
+    /**
+     * Remove a previously registered date change listener.
+     *
+     * @param l listener to remove (ignored when null)
+     */
     public static void removeDateChangeListener(final DateChangeListener l) { 
         if (l != null) {
             dateListeners.remove(l);
         }
     }
+
+    /**
+     * Clear all registered date change listeners.
+     */
     public static void clearDateChangeListeners() { 
         dateListeners.clear();
     }
+
+    /**
+     * Notify all registered date listeners that the application date has changed.
+     *
+     * @param d new application date
+     */
     private static void notifyDateChanged(final java.time.LocalDate d) {
         for (DateChangeListener l : dateListeners) {
             try {
@@ -97,19 +118,40 @@ public class Main {
     }
     // Student change listeners
     private static final java.util.List<StudentChangeListener> studentListeners = new java.util.concurrent.CopyOnWriteArrayList<>();
+    /**
+     * Register a listener to be notified when the selected student is changed.
+     *
+     * @param l listener to register (ignored when null)
+     */
     public static void addStudentChangeListener(final StudentChangeListener l) {
         if (l != null) {
             studentListeners.add(l);
         }
     }
+
+    /**
+     * Remove a previously registered student change listener.
+     *
+     * @param l listener to remove (ignored when null)
+     */
     public static void removeStudentChangeListener(final StudentChangeListener l) {
         if (l != null) {
             studentListeners.remove(l);
         }
     }
+
+    /**
+     * Clear all registered student change listeners.
+     */
     public static void clearStudentChangeListeners() {
         studentListeners.clear();
     }
+
+    /**
+     * Notify registered student change listeners that the selected student has changed.
+     *
+     * @param s new selected student name
+     */
     private static void notifyStudentChanged(final String s) {
         currentStudent = s;
         for (StudentChangeListener l : studentListeners) {
@@ -117,6 +159,36 @@ public class Main {
                 l.studentChanged(s);
             } catch (Exception ex) {
                 LOG.warn("StudentChangeListener threw: {}", ex.toString());
+            }
+        }
+    }
+
+
+    // Settings change listeners
+    private static final java.util.List<SettingsChangeListener> settingsListeners = new java.util.concurrent.CopyOnWriteArrayList<>();
+
+    public static void addSettingsChangeListener(final SettingsChangeListener l) {
+        if (l != null) {
+            settingsListeners.add(l);
+        }
+    }
+
+    public static void removeSettingsChangeListener(final SettingsChangeListener l) {
+        if (l != null) {
+            settingsListeners.remove(l);
+        }
+    }
+
+    public static void clearSettingsChangeListeners() {
+        settingsListeners.clear();
+    }
+
+    public static void notifySettingsChanged() {
+        for (SettingsChangeListener l : settingsListeners) {
+            try {
+                l.settingsChanged();
+            } catch (Exception ex) {
+                LOG.warn("SettingsChangeListener threw: {}", ex.toString());
             }
         }
     }
@@ -185,6 +257,8 @@ public class Main {
 
             // Create initial shared graph and pages for the first student
             sharedGraph = new JLineGraph();
+            // Register shared graph to receive settings change notifications
+            addSettingsChangeListener(sharedGraph);
             List<String> students = Helpers.getStudents();
             String demoStudent = students.isEmpty() ? "Demo Student" : students.get(0);
             LocalDate today = LocalDate.now();

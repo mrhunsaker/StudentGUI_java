@@ -208,7 +208,13 @@ public class Braille extends JPanel implements com.studentgui.app.DateChangeList
 
     /**
      * Read entered skill values and persist them as a new progress session.
-     * Performs integer validation and informs the user on invalid input.
+    * Performs integer validation and informs the user on invalid input.
+    *
+    * Implementation note: arrays used to call {@code insertAssessmentResults}
+    * are allocated dynamically based on the actual number of parts
+    * ({@code partCodes.length}) so that the stored columns exactly match the
+    * plotted series. This fixes a previous issue where fixed-size arrays
+    * could become out-of-sync with the parts list.
      */
     private void submitData() {
         if (this.studentNameParam == null || this.studentNameParam.trim().isEmpty()) {

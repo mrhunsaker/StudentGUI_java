@@ -1,4 +1,4 @@
-Pages and Database helper methods used
+# Pages and Database helper methods used
 
 This report lists each app page under src/main/java/com/studentgui/apppages and the Database helper methods (and other helpers) each page calls when saving or refreshing.
 
@@ -108,7 +108,36 @@ This report lists each app page under src/main/java/com/studentgui/apppages and 
   - No DB persistence (static overview pane)
 
 Notes
+
 - All assessment pages that create assessment sessions call SessionJsonWriter.writeSessionJson(...) with a typed DTO (AssessmentPayload, NotesPayload, KeyboardingPayload, ContactPayload, etc.).
 - The SQL schema generator (SqlGenerate) creates the tables referenced above: Student, ProgressType, ProgressSession, AssessmentPart, AssessmentResult, KeyboardingResult, ContactLog, etc.
+
+Recent changes (applied in branch refactor/exception-cleanup)
+
+- Braille submitData array sizing
+  - The `Braille` page previously constructed fixed-size arrays when preparing
+    the `codes` and `scores` to persist into the normalized schema. That could
+    lead to a mismatch between stored columns and the plotted series. The code
+    now allocates arrays using the actual `partCodes.length` so storage and
+    plotting stay aligned.
+
+- Default student behavior
+  - Many pages now default to the first roster entry when constructed with a
+    null or empty student name. The helper `com.studentgui.apphelpers.Helpers.defaultStudent()`
+    returns the first entry in `json_Files/students.json` (or a sensible
+    fallback) and is used by pages to avoid null student names on open.
+
+- Plot visualization updates (JLineGraph)
+  - Plotted points receive a small rendering jitter of ±0.10 so overlapping
+    points are easier to identify visually. This jitter is applied at render
+    time only and does not mutate persisted values.
+  - Background bands have been changed to the following numeric ranges:
+    red = -0.25..0.5, orange = 0.5..1.5, orange = 1.5..2.5, yellow = 2.5..3.5,
+    green = 3.5..4.5. The Y-axis limits have been adjusted to -0.25..4.25.
+
+Verification & build notes
+
+- After applying these changes, run `mvn -DskipTests package` in the project
+  root to compile the project and produce the shaded jar in `target/`.
 
 End of report.

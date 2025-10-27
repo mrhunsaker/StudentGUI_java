@@ -6,6 +6,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
 import javax.swing.JPanel;
@@ -23,10 +24,29 @@ import org.jfree.data.xy.XYSeriesCollection;
 
 /**
  * Lightweight line chart component used across pages to display recent
- * assessment sessions. Wraps a JFreeChart XY plot and exposes a simple
- * {@code updateWithData(List<List<Integer>>)} method expected by the pages.
+ * assessment sessions. Wraps a JFreeChart XY plot and exposes a small set
+ * of convenience update methods used by the application pages:
+ * <ul>
+ *   <li>{@link #updateWithData(java.util.List)}</li>
+ *   <li>{@link #updateWithGroupedData(java.util.List, String[])}</li>
+ *   <li>{@link #updateWithGroupedDataByDate(java.util.List, java.util.List, String[], String[])}</li>
+ * </ul>
+ *
+ * Important implementation notes:
+ * <ul>
+ *   <li>Rendering jitter: a small visual jitter of +/- {@code JITTER_AMPLITUDE}
+ *       is applied to plotted points via {@link #addJitter(double)} to help
+ *       reveal overlapping points. This is a display-only transformation
+ *       and does not modify persisted session values.</li>
+ *   <li>Background bands: the component draws horizontal colored bands to
+ *       indicate score ranges; the bands use the ranges: red = -0.25..0.5,
+ *       orange = 0.5..1.5, orange = 1.5..2.5, yellow = 2.5..3.5, green =
+ *       3.5..4.5. The Y-axis range is set to {@code -0.25 .. 4.25} by default.</li>
+ *   <li>Grouped charts and time-series charts share the same band drawing
+ *       helper {@link #addHorizontalBands(org.jfree.chart.plot.XYPlot, double, double)}</li>
+ * </ul>
  */
-public class JLineGraph extends JPanel {
+public class JLineGraph extends JPanel implements com.studentgui.app.SettingsChangeListener {
     private static final long serialVersionUID = 1L;
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(JLineGraph.class);
     /** The dataset containing XY series for historical and latest sessions. */
@@ -44,15 +64,36 @@ public class JLineGraph extends JPanel {
     /** Jitter amplitude (plus/minus) applied to plotted data points. */
     private static final double JITTER_AMPLITUDE = 0.10d;
 
+    /** Whether rendering jitter is currently enabled. Default: true. */
+    private boolean jitterEnabled = true;
+    /** When true, use a deterministic java.util.Random seeded RNG instead of ThreadLocalRandom. */
+    private boolean jitterDeterministic = false;
+    /** Optional seed used when deterministic jitter is enabled. */
+    private Long jitterSeed = null;
+    /** Cached Random instance when deterministic mode is enabled. */
+    private Random deterministicRandom = null;
+
     /**
      * Add a small random jitter within +/- JITTER_AMPLITUDE to the provided value.
-     * This helps separate overlapping points visually.
+     * When jitter is disabled this returns the original value unchanged.
      */
     private double addJitter(final double v) {
+        if (!jitterEnabled) {
+            return v;
+        }
         try {
-            return v + ThreadLocalRandom.current().nextDouble(-JITTER_AMPLITUDE, JITTER_AMPLITUDE);
+            if (jitterDeterministic) {
+                if (deterministicRandom == null) {
+                    long seed = jitterSeed == null ? 0L : jitterSeed.longValue();
+                    deterministicRandom = new Random(seed);
+                }
+                double r = deterministicRandom.nextDouble() * 2.0 - 1.0; // -1..1
+                return v + (r * JITTER_AMPLITUDE);
+            } else {
+                return v + ThreadLocalRandom.current().nextDouble(-JITTER_AMPLITUDE, JITTER_AMPLITUDE);
+            }
         } catch (Throwable t) {
-            // In the unlikely event ThreadLocalRandom is unavailable, fall back to no jitter
+            // In the unlikely event RNG is unavailable, fall back to no jitter
             return v;
         }
     }
@@ -106,15 +147,52 @@ public class JLineGraph extends JPanel {
         // Create background bands
         addBackgroundBands(plot);
 
-    chartPanel = new ChartPanel(chart);
-    chartPanel.setPreferredSize(new Dimension(800, 600));
-    chartPanel.getAccessibleContext().setAccessibleName("Skill progression chart");
-    chartPanel.setToolTipText("Skill progression chart showing historical and latest values");
-    add(chartPanel, BorderLayout.CENTER);
-    multiChartContainer = null;
+        chartPanel = new ChartPanel(chart);
+        chartPanel.setPreferredSize(new Dimension(800, 600));
+        chartPanel.getAccessibleContext().setAccessibleName("Skill progression chart");
+        chartPanel.setToolTipText("Skill progression chart showing historical and latest values");
+        add(chartPanel, BorderLayout.CENTER);
+        multiChartContainer = null;
 
         // Set custom X-axis labels
         updateXAxisLabels();
+        // Apply any persisted settings at creation time
+        try {
+            settingsChanged();
+        } catch (Throwable t) {
+            // ignore any issues reading settings at startup
+        }
+    }
+
+    @Override
+    public void settingsChanged() {
+        try {
+            String je = com.studentgui.apphelpers.Settings.get("jitter.enabled", String.valueOf(this.jitterEnabled));
+            setJitterEnabled("true".equalsIgnoreCase(je));
+            String jd = com.studentgui.apphelpers.Settings.get("jitter.deterministic", String.valueOf(this.jitterDeterministic));
+            setJitterDeterministic("true".equalsIgnoreCase(jd));
+            String s = com.studentgui.apphelpers.Settings.get("jitter.seed", this.jitterSeed == null ? "" : String.valueOf(this.jitterSeed));
+            if (s == null || s.trim().isEmpty()) {
+                setJitterSeed(null);
+            } else {
+                try {
+                    long v = Long.parseLong(s.trim());
+                    setJitterSeed(Long.valueOf(v));
+                } catch (NumberFormatException nfe) {
+                    setJitterSeed(null);
+                }
+            }
+            // reset cached RNG so seed/cfg takes effect
+            this.deterministicRandom = null;
+            if (chart != null) {
+                chart.fireChartChanged();
+            }
+            if (chartPanel != null) {
+                chartPanel.repaint();
+            }
+        } catch (Throwable t) {
+            LOG.debug("Failed applying settings: {}", t.toString());
+        }
     }
 
     /**
@@ -161,6 +239,64 @@ public class JLineGraph extends JPanel {
         } catch (Throwable t) {
             LOG.debug("Unable to add horizontal bands: {}", t.toString());
         }
+    }
+
+    /**
+     * Enable or disable rendering jitter at runtime.
+     * @param enabled true to enable jitter, false to draw raw values
+     */
+    public void setJitterEnabled(final boolean enabled) {
+        this.jitterEnabled = enabled;
+    }
+
+    /**
+     * Query whether rendering jitter is currently enabled.
+     *
+     * @return true when jitter is enabled, false otherwise
+     */
+    public boolean isJitterEnabled() {
+        return this.jitterEnabled;
+    }
+
+    /**
+     * Enable/disable deterministic (seeded) jitter.
+     * When enabled, jitter will be generated from a java.util.Random seeded
+     * with {@link #jitterSeed} (or 0 when seed is null).
+     *
+     * @param deterministic true to use a seeded RNG, false to use non-deterministic RNG
+     */
+    public void setJitterDeterministic(final boolean deterministic) {
+        this.jitterDeterministic = deterministic;
+        this.deterministicRandom = null; // reset instance so seed takes effect
+    }
+
+    /**
+     * Query whether deterministic jitter is enabled.
+     *
+     * @return true when deterministic (seeded) jitter is enabled
+     */
+    public boolean isJitterDeterministic() {
+        return this.jitterDeterministic;
+    }
+
+    /**
+     * Set the seed used when deterministic jitter is enabled. Pass null to
+     * clear the seed (will use 0 when a deterministic RNG is created).
+     *
+     * @param seed seed value or null to clear
+     */
+    public void setJitterSeed(final Long seed) {
+        this.jitterSeed = seed;
+        this.deterministicRandom = null;
+    }
+
+    /**
+     * Return the currently configured jitter seed or null when unset.
+     *
+     * @return configured seed value or null when not set
+     */
+    public Long getJitterSeed() {
+        return this.jitterSeed;
     }
 
     /**
@@ -349,7 +485,16 @@ public class JLineGraph extends JPanel {
     }
 
     /**
-     * New overload that accepts human-friendly labels parallel to partCodes.
+     * Plot grouped data over time with optional human-friendly labels.
+     * Each provided {@code partCodes} entry maps to a column index inside
+     * {@code rows} and (optionally) a friendly label supplied in
+     * {@code partLabels}. The dates list must be ordered oldest-first and
+     * must be parallel to the rows list.
+     *
+     * @param dates chronological list of session dates (oldest first)
+     * @param rows list of session rows where each row is a list of integer scores
+     * @param partCodes array of part codes aligned with the columns in each row
+     * @param partLabels optional human friendly labels parallel to {@code partCodes}
      */
     public void updateWithGroupedDataByDate(final java.util.List<java.time.LocalDate> dates, final java.util.List<java.util.List<Integer>> rows, final String[] partCodes, final String[] partLabels) {
         LOG.debug("updateWithGroupedDataByDate called with dates={} rows={} parts={}", dates == null ? 0 : dates.size(), rows == null ? 0 : rows.size(), partCodes == null ? 0 : partCodes.length);
@@ -550,6 +695,8 @@ public class JLineGraph extends JPanel {
      * Show an empty grouped chart using the provided part codes. This will
      * render one row of zeros sized to the number of parts so the UI shows
      * grouped axes and placeholders even when no session data exists yet.
+     *
+     * @param partCodes array of part codes used to determine the number of columns
      */
     public void showEmptyGrouped(final String[] partCodes) {
         if (partCodes == null) {
