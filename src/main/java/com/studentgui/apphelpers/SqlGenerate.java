@@ -173,7 +173,7 @@ public class SqlGenerate {
      * @param conn established JDBC connection to the target SQLite DB
      * @throws SQLException if applying any schema statement fails
      */
-    private static void executeSchema(Connection conn) throws SQLException {
+    private static void executeSchema(final Connection conn) throws SQLException {
         try (Statement st = conn.createStatement()) {
             for (String sql : SCHEMA) {
                 st.execute(sql);

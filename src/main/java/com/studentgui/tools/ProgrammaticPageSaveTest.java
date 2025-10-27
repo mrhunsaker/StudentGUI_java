@@ -26,7 +26,7 @@ public class ProgrammaticPageSaveTest {
      * @param args ignored
      * @throws Exception on reflection or DB errors
      */
-    public static void main(String[] args) throws Exception {
+    public static void main(final String[] args) throws Exception {
         Helpers.createFolderHierarchy();
         JLineGraph graph = new JLineGraph();
         Braille page = new Braille("Smoke Test", LocalDate.now(), graph);
@@ -64,15 +64,19 @@ public class ProgrammaticPageSaveTest {
         System.out.println("Programmatic submit triggered. Check app_home for outputs.");
     }
 
-    private static JButton findButtonByAccessibleName(java.awt.Container c, String name) {
+    private static JButton findButtonByAccessibleName(final java.awt.Container c, final String name) {
         for (java.awt.Component comp : c.getComponents()) {
             if (comp instanceof JButton) {
                 JButton b = (JButton) comp;
-                if (name.equals(b.getAccessibleContext().getAccessibleName())) return b;
+                if (name.equals(b.getAccessibleContext().getAccessibleName())) {
+                    return b;
+                }
             }
             if (comp instanceof java.awt.Container) {
                 JButton r = findButtonByAccessibleName((java.awt.Container) comp, name);
-                if (r != null) return r;
+                if (r != null) {
+                    return r;
+                }
             }
         }
         return null;

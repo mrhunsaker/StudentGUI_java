@@ -10,7 +10,7 @@ import com.studentgui.apphelpers.Helpers;
 import com.studentgui.apppages.JLineGraph;
 
 public class GroupedSmoke {
-    public static void main(String[] args) throws Exception {
+    public static void main(final String[] args) throws Exception {
         Helpers.createFolderHierarchy();
         JLineGraph graph = new JLineGraph();
 

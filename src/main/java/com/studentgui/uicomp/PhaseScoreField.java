@@ -236,10 +236,10 @@ public class PhaseScoreField extends JPanel {
      *
      * @param v desired spinner value
      */
-    public void setValue(int v) { spinner.setValue(Math.max(0, Math.min(4, v))); }
+    public void setValue(final int v) { spinner.setValue(Math.max(0, Math.min(4, v))); }
 
     @Override
-    public void setName(String name) { 
+    public void setName(final String name) {
         super.setName(name);
         spinner.setName(name);
     }

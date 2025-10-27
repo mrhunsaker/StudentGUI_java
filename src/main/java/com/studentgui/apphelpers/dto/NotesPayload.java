@@ -15,12 +15,12 @@ public class NotesPayload implements SessionPayload {
     /**
      * Create a notes payload.
      *
-     * @param sessionId DB session id
-     * @param notes freeform notes
+    * @param sessionIdParam DB session id
+    * @param notesParam freeform notes
      */
-    public NotesPayload(int sessionId, String notes) {
-        this.sessionId = sessionId;
-        this.notes = notes;
+    public NotesPayload(final int sessionIdParam, final String notesParam) {
+        this.sessionId = sessionIdParam;
+        this.notes = notesParam;
     }
 
     @Override

@@ -10,16 +10,21 @@ import com.studentgui.apphelpers.Database;
 import com.studentgui.apphelpers.Helpers;
 
 public class QueryStudentData {
-    public static void main(String[] args) throws Exception {
+    public static void main(final String[] args) throws Exception {
         Helpers.createFolderHierarchy();
         List<String> students = Helpers.getStudents();
         String student = null;
-        if (args.length > 0) student = args[0];
+        if (args.length > 0) {
+            student = args[0];
+        }
         if (student == null) {
             System.out.println("Known students:");
-            for (String s: students) System.out.println(" - " + s);
-            if (!students.isEmpty()) student = students.get(0);
-            else {
+            for (String s : students) {
+                System.out.println(" - " + s);
+            }
+            if (!students.isEmpty()) {
+                student = students.get(0);
+            } else {
                 System.out.println("No students found in DB. Exiting.");
                 return;
             }
@@ -33,10 +38,14 @@ public class QueryStudentData {
                         int ptId = rs.getInt("id");
                         String ptName = rs.getString("name");
                         // count parts
-                        int partCount = 0;
+                            int partCount = 0;
                         try (PreparedStatement ps2 = c.prepareStatement("SELECT COUNT(*) FROM AssessmentPart WHERE progress_type_id = ?")) {
                             ps2.setInt(1, ptId);
-                            try (ResultSet rs2 = ps2.executeQuery()) { if (rs2.next()) partCount = rs2.getInt(1); }
+                            try (ResultSet rs2 = ps2.executeQuery()) {
+                                if (rs2.next()) {
+                                    partCount = rs2.getInt(1);
+                                }
+                            }
                         }
                         List<List<Integer>> rows = Database.fetchLatestAssessmentResults(student, ptName, 5);
                         System.out.println(String.format("ProgressType '%s' (id=%d) parts=%d sessions=%d", ptName, ptId, partCount, rows.size()));

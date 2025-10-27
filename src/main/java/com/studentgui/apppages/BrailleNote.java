@@ -53,7 +53,7 @@ public class BrailleNote extends JPanel implements com.studentgui.app.DateChange
      * @param lineGraph shared graph component used to display recent results
      */
     public BrailleNote(String studentName, LocalDate date, JLineGraph lineGraph) {
-        this.studentNameParam = studentName;
+    this.studentNameParam = (studentName == null || studentName.trim().isEmpty()) ? com.studentgui.apphelpers.Helpers.defaultStudent() : studentName;
         this.dateParam = date;
         this.lineGraph = lineGraph; // Use the passed in graph instance
         setLayout(new BorderLayout());
@@ -221,8 +221,10 @@ public class BrailleNote extends JPanel implements com.studentgui.app.DateChange
                 LOG.warn("Unable to save BrailleNote session JSON for sessionId={}", sessionId);
             }
             try {
-                java.nio.file.Path out = com.studentgui.apphelpers.Helpers.APP_HOME.resolve("StudentDataFiles").resolve(com.studentgui.apphelpers.Helpers.safeName(this.studentNameParam)).resolve("plots");
-                java.nio.file.Files.createDirectories(out);
+                java.nio.file.Path plotsOut = com.studentgui.apphelpers.Helpers.studentPlotsDir(this.studentNameParam);
+                java.nio.file.Path reportsOut = com.studentgui.apphelpers.Helpers.studentReportsDir(this.studentNameParam);
+                java.nio.file.Files.createDirectories(plotsOut);
+                java.nio.file.Files.createDirectories(reportsOut);
                 java.time.format.DateTimeFormatter df = java.time.format.DateTimeFormatter.ISO_DATE;
                 String dateStr = this.dateParam != null ? this.dateParam.format(df) : java.time.LocalDate.now().toString();
                 String baseName = "BrailleNote-" + sessionId + "-" + dateStr;
@@ -235,7 +237,7 @@ public class BrailleNote extends JPanel implements com.studentgui.app.DateChange
                 }
                 if (rwd != null && rwd.rows != null && !rwd.rows.isEmpty()) {
                     lineGraph.updateWithGroupedDataByDate(rwd.dates, rwd.rows, codes, labels);
-                    groups = lineGraph.saveGroupedCharts(out, baseName, 1000, 240);
+                    groups = lineGraph.saveGroupedCharts(plotsOut, baseName, 1000, 240);
                     java.time.LocalDate headerDate = rwd.dates.get(rwd.dates.size() - 1);
                     dateStr = headerDate.format(df);
                 } else {
@@ -246,7 +248,7 @@ public class BrailleNote extends JPanel implements com.studentgui.app.DateChange
                     }
                     rowsList.add(latest);
                     lineGraph.updateWithGroupedData(rowsList, codes);
-                    groups = lineGraph.saveGroupedCharts(out, baseName, 1000, 240);
+                    groups = lineGraph.saveGroupedCharts(plotsOut, baseName, 1000, 240);
                 }
 
                 if (groups == null) {
@@ -258,8 +260,9 @@ public class BrailleNote extends JPanel implements com.studentgui.app.DateChange
                     md.append("## ").append(e.getKey()).append("\n\n");
                     md.append("![](./").append(e.getValue().getFileName().toString()).append(")\n\n");
                 }
-                java.nio.file.Path mdFile = out.resolve(baseName + ".md");
-                java.nio.file.Files.writeString(mdFile, md.toString(), java.nio.charset.StandardCharsets.UTF_8);
+                java.nio.file.Path mdFile = reportsOut.resolve(baseName + ".md");
+                String mdText = md.toString().replace("![](./", "![](../plots/");
+                java.nio.file.Files.writeString(mdFile, mdText, java.nio.charset.StandardCharsets.UTF_8);
 
                 try {
                     String[] palette = JLineGraph.PALETTE_HEX;
@@ -299,8 +302,9 @@ public class BrailleNote extends JPanel implements com.studentgui.app.DateChange
                         html.append("</div>");
                     }
                     html.append("</body></html>");
-                    java.nio.file.Path htmlFile = out.resolve(baseName + ".html");
-                    java.nio.file.Files.writeString(htmlFile, html.toString(), java.nio.charset.StandardCharsets.UTF_8);
+                    java.nio.file.Path htmlFile = reportsOut.resolve(baseName + ".html");
+                    String htmlStr = html.toString().replace("src=\"./", "src=\"../plots/");
+                    java.nio.file.Files.writeString(htmlFile, htmlStr, java.nio.charset.StandardCharsets.UTF_8);
                     LOG.info("Wrote BrailleNote HTML session report {}", htmlFile);
                 } catch (java.io.IOException ioex) {
                     LOG.warn("Unable to write BrailleNote HTML report: {}", ioex.toString());

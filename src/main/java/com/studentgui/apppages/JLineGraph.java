@@ -6,6 +6,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 
 import javax.swing.JPanel;
 
@@ -40,6 +41,21 @@ public class JLineGraph extends JPanel {
     private final NumberAxis xAxis;
     /** Expected number of skill columns per session. */
     private static final int NUMBER_OF_SKILLS = 28; // Adjust as needed
+    /** Jitter amplitude (plus/minus) applied to plotted data points. */
+    private static final double JITTER_AMPLITUDE = 0.10d;
+
+    /**
+     * Add a small random jitter within +/- JITTER_AMPLITUDE to the provided value.
+     * This helps separate overlapping points visually.
+     */
+    private double addJitter(final double v) {
+        try {
+            return v + ThreadLocalRandom.current().nextDouble(-JITTER_AMPLITUDE, JITTER_AMPLITUDE);
+        } catch (Throwable t) {
+            // In the unlikely event ThreadLocalRandom is unavailable, fall back to no jitter
+            return v;
+        }
+    }
     /** Public color palette (hex) for HTML legends and consistency across pages. */
     public static final String[] PALETTE_HEX = new String[] {
         "#1b9e77","#d95f02","#7570b3","#e7298a","#66a61e","#e6ab02","#a6761d","#666666"
@@ -105,24 +121,46 @@ public class JLineGraph extends JPanel {
      * Add lightly-colored horizontal bands to the plot to indicate score
      * ranges.
      */
-    private void addBackgroundBands(XYPlot plot) {
-        // Define the colors for the bands
-        Color red = new Color(255, 0, 0, 25);
-        Color orange = new Color(255, 165, 0, 25);
-        Color yellow = new Color(255, 255, 0, 25);
-        Color green = new Color(0, 255, 0, 25);
+    private void addBackgroundBands(final XYPlot plot) {
+        // Use the generic band painter to draw the requested bands across the
+        // full X domain of the main chart.
+        double left = 0.0;
+        double right = NUMBER_OF_SKILLS + 1;
+        addHorizontalBands(plot, left, right);
+    }
 
-        // Define the vertices for the polygons as interleaved coordinates
-        double[] redCoords = {0, 0, NUMBER_OF_SKILLS + 1, 0, NUMBER_OF_SKILLS + 1, 1, 0, 1};
-        double[] orangeCoords = {0, 1, NUMBER_OF_SKILLS + 1, 1, NUMBER_OF_SKILLS + 1, 2, 0, 2};
-        double[] yellowCoords = {0, 2, NUMBER_OF_SKILLS + 1, 2, NUMBER_OF_SKILLS + 1, 3, 0, 3};
-        double[] greenCoords = {0, 3, NUMBER_OF_SKILLS + 1, 3, NUMBER_OF_SKILLS + 1, 4, 0, 4};
+    /**
+     * Add horizontal background bands to the provided plot between left and right
+     * X coordinates. Bands follow the requested ranges:
+     * red = -0.25..0.5, orange = 0.5..1.5, orange = 1.5..2.5, yellow = 2.5..3.5,
+     * green = 3.5..4.5
+     */
+    private void addHorizontalBands(final XYPlot plot, final double left, final double right) {
+        try {
+            java.awt.Color red = new java.awt.Color(255, 0, 0, 40);
+            java.awt.Color orange = new java.awt.Color(255, 165, 0, 40);
+            java.awt.Color orange2 = new java.awt.Color(255, 140, 0, 40);
+            java.awt.Color yellow = new java.awt.Color(255, 255, 0, 40);
+            java.awt.Color green = new java.awt.Color(0, 255, 0, 40);
 
-        // Create and add the background annotations
-        plot.addAnnotation(new XYPolygonAnnotation(redCoords, null, null, red));
-        plot.addAnnotation(new XYPolygonAnnotation(orangeCoords, null, null, orange));
-        plot.addAnnotation(new XYPolygonAnnotation(yellowCoords, null, null, yellow));
-        plot.addAnnotation(new XYPolygonAnnotation(greenCoords, null, null, green));
+            double[][] bands = new double[][]{
+                { -0.25, 0.5 },
+                {  0.5,  1.5 },
+                {  1.5,  2.5 },
+                {  2.5,  3.5 },
+                {  3.5,  4.5 }
+            };
+            java.awt.Color[] colors = new java.awt.Color[] { red, orange, orange2, yellow, green };
+
+            for (int i = 0; i < bands.length; i++) {
+                double low = bands[i][0];
+                double high = bands[i][1];
+                double[] coords = new double[] { left, low, right, low, right, high, left, high };
+                plot.addAnnotation(new XYPolygonAnnotation(coords, null, null, colors[i]));
+            }
+        } catch (Throwable t) {
+            LOG.debug("Unable to add horizontal bands: {}", t.toString());
+        }
     }
 
     /**
@@ -133,7 +171,7 @@ public class JLineGraph extends JPanel {
      * @param allSkillValues list of sessions where each session is a list of
      *                       integer skill values (older sessions first)
      */
-    public void updateWithData(List<List<Integer>> allSkillValues) {
+    public void updateWithData(final List<List<Integer>> allSkillValues) {
         LOG.debug("updateWithData called with {} rows", allSkillValues == null ? 0 : allSkillValues.size());
         if (allSkillValues == null || allSkillValues.isEmpty()) {
             return;
@@ -151,8 +189,8 @@ public class JLineGraph extends JPanel {
             }
             for (int j = 0; j < skillValues.size(); j++) {
                 Integer v = skillValues.get(j);
-                int y = v == null ? 0 : v;
-                hs.add(j + 1, y);
+                double y = (double) (v == null ? 0 : v);
+                hs.add(j + 1, addJitter(y));
             }
             lineDataset.addSeries(hs);
             renderer.setSeriesPaint(s, Color.GRAY);
@@ -166,8 +204,8 @@ public class JLineGraph extends JPanel {
         if (latestSkillValues != null) {
             for (int i = 0; i < latestSkillValues.size(); i++) {
                 Integer v = latestSkillValues.get(i);
-                int y = v == null ? 0 : v;
-                latestSeries.add(i + 1, y);
+                double y = (double) (v == null ? 0 : v);
+                latestSeries.add(i + 1, addJitter(y));
             }
         }
         lineDataset.addSeries(latestSeries);
@@ -182,7 +220,7 @@ public class JLineGraph extends JPanel {
         // Ensure Y axis range and ticks are consistent across charts
         try {
             NumberAxis y = (NumberAxis) chart.getXYPlot().getRangeAxis();
-            y.setRange(-0.25, 4.0);
+            y.setRange(-0.25, 4.25);
             y.setTickUnit(new org.jfree.chart.axis.NumberTickUnit(1));
         } catch (ClassCastException ignored) {
             // if range axis isn't a NumberAxis, ignore
@@ -199,7 +237,7 @@ public class JLineGraph extends JPanel {
      * @param allSkillValues list of sessions (older first) where each session is a list of integer skill values
      * @param partCodes array of part codes aligned with columns in each session row
      */
-    public void updateWithGroupedData(List<List<Integer>> allSkillValues, String[] partCodes) {
+    public void updateWithGroupedData(final List<List<Integer>> allSkillValues, final String[] partCodes) {
         LOG.debug("updateWithGroupedData called with rows={} partCodes={}", allSkillValues == null ? 0 : allSkillValues.size(), partCodes == null ? 0 : partCodes.length);
         // validate
         if (partCodes == null || partCodes.length == 0 || allSkillValues == null || allSkillValues.isEmpty()) {
@@ -233,8 +271,8 @@ public class JLineGraph extends JPanel {
                     int colIndex = idxs.get(k);
                     int x = k + 1;
                     Integer vv = (colIndex < sessionRow.size() ? sessionRow.get(colIndex) : null);
-                    int y = vv == null ? 0 : vv;
-                    series.add(x, y);
+                    double y = (double) (vv == null ? 0 : vv);
+                    series.add(x, addJitter(y));
                 }
                 dataset.addSeries(series);
             }
@@ -268,7 +306,7 @@ public class JLineGraph extends JPanel {
             // Ensure Y axis range and ticks show 0..3 grid with a small lower padding for x-axis visibility
             try {
                 NumberAxis yAxis = (NumberAxis) plot.getRangeAxis();
-                yAxis.setRange(-0.25, 4.0);
+                yAxis.setRange(-0.25, 4.25);
                 yAxis.setTickUnit(new org.jfree.chart.axis.NumberTickUnit(1));
             } catch (ClassCastException cce) {
                 LOG.debug("Range axis is not a NumberAxis: {}", cce.toString());
@@ -304,7 +342,7 @@ public class JLineGraph extends JPanel {
      * @param rows list of session rows where each row is a list of integer scores
      * @param partCodes array of part codes aligned with the columns in each row
      */
-    public void updateWithGroupedDataByDate(java.util.List<java.time.LocalDate> dates, java.util.List<java.util.List<Integer>> rows, String[] partCodes) {
+    public void updateWithGroupedDataByDate(final java.util.List<java.time.LocalDate> dates, final java.util.List<java.util.List<Integer>> rows, final String[] partCodes) {
         // Backwards-compatible wrapper: use code strings as labels if caller didn't provide labels
         String[] labels = partCodes == null ? null : partCodes.clone();
         updateWithGroupedDataByDate(dates, rows, partCodes, labels);
@@ -313,7 +351,7 @@ public class JLineGraph extends JPanel {
     /**
      * New overload that accepts human-friendly labels parallel to partCodes.
      */
-    public void updateWithGroupedDataByDate(java.util.List<java.time.LocalDate> dates, java.util.List<java.util.List<Integer>> rows, String[] partCodes, String[] partLabels) {
+    public void updateWithGroupedDataByDate(final java.util.List<java.time.LocalDate> dates, final java.util.List<java.util.List<Integer>> rows, final String[] partCodes, final String[] partLabels) {
         LOG.debug("updateWithGroupedDataByDate called with dates={} rows={} parts={}", dates == null ? 0 : dates.size(), rows == null ? 0 : rows.size(), partCodes == null ? 0 : partCodes.length);
         if (dates == null || rows == null || partCodes == null) {
             return;
@@ -359,9 +397,9 @@ public class JLineGraph extends JPanel {
                     java.time.LocalDate d = dates.get(r);
                     java.util.List<Integer> row = rows.get(r);
                     Integer vv = (colIndex < row.size()) ? row.get(colIndex) : null;
-                    int val = vv == null ? 0 : vv;
+                    double val = (double) (vv == null ? 0 : vv);
                     org.jfree.data.time.Day day = new org.jfree.data.time.Day(java.util.Date.from(d.atStartOfDay(java.time.ZoneId.systemDefault()).toInstant()));
-                    ts.addOrUpdate(day, val);
+                    ts.addOrUpdate(day, addJitter(val));
                 }
                 dataset.addSeries(ts);
             }
@@ -397,26 +435,8 @@ public class JLineGraph extends JPanel {
                 }
                 double left = domainLower == Long.MIN_VALUE ? plot.getDomainAxis().getRange().getLowerBound() : domainLower;
                 double right = domainUpper == Long.MAX_VALUE ? plot.getDomainAxis().getRange().getUpperBound() : domainUpper;
-                // band 0..1 (red)
-                {
-                    double[] coords = new double[] { left, 0.0, right, 0.0, right, 1.0, left, 1.0 };
-                    plot.addAnnotation(new XYPolygonAnnotation(coords, null, null, new java.awt.Color(255, 0, 0, 40)));
-                }
-                // band 1..2 (orange)
-                {
-                    double[] coords = new double[] { left, 1.0, right, 1.0, right, 2.0, left, 2.0 };
-                    plot.addAnnotation(new XYPolygonAnnotation(coords, null, null, new java.awt.Color(255, 165, 0, 40)));
-                }
-                // band 2..3 (yellow)
-                {
-                    double[] coords = new double[] { left, 2.0, right, 2.0, right, 3.0, left, 3.0 };
-                    plot.addAnnotation(new XYPolygonAnnotation(coords, null, null, new java.awt.Color(255, 255, 0, 40)));
-                }
-                // band 3..4 (green)
-                {
-                    double[] coords = new double[] { left, 3.0, right, 3.0, right, 4.0, left, 4.0 };
-                    plot.addAnnotation(new XYPolygonAnnotation(coords, null, null, new java.awt.Color(0, 255, 0, 40)));
-                }
+                // Use shared helper to draw bands in the domain coordinates (millis)
+                addHorizontalBands(plot, left, right);
             } catch (Throwable t) {
                 LOG.debug("Unable to add background bands as annotations: {}", t.toString());
             }
@@ -432,13 +452,13 @@ public class JLineGraph extends JPanel {
             plot.setRenderer(renderer);
 
             // Ensure Y axis range and ticks show 0..3 grid with a small lower padding for x-axis visibility
-            try {
-                NumberAxis yAxis = (NumberAxis) plot.getRangeAxis();
-                yAxis.setRange(-0.25, 4.0);
-                yAxis.setTickUnit(new org.jfree.chart.axis.NumberTickUnit(1));
-            } catch (ClassCastException cce) {
-                LOG.debug("Range axis is not a NumberAxis: {}", cce.toString());
-            }
+                try {
+                    NumberAxis yAxis = (NumberAxis) plot.getRangeAxis();
+                    yAxis.setRange(-0.25, 4.25);
+                    yAxis.setTickUnit(new org.jfree.chart.axis.NumberTickUnit(1));
+                } catch (ClassCastException cce) {
+                    LOG.debug("Range axis is not a NumberAxis: {}", cce.toString());
+                }
 
             // Ensure Y axis range and ticks show 0..3 grid with a small lower padding for x-axis visibility
             try {
@@ -492,7 +512,7 @@ public class JLineGraph extends JPanel {
      * @return ordered map of group id to written file path
      * @throws java.io.IOException on I/O error
      */
-    public java.util.Map<String, java.nio.file.Path> saveGroupedCharts(java.nio.file.Path dir, String baseName, int width, int heightPerGroup) throws java.io.IOException {
+    public java.util.Map<String, java.nio.file.Path> saveGroupedCharts(final java.nio.file.Path dir, final String baseName, final int width, final int heightPerGroup) throws java.io.IOException {
         java.util.Map<String, java.nio.file.Path> out = new java.util.LinkedHashMap<>();
         if (dir == null) {
             throw new java.io.IOException("output dir is null");
@@ -531,7 +551,7 @@ public class JLineGraph extends JPanel {
      * render one row of zeros sized to the number of parts so the UI shows
      * grouped axes and placeholders even when no session data exists yet.
      */
-    public void showEmptyGrouped(String[] partCodes) {
+    public void showEmptyGrouped(final String[] partCodes) {
         if (partCodes == null) {
             return;
         }
@@ -550,7 +570,7 @@ public class JLineGraph extends JPanel {
      * @param height image height in pixels
      * @throws java.io.IOException if writing fails
      */
-    public void saveChart(java.nio.file.Path outputPath, int width, int height) throws java.io.IOException {
+    public void saveChart(final java.nio.file.Path outputPath, final int width, final int height) throws java.io.IOException {
         if (outputPath == null) {
             throw new java.io.IOException("outputPath is null");
         }

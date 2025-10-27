@@ -35,7 +35,7 @@ public final class Settings {
      * @param def default value when key is absent
      * @return stored value or default
      */
-    public static String get(String key, String def) {
+    public static String get(final String key, final String def) {
         return props.getProperty(key, def);
     }
 
@@ -45,7 +45,7 @@ public final class Settings {
      * @param key setting key
      * @param value setting value (null treated as empty string)
      */
-    public static void put(String key, String value) {
+    public static void put(final String key, final String value) {
         props.setProperty(key, value == null ? "" : value);
         // persist immediately
         try (OutputStream out = Files.newOutputStream(SETTINGS_FILE)) {

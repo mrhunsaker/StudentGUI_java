@@ -53,7 +53,7 @@ public class IOS extends JPanel {
      * @param graph shared graph used to visualize recent sessions
      */
     public IOS(String studentName, LocalDate date, JLineGraph graph) {
-        this.studentNameParam = studentName;
+    this.studentNameParam = (studentName == null || studentName.trim().isEmpty()) ? com.studentgui.apphelpers.Helpers.defaultStudent() : studentName;
         this.dateParam = date;
         this.graph = graph;
         setLayout(new BorderLayout());
@@ -118,8 +118,15 @@ public class IOS extends JPanel {
     openLatest.setPreferredSize(new java.awt.Dimension(0, 32));
     openLatest.addActionListener((ActionEvent e) -> {
         java.nio.file.Path pth = com.studentgui.apphelpers.Helpers.latestPlotPath(this.studentNameParam, "iOS");
-        if (pth == null) com.studentgui.apphelpers.UiNotifier.show("No iOS plot found for student");
-        else { try { java.awt.Desktop.getDesktop().open(pth.toFile()); } catch (java.io.IOException | UnsupportedOperationException | SecurityException ex) { com.studentgui.apphelpers.UiNotifier.show("Unable to open plot: " + pth.getFileName().toString()); } }
+        if (pth == null) {
+            com.studentgui.apphelpers.UiNotifier.show("No iOS plot found for student");
+        } else {
+            try {
+                java.awt.Desktop.getDesktop().open(pth.toFile());
+            } catch (java.io.IOException | UnsupportedOperationException | SecurityException ex) {
+                com.studentgui.apphelpers.UiNotifier.show("Unable to open plot: " + pth.getFileName().toString());
+            }
+        }
     });
     p.add(openLatest, gbc);
 
@@ -152,10 +159,10 @@ public class IOS extends JPanel {
     private void initParts() {
         try {
             int ptId = com.studentgui.apphelpers.Database.getOrCreateProgressType("iOS");
-            java.util.Set<String> keys = inputs.keySet();
+                java.util.Set<String> keys = inputs.keySet();
             String[] codes = new String[keys.size()];
             int idx = 0;
-            for (String k: keys) {
+            for (String k : keys) {
                 codes[idx++] = k;
             }
             com.studentgui.apphelpers.Database.ensureAssessmentParts(ptId, codes);
@@ -191,8 +198,10 @@ public class IOS extends JPanel {
             java.nio.file.Path jsonOut = com.studentgui.apphelpers.SessionJsonWriter.writeSessionJson(this.studentNameParam, "iOS", payload, sessionId);
             if (jsonOut == null) LOG.warn("Unable to save iOS session JSON for sessionId={}", sessionId);
             try {
-                java.nio.file.Path out = com.studentgui.apphelpers.Helpers.APP_HOME.resolve("StudentDataFiles").resolve(com.studentgui.apphelpers.Helpers.safeName(this.studentNameParam)).resolve("plots");
-                java.nio.file.Files.createDirectories(out);
+                java.nio.file.Path plotsOut = com.studentgui.apphelpers.Helpers.studentPlotsDir(this.studentNameParam);
+                java.nio.file.Path reportsOut = com.studentgui.apphelpers.Helpers.studentReportsDir(this.studentNameParam);
+                java.nio.file.Files.createDirectories(plotsOut);
+                java.nio.file.Files.createDirectories(reportsOut);
                 java.time.format.DateTimeFormatter df = java.time.format.DateTimeFormatter.ISO_DATE;
                 String dateStr = this.dateParam != null ? this.dateParam.format(df) : java.time.LocalDate.now().toString();
                 String baseName = "iOS-" + sessionId + "-" + dateStr;
@@ -206,18 +215,18 @@ public class IOS extends JPanel {
                 // codes already built above as 'codes'
                 if (rwd != null && rwd.rows != null && !rwd.rows.isEmpty()) {
                     graph.updateWithGroupedDataByDate(rwd.dates, rwd.rows, codes, labels);
-                    groups = graph.saveGroupedCharts(out, baseName, 1000, 240);
+                    groups = graph.saveGroupedCharts(plotsOut, baseName, 1000, 240);
                     java.time.LocalDate headerDate = rwd.dates.get(rwd.dates.size() - 1);
                     dateStr = headerDate.format(df);
                 } else {
                     java.util.List<java.util.List<Integer>> rowsList = new java.util.ArrayList<>();
-                    java.util.List<Integer> latest = new java.util.ArrayList<>();
-                    for (String c : codes) {
-                        latest.add(inputs.get(c).getValue());
-                    }
-                    rowsList.add(latest);
+                        java.util.List<Integer> latest = new java.util.ArrayList<>();
+                        for (String c : codes) {
+                            latest.add(inputs.get(c).getValue());
+                        }
+                        rowsList.add(latest);
                     graph.updateWithGroupedData(rowsList, codes);
-                    groups = graph.saveGroupedCharts(out, baseName, 1000, 240);
+                    groups = graph.saveGroupedCharts(plotsOut, baseName, 1000, 240);
                 }
 
                 if (groups == null) {
@@ -227,9 +236,9 @@ public class IOS extends JPanel {
                 md.append("# ").append(this.studentNameParam == null ? "Unknown Student" : this.studentNameParam).append(" - ").append(dateStr).append("\n\n");
                 for (java.util.Map.Entry<String, java.nio.file.Path> e : groups.entrySet()) {
                     md.append("## ").append(e.getKey()).append("\n\n");
-                    md.append("![](./").append(e.getValue().getFileName().toString()).append(")\n\n");
+                    md.append("![](../plots/").append(e.getValue().getFileName().toString()).append(")\n\n");
                 }
-                java.nio.file.Path mdFile = out.resolve(baseName + ".md");
+                java.nio.file.Path mdFile = reportsOut.resolve(baseName + ".md");
                 java.nio.file.Files.writeString(mdFile, md.toString(), java.nio.charset.StandardCharsets.UTF_8);
 
                 try {
@@ -250,7 +259,7 @@ public class IOS extends JPanel {
                         String grp = e2.getKey();
                         String imgName = e2.getValue().getFileName().toString();
                         html.append("<h2>").append(grp).append("</h2>");
-                        html.append("<div class=\"plot\"><img src=\"./").append(imgName).append("\" alt=\"").append(grp).append("\"></div>");
+                        html.append("<div class=\"plot\"><img src=\"../plots/").append(imgName).append("\" alt=\"").append(grp).append("\"></div>");
                         java.util.List<Integer> idxs = groupsIdx.getOrDefault(grp, new java.util.ArrayList<>());
                         html.append("<div class=\"legend\">");
                         for (int s = 0; s < idxs.size(); s++) {
@@ -270,7 +279,7 @@ public class IOS extends JPanel {
                         html.append("</div>");
                     }
                     html.append("</body></html>");
-                    java.nio.file.Path htmlFile = out.resolve(baseName + ".html");
+                    java.nio.file.Path htmlFile = reportsOut.resolve(baseName + ".html");
                     java.nio.file.Files.writeString(htmlFile, html.toString(), java.nio.charset.StandardCharsets.UTF_8);
                     LOG.info("Wrote iOS HTML session report {}", htmlFile);
                 } catch (java.io.IOException ioex) {

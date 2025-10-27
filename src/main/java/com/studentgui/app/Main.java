@@ -73,12 +73,12 @@ public class Main {
     // Listeners to notify when the top-bar date changes
     private static final java.util.List<DateChangeListener> dateListeners = new java.util.concurrent.CopyOnWriteArrayList<>();
 
-    public static void addDateChangeListener(DateChangeListener l) { 
+    public static void addDateChangeListener(final DateChangeListener l) { 
         if (l != null) {
             dateListeners.add(l);
         }
     }
-    public static void removeDateChangeListener(DateChangeListener l) { 
+    public static void removeDateChangeListener(final DateChangeListener l) { 
         if (l != null) {
             dateListeners.remove(l);
         }
@@ -86,15 +86,23 @@ public class Main {
     public static void clearDateChangeListeners() { 
         dateListeners.clear();
     }
-    private static void notifyDateChanged(java.time.LocalDate d) { for (DateChangeListener l : dateListeners) { try { l.dateChanged(d); } catch (Exception ex) { LOG.warn("DateChangeListener threw: {}", ex.toString()); } } }
+    private static void notifyDateChanged(final java.time.LocalDate d) {
+        for (DateChangeListener l : dateListeners) {
+            try {
+                l.dateChanged(d);
+            } catch (Exception ex) {
+                LOG.warn("DateChangeListener threw: {}", ex.toString());
+            }
+        }
+    }
     // Student change listeners
     private static final java.util.List<StudentChangeListener> studentListeners = new java.util.concurrent.CopyOnWriteArrayList<>();
-    public static void addStudentChangeListener(StudentChangeListener l) {
+    public static void addStudentChangeListener(final StudentChangeListener l) {
         if (l != null) {
             studentListeners.add(l);
         }
     }
-    public static void removeStudentChangeListener(StudentChangeListener l) {
+    public static void removeStudentChangeListener(final StudentChangeListener l) {
         if (l != null) {
             studentListeners.remove(l);
         }
@@ -102,7 +110,7 @@ public class Main {
     public static void clearStudentChangeListeners() {
         studentListeners.clear();
     }
-    private static void notifyStudentChanged(String s) {
+    private static void notifyStudentChanged(final String s) {
         currentStudent = s;
         for (StudentChangeListener l : studentListeners) {
             try {
@@ -119,7 +127,7 @@ public class Main {
      *
      * @param args command-line arguments (unused)
      */
-    public static void main(String[] args) {
+    public static void main(final String[] args) {
         // Apply saved look and feel (default to light)
         // Settings.get and setTheme handle any expected failures internally;
         // call directly so we avoid a broad RuntimeException catch.
@@ -193,7 +201,7 @@ public class Main {
     *
     * @param theme human-friendly theme name or fully-qualified LookAndFeel class name
      */
-    public static void setTheme(String theme) {
+    public static void setTheme(final String theme) {
         try {
             String t = theme == null ? "light" : theme;
             // Common keywords for bundled themes
@@ -274,7 +282,7 @@ public class Main {
         bar.add(dateField);
         bar.add(goBtn);
 
-        goBtn.addActionListener(e -> {
+            goBtn.addActionListener(e -> {
             String selected = (String) studentBox.getSelectedItem();
             LocalDate date = LocalDate.now();
             try {
@@ -310,7 +318,7 @@ public class Main {
      * @param student selected student's display name
      * @param date the session date for newly created pages
      */
-    private static void recreatePages(String student, LocalDate date) {
+    private static void recreatePages(final String student, final LocalDate date) {
         // recreate the pages with a fresh sharedGraph so the graph is reset for the selected student/date
         if (sharedGraph == null) {
             sharedGraph = new JLineGraph();
@@ -411,7 +419,7 @@ public class Main {
      * @param name registration name for the page
      * @param comp optional component instance to add (may be null)
      */
-    public static void showPage(String name, JComponent comp) {
+    public static void showPage(final String name, final JComponent comp) {
         CardLayout cl = (CardLayout) contentPanel.getLayout();
         if (comp != null && comp.getParent() == null) {
             contentPanel.add(comp, name);

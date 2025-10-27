@@ -64,7 +64,7 @@ public class ContactLog extends JPanel {
      * @param graph shared graph component shown under the editor
      */
     public ContactLog(String studentName, LocalDate date, JLineGraph graph) {
-        this.studentNameParam = studentName;
+    this.studentNameParam = (studentName == null || studentName.trim().isEmpty()) ? com.studentgui.apphelpers.Helpers.defaultStudent() : studentName;
         this.dateParam = date;
         setLayout(new BorderLayout());
 
@@ -194,7 +194,9 @@ public class ContactLog extends JPanel {
             com.studentgui.apphelpers.UiNotifier.show("Contact log saved.");
             com.studentgui.apphelpers.dto.ContactPayload payload = new com.studentgui.apphelpers.dto.ContactPayload(sessionId, guardian, method, phone, email, response, general, specific, notes);
             java.nio.file.Path jsonOut = com.studentgui.apphelpers.SessionJsonWriter.writeSessionJson(this.studentNameParam, "ContactLog", payload, sessionId);
-            if (jsonOut == null) LOG.warn("Unable to save ContactLog session JSON for sessionId={}", sessionId);
+            if (jsonOut == null) {
+                LOG.warn("Unable to save ContactLog session JSON for sessionId={}", sessionId);
+            }
         } catch (SQLException ex) {
             LOG.error("Error saving contact log", ex);
             javax.swing.JOptionPane.showMessageDialog(this, "Database error saving contact log: " + ex.getMessage(), "Database error", javax.swing.JOptionPane.ERROR_MESSAGE);

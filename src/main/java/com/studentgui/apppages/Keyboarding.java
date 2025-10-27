@@ -51,7 +51,7 @@ public class Keyboarding extends JPanel implements com.studentgui.app.DateChange
      * @param lineGraph shared graph component (unused for keyboarding results)
      */
     public Keyboarding(String studentName, LocalDate date, JLineGraph lineGraph) {
-        this.studentNameParam = studentName;
+    this.studentNameParam = (studentName == null || studentName.trim().isEmpty()) ? com.studentgui.apphelpers.Helpers.defaultStudent() : studentName;
         this.dateParam = date;
         this.lineGraph = lineGraph;
         setLayout(new BorderLayout());
@@ -152,8 +152,10 @@ public class Keyboarding extends JPanel implements com.studentgui.app.DateChange
                 LOG.warn("Unable to save Keyboarding session JSON for sessionId={}", sessionId);
             }
             try {
-                java.nio.file.Path out = com.studentgui.apphelpers.Helpers.APP_HOME.resolve("StudentDataFiles").resolve(com.studentgui.apphelpers.Helpers.safeName(this.studentNameParam)).resolve("plots");
-                java.nio.file.Files.createDirectories(out);
+                java.nio.file.Path plotsOut = com.studentgui.apphelpers.Helpers.studentPlotsDir(this.studentNameParam);
+                java.nio.file.Path reportsOut = com.studentgui.apphelpers.Helpers.studentReportsDir(this.studentNameParam);
+                java.nio.file.Files.createDirectories(plotsOut);
+                java.nio.file.Files.createDirectories(reportsOut);
                 java.time.format.DateTimeFormatter df = java.time.format.DateTimeFormatter.ISO_DATE;
                 String dateStr = this.dateParam != null ? this.dateParam.format(df) : java.time.LocalDate.now().toString();
                 String baseName = "Keyboarding-" + sessionId + "-" + dateStr;
@@ -165,7 +167,7 @@ public class Keyboarding extends JPanel implements com.studentgui.app.DateChange
                 md.append("**Topic:** ").append(topic == null || topic.isEmpty() ? "(none)" : topic).append("  \n\n");
                 md.append("**Speed (WPM):** ").append(String.valueOf(speed)).append("  \n\n");
                 md.append("**Accuracy (%):** ").append(String.valueOf(accuracy)).append("  \n\n");
-                java.nio.file.Path mdFile = out.resolve(baseName + ".md");
+                java.nio.file.Path mdFile = reportsOut.resolve(baseName + ".md");
                 java.nio.file.Files.writeString(mdFile, md.toString(), java.nio.charset.StandardCharsets.UTF_8);
 
                 try {
@@ -182,7 +184,7 @@ public class Keyboarding extends JPanel implements com.studentgui.app.DateChange
                     html.append("<p><strong>Accuracy (%):</strong> ").append(String.valueOf(accuracy)).append("</p>");
                     html.append("</div>");
                     html.append("</body></html>");
-                    java.nio.file.Path htmlFile = out.resolve(baseName + ".html");
+                    java.nio.file.Path htmlFile = reportsOut.resolve(baseName + ".html");
                     java.nio.file.Files.writeString(htmlFile, html.toString(), java.nio.charset.StandardCharsets.UTF_8);
                     LOG.info("Wrote Keyboarding session report {}", htmlFile);
                 } catch (java.io.IOException ioex) {

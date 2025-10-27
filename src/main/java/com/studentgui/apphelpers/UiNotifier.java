@@ -23,7 +23,7 @@ public class UiNotifier {
      *
      * @param message message text to display
      */
-    public static void show(String message) {
+    public static void show(final String message) {
         SwingUtilities.invokeLater(() -> {
             if (window != null) {
                 window.dispose();

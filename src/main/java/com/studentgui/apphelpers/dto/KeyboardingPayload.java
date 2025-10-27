@@ -21,18 +21,18 @@ public class KeyboardingPayload implements SessionPayload {
     /**
      * Create keyboarding payload.
      *
-     * @param sessionId DB session id
-     * @param program program name
-     * @param topic topic name
-     * @param speed words per minute
-     * @param accuracy percent accuracy
+    * @param sessionIdParam DB session id
+    * @param programParam program name
+    * @param topicParam topic name
+    * @param speedParam words per minute
+    * @param accuracyParam percent accuracy
      */
-    public KeyboardingPayload(int sessionId, String program, String topic, int speed, int accuracy) {
-        this.sessionId = sessionId;
-        this.program = program;
-        this.topic = topic;
-        this.speed = speed;
-        this.accuracy = accuracy;
+    public KeyboardingPayload(final int sessionIdParam, final String programParam, final String topicParam, final int speedParam, final int accuracyParam) {
+        this.sessionId = sessionIdParam;
+        this.program = programParam;
+        this.topic = topicParam;
+        this.speed = speedParam;
+        this.accuracy = accuracyParam;
     }
 
     @Override

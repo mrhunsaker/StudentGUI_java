@@ -52,8 +52,8 @@ public class Abacus extends JPanel implements com.studentgui.app.DateChangeListe
      * @param date the date to associate with created progress sessions
      * @param lineGraph the shared graph component used to visualize results
      */
-    public Abacus(String studentName, LocalDate date, JLineGraph lineGraph) {
-        this.studentNameParam = studentName;
+    public Abacus(final String studentName, final LocalDate date, final JLineGraph lineGraph) {
+    this.studentNameParam = (studentName == null || studentName.trim().isEmpty()) ? com.studentgui.apphelpers.Helpers.defaultStudent() : studentName;
         this.dateParam = date;
         this.lineGraph = lineGraph; // Use the passed in graph instance
         setLayout(new BorderLayout());
@@ -227,11 +227,15 @@ public class Abacus extends JPanel implements com.studentgui.app.DateChangeListe
             // Also persist this session as a JSON file in the student's folder (timestamped per-session)
             com.studentgui.apphelpers.dto.AssessmentPayload payload = new com.studentgui.apphelpers.dto.AssessmentPayload(sessionId, codes, scores);
             java.nio.file.Path jsonOut = com.studentgui.apphelpers.SessionJsonWriter.writeSessionJson(this.studentNameParam, "Abacus", payload, sessionId);
-            if (jsonOut == null) LOG.warn("Unable to save Abacus session JSON for sessionId={}", sessionId);
+            if (jsonOut == null) {
+                LOG.warn("Unable to save Abacus session JSON for sessionId={}", sessionId);
+            }
             // Generate per-phase PNGs (time-series) and a markdown report for this session
             try {
-                java.nio.file.Path out = com.studentgui.apphelpers.Helpers.APP_HOME.resolve("StudentDataFiles").resolve(com.studentgui.apphelpers.Helpers.safeName(this.studentNameParam)).resolve("plots");
-                java.nio.file.Files.createDirectories(out);
+                java.nio.file.Path plotsOut = com.studentgui.apphelpers.Helpers.studentPlotsDir(this.studentNameParam);
+                java.nio.file.Path reportsOut = com.studentgui.apphelpers.Helpers.studentReportsDir(this.studentNameParam);
+                java.nio.file.Files.createDirectories(plotsOut);
+                java.nio.file.Files.createDirectories(reportsOut);
                 java.time.format.DateTimeFormatter df = java.time.format.DateTimeFormatter.ISO_DATE;
                 String dateStr = (this.dateParam != null ? this.dateParam.format(df) : java.time.LocalDate.now().toString());
                 String baseName = "Abacus-" + sessionId + "-" + dateStr;
@@ -248,7 +252,7 @@ public class Abacus extends JPanel implements com.studentgui.app.DateChangeListe
                         }
                         lineGraph.updateWithGroupedDataByDate(rwd.dates, rwd.rows, codes, labels);
                     // Persist each group as a PNG (time-series image)
-                    groups = lineGraph.saveGroupedCharts(out, baseName, 1000, 240);
+                    groups = lineGraph.saveGroupedCharts(plotsOut, baseName, 1000, 240);
                     // Use the most-recent session date for the report header if available
                     java.time.LocalDate headerDate = rwd.dates.get(rwd.dates.size() - 1);
                     dateStr = headerDate.format(df);
@@ -261,19 +265,23 @@ public class Abacus extends JPanel implements com.studentgui.app.DateChangeListe
                     }
                     rows.add(latest);
                     lineGraph.updateWithGroupedData(rows, codes);
-                    groups = lineGraph.saveGroupedCharts(out, baseName, 1000, 240);
+                    groups = lineGraph.saveGroupedCharts(plotsOut, baseName, 1000, 240);
                 }
 
                 // Generate markdown report
-                if (groups == null) groups = new java.util.LinkedHashMap<>();
+                if (groups == null) {
+                    groups = new java.util.LinkedHashMap<>();
+                }
                 StringBuilder md = new StringBuilder();
                 md.append("# ").append(this.studentNameParam == null ? "Unknown Student" : this.studentNameParam).append(" - ").append(dateStr).append("\n\n");
                 for (java.util.Map.Entry<String, java.nio.file.Path> e : groups.entrySet()) {
                     md.append("## ").append(e.getKey()).append("\n\n");
                     md.append("![](./").append(e.getValue().getFileName().toString()).append(")\n\n");
                 }
-                java.nio.file.Path mdFile = out.resolve(baseName + ".md");
-                java.nio.file.Files.writeString(mdFile, md.toString(), java.nio.charset.StandardCharsets.UTF_8);
+                java.nio.file.Path mdFile = reportsOut.resolve(baseName + ".md");
+                // images live in ../plots relative to reports
+                String mdText = md.toString().replace("![](./", "![](../plots/");
+                java.nio.file.Files.writeString(mdFile, mdText, java.nio.charset.StandardCharsets.UTF_8);
                 LOG.info("Wrote Abacus session report {} with {} group images", mdFile, groups.size());
                 // Also produce a simple HTML report that embeds the PNGs and
                 // shows a scrollable legend under each plot.
@@ -318,8 +326,10 @@ public class Abacus extends JPanel implements com.studentgui.app.DateChangeListe
                     }
 
                     html.append("</body></html>");
-                    java.nio.file.Path htmlFile = out.resolve(baseName + ".html");
-                    java.nio.file.Files.writeString(htmlFile, html.toString(), java.nio.charset.StandardCharsets.UTF_8);
+                    java.nio.file.Path htmlFile = reportsOut.resolve(baseName + ".html");
+                    // adjust image src to point to ../plots
+                    String htmlStr = html.toString().replace("src=\"./", "src=\"../plots/");
+                    java.nio.file.Files.writeString(htmlFile, htmlStr, java.nio.charset.StandardCharsets.UTF_8);
                     LOG.info("Wrote Abacus HTML session report {}", htmlFile);
                 } catch (java.io.IOException ioex) {
                     LOG.warn("Unable to write HTML report: {}", ioex.toString());
@@ -362,7 +372,7 @@ public class Abacus extends JPanel implements com.studentgui.app.DateChangeListe
         }
     }
     @Override
-    public void dateChanged(LocalDate newDate) {
+    public void dateChanged(final LocalDate newDate) {
         this.dateParam = newDate;
         // When the global date changes, update the graph to reflect any
         // date-related logic (most refreshGraph implementations load
@@ -372,7 +382,7 @@ public class Abacus extends JPanel implements com.studentgui.app.DateChangeListe
     }
 
     @Override
-    public void studentChanged(String newStudent) {
+    public void studentChanged(final String newStudent) {
         this.studentNameParam = newStudent;
         SwingUtilities.invokeLater(() -> {
             refreshGraph();

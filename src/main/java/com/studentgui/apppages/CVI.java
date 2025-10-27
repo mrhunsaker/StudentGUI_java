@@ -53,7 +53,7 @@ public class CVI extends JPanel {
      * @param graph shared graph used to visualize recent results
      */
     public CVI(String studentName, LocalDate date, JLineGraph graph) {
-        this.studentNameParam = studentName;
+    this.studentNameParam = (studentName == null || studentName.trim().isEmpty()) ? com.studentgui.apphelpers.Helpers.defaultStudent() : studentName;
         this.dateParam = date;
         this.graph = graph;
     setLayout(new BorderLayout());
@@ -164,8 +164,10 @@ public class CVI extends JPanel {
             java.nio.file.Path jsonOut = com.studentgui.apphelpers.SessionJsonWriter.writeSessionJson(this.studentNameParam, "CVI", payload, sessionId);
             if (jsonOut == null) LOG.warn("Unable to save CVI session JSON for sessionId={}", sessionId);
             try {
-                java.nio.file.Path out = com.studentgui.apphelpers.Helpers.APP_HOME.resolve("StudentDataFiles").resolve(com.studentgui.apphelpers.Helpers.safeName(this.studentNameParam)).resolve("plots");
-                java.nio.file.Files.createDirectories(out);
+                java.nio.file.Path plotsOut = com.studentgui.apphelpers.Helpers.studentPlotsDir(this.studentNameParam);
+                java.nio.file.Path reportsOut = com.studentgui.apphelpers.Helpers.studentReportsDir(this.studentNameParam);
+                java.nio.file.Files.createDirectories(plotsOut);
+                java.nio.file.Files.createDirectories(reportsOut);
                 java.time.format.DateTimeFormatter df = java.time.format.DateTimeFormatter.ISO_DATE;
                 String dateStr = this.dateParam != null ? this.dateParam.format(df) : java.time.LocalDate.now().toString();
                 String baseName = "CVI-" + sessionId + "-" + dateStr;
@@ -176,7 +178,7 @@ public class CVI extends JPanel {
                 for (int i = 0; i < codes.length; i++) labels[i] = inputs.get(codes[i]).getLabel();
                 if (rwd != null && rwd.rows != null && !rwd.rows.isEmpty()) {
                     graph.updateWithGroupedDataByDate(rwd.dates, rwd.rows, codes, labels);
-                    groups = graph.saveGroupedCharts(out, baseName, 1000, 240);
+                    groups = graph.saveGroupedCharts(plotsOut, baseName, 1000, 240);
                     java.time.LocalDate headerDate = rwd.dates.get(rwd.dates.size() - 1);
                     dateStr = headerDate.format(df);
                 } else {
@@ -187,7 +189,7 @@ public class CVI extends JPanel {
                     }
                     rowsList.add(latest);
                     graph.updateWithGroupedData(rowsList, codes);
-                    groups = graph.saveGroupedCharts(out, baseName, 1000, 240);
+                    groups = graph.saveGroupedCharts(plotsOut, baseName, 1000, 240);
                 }
 
                 if (groups == null) groups = new java.util.LinkedHashMap<>();
@@ -195,9 +197,9 @@ public class CVI extends JPanel {
                 md.append("# ").append(this.studentNameParam == null ? "Unknown Student" : this.studentNameParam).append(" - ").append(dateStr).append("\n\n");
                 for (java.util.Map.Entry<String, java.nio.file.Path> e : groups.entrySet()) {
                     md.append("## ").append(e.getKey()).append("\n\n");
-                    md.append("![](./").append(e.getValue().getFileName().toString()).append(")\n\n");
+                    md.append("![](../plots/").append(e.getValue().getFileName().toString()).append(")\n\n");
                 }
-                java.nio.file.Path mdFile = out.resolve(baseName + ".md");
+                java.nio.file.Path mdFile = reportsOut.resolve(baseName + ".md");
                 java.nio.file.Files.writeString(mdFile, md.toString(), java.nio.charset.StandardCharsets.UTF_8);
 
                 try {
@@ -218,7 +220,7 @@ public class CVI extends JPanel {
                         String grp = e2.getKey();
                         String imgName = e2.getValue().getFileName().toString();
                         html.append("<h2>").append(grp).append("</h2>");
-                        html.append("<div class=\"plot\"><img src=\"./").append(imgName).append("\" alt=\"").append(grp).append("\"></div>");
+                        html.append("<div class=\"plot\"><img src=\"../plots/").append(imgName).append("\" alt=\"").append(grp).append("\"></div>");
                         java.util.List<Integer> idxs = groupsIdx.getOrDefault(grp, new java.util.ArrayList<>());
                         html.append("<div class=\"legend\">");
                         for (int s = 0; s < idxs.size(); s++) {
@@ -238,7 +240,7 @@ public class CVI extends JPanel {
                         html.append("</div>");
                     }
                     html.append("</body></html>");
-                    java.nio.file.Path htmlFile = out.resolve(baseName + ".html");
+                    java.nio.file.Path htmlFile = reportsOut.resolve(baseName + ".html");
                     java.nio.file.Files.writeString(htmlFile, html.toString(), java.nio.charset.StandardCharsets.UTF_8);
                     LOG.info("Wrote CVI HTML session report {}", htmlFile);
                 } catch (java.io.IOException ioex) {

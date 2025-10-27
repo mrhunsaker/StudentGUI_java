@@ -54,9 +54,9 @@ public class Braille extends JPanel implements com.studentgui.app.DateChangeList
      * @param date the session date to use when creating a progress session
      * @param lineGraph shared graph component used to display recent results
      */
-    public Braille(String studentName, LocalDate date, JLineGraph lineGraph) {
+    public Braille(final String studentName, final LocalDate date, final JLineGraph lineGraph) {
         this.lineGraph = lineGraph; // Use the passed in graph instance
-        this.studentNameParam = studentName != null ? studentName : "Unknown Student";
+    this.studentNameParam = (studentName == null || studentName.trim().isEmpty()) ? com.studentgui.apphelpers.Helpers.defaultStudent() : studentName;
         this.dateParam = date != null ? date : LocalDate.now();
         setLayout(new BorderLayout());
 
@@ -221,9 +221,11 @@ public class Braille extends JPanel implements com.studentgui.app.DateChangeList
             int ptId = com.studentgui.apphelpers.Database.getOrCreateProgressType("Braille");
             int sessionId = com.studentgui.apphelpers.Database.createProgressSession(studentId, ptId, this.dateParam);
 
-            String[] codes = new String[28];
-            int[] scores = new int[28];
-            for (int i = 0; i < 28; i++) {
+            // Allocate arrays based on the actual number of parts so that
+            // the submitted data and plotted series stay in sync.
+            String[] codes = new String[this.partCodes.length];
+            int[] scores = new int[this.partCodes.length];
+            for (int i = 0; i < this.partCodes.length; i++) {
                 codes[i] = this.partCodes[i];
                 scores[i] = skillFields[i].getValue();
             }
@@ -236,8 +238,10 @@ public class Braille extends JPanel implements com.studentgui.app.DateChangeList
                 LOG.warn("Unable to save Braille session JSON for sessionId={}", sessionId);
             }
             try {
-                java.nio.file.Path out = com.studentgui.apphelpers.Helpers.APP_HOME.resolve("StudentDataFiles").resolve(com.studentgui.apphelpers.Helpers.safeName(this.studentNameParam)).resolve("plots");
-                java.nio.file.Files.createDirectories(out);
+                java.nio.file.Path plotsOut = com.studentgui.apphelpers.Helpers.studentPlotsDir(this.studentNameParam);
+                java.nio.file.Path reportsOut = com.studentgui.apphelpers.Helpers.studentReportsDir(this.studentNameParam);
+                java.nio.file.Files.createDirectories(plotsOut);
+                java.nio.file.Files.createDirectories(reportsOut);
                 java.time.format.DateTimeFormatter df = java.time.format.DateTimeFormatter.ISO_DATE;
                 String dateStr = this.dateParam != null ? this.dateParam.format(df) : java.time.LocalDate.now().toString();
                 String baseName = "Braille-" + sessionId + "-" + dateStr;
@@ -250,7 +254,7 @@ public class Braille extends JPanel implements com.studentgui.app.DateChangeList
                 }
                 if (rwd != null && rwd.rows != null && !rwd.rows.isEmpty()) {
                     lineGraph.updateWithGroupedDataByDate(rwd.dates, rwd.rows, this.partCodes, labels);
-                    groups = lineGraph.saveGroupedCharts(out, baseName, 1000, 240);
+                    groups = lineGraph.saveGroupedCharts(plotsOut, baseName, 1000, 240);
                     java.time.LocalDate headerDate = rwd.dates.get(rwd.dates.size() - 1);
                     dateStr = headerDate.format(df);
                 } else {
@@ -261,7 +265,7 @@ public class Braille extends JPanel implements com.studentgui.app.DateChangeList
                     }
                     rowsList.add(latest);
                     lineGraph.updateWithGroupedData(rowsList, this.partCodes);
-                    groups = lineGraph.saveGroupedCharts(out, baseName, 1000, 240);
+                    groups = lineGraph.saveGroupedCharts(plotsOut, baseName, 1000, 240);
                 }
 
                 if (groups == null) {
@@ -273,8 +277,10 @@ public class Braille extends JPanel implements com.studentgui.app.DateChangeList
                     md.append("## ").append(e.getKey()).append("\n\n");
                     md.append("![](./").append(e.getValue().getFileName().toString()).append(")\n\n");
                 }
-                java.nio.file.Path mdFile = out.resolve(baseName + ".md");
-                java.nio.file.Files.writeString(mdFile, md.toString(), java.nio.charset.StandardCharsets.UTF_8);
+                java.nio.file.Path mdFile = reportsOut.resolve(baseName + ".md");
+                // images live in ../plots relative to reports
+                String mdText = md.toString().replace("![](./", "![](../plots/");
+                java.nio.file.Files.writeString(mdFile, mdText, java.nio.charset.StandardCharsets.UTF_8);
 
                 // HTML report using shared palette
                 try {
@@ -315,8 +321,9 @@ public class Braille extends JPanel implements com.studentgui.app.DateChangeList
                         html.append("</div>");
                     }
                     html.append("</body></html>");
-                    java.nio.file.Path htmlFile = out.resolve(baseName + ".html");
-                    java.nio.file.Files.writeString(htmlFile, html.toString(), java.nio.charset.StandardCharsets.UTF_8);
+                    java.nio.file.Path htmlFile = reportsOut.resolve(baseName + ".html");
+                    String htmlStr = html.toString().replace("src=\"./", "src=\"../plots/");
+                    java.nio.file.Files.writeString(htmlFile, htmlStr, java.nio.charset.StandardCharsets.UTF_8);
                     LOG.info("Wrote Braille HTML session report {}", htmlFile);
                 } catch (java.io.IOException ioex) {
                     LOG.warn("Unable to write Braille HTML report: {}", ioex.toString());
@@ -357,7 +364,7 @@ public class Braille extends JPanel implements com.studentgui.app.DateChangeList
     }
 
     @Override
-    public void dateChanged(LocalDate newDate) {
+    public void dateChanged(final LocalDate newDate) {
         this.dateParam = newDate;
         SwingUtilities.invokeLater(() -> {
             refreshGraph();
@@ -366,7 +373,7 @@ public class Braille extends JPanel implements com.studentgui.app.DateChangeList
     }
     
     @Override
-    public void studentChanged(String newStudent) {
+    public void studentChanged(final String newStudent) {
         this.studentNameParam = newStudent != null ? newStudent : "Unknown Student";
         SwingUtilities.invokeLater(() -> {
             refreshGraph();

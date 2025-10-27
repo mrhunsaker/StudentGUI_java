@@ -42,7 +42,7 @@ public class Observations extends JPanel {
      * @param date        the date this observation applies to
      */
     public Observations(String studentName, LocalDate date) {
-        this.studentNameParam = studentName;
+    this.studentNameParam = (studentName == null || studentName.trim().isEmpty()) ? com.studentgui.apphelpers.Helpers.defaultStudent() : studentName;
         this.dateParam = date;
         setLayout(new BorderLayout());
 
@@ -107,7 +107,9 @@ public class Observations extends JPanel {
             com.studentgui.apphelpers.UiNotifier.show("Observations saved.");
             com.studentgui.apphelpers.dto.NotesPayload payload = new com.studentgui.apphelpers.dto.NotesPayload(sessionId, notes);
             java.nio.file.Path jsonOut = com.studentgui.apphelpers.SessionJsonWriter.writeSessionJson(this.studentNameParam, "Observations", payload, sessionId);
-            if (jsonOut == null) LOG.warn("Unable to save Observations session JSON for sessionId={}", sessionId);
+            if (jsonOut == null) {
+                LOG.warn("Unable to save Observations session JSON for sessionId={}", sessionId);
+            }
         } catch (SQLException ex) {
             LOG.error("Error saving observations", ex);
             JOptionPane.showMessageDialog(this, "Database error saving observations: " + ex.getMessage(), "Database error", JOptionPane.ERROR_MESSAGE);

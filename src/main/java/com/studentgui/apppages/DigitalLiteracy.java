@@ -54,8 +54,8 @@ public class DigitalLiteracy extends JPanel implements com.studentgui.app.DateCh
      * @param date session date to associate with persisted progress
      * @param lineGraph shared graph component used to display recent results
      */
-    public DigitalLiteracy(String studentName, LocalDate date, JLineGraph lineGraph) {
-        this.studentNameParam = studentName;
+    public DigitalLiteracy(final String studentName, final LocalDate date, final JLineGraph lineGraph) {
+    this.studentNameParam = (studentName == null || studentName.trim().isEmpty()) ? com.studentgui.apphelpers.Helpers.defaultStudent() : studentName;
         this.dateParam = date;
         this.lineGraph = lineGraph; // Use the passed in graph instance
         setLayout(new BorderLayout());
@@ -217,10 +217,14 @@ public class DigitalLiteracy extends JPanel implements com.studentgui.app.DateCh
             com.studentgui.apphelpers.UiNotifier.show("Digital Literacy data saved.");
             com.studentgui.apphelpers.dto.AssessmentPayload payload = new com.studentgui.apphelpers.dto.AssessmentPayload(sessionId, codes, scores);
             java.nio.file.Path jsonOut = com.studentgui.apphelpers.SessionJsonWriter.writeSessionJson(this.studentNameParam, "DigitalLiteracy", payload, sessionId);
-            if (jsonOut == null) LOG.warn("Unable to save DigitalLiteracy session JSON for sessionId={}", sessionId);
+            if (jsonOut == null) {
+                LOG.warn("Unable to save DigitalLiteracy session JSON for sessionId={}", sessionId);
+            }
             try {
-                java.nio.file.Path out = com.studentgui.apphelpers.Helpers.APP_HOME.resolve("StudentDataFiles").resolve(com.studentgui.apphelpers.Helpers.safeName(this.studentNameParam)).resolve("plots");
-                java.nio.file.Files.createDirectories(out);
+                java.nio.file.Path plotsOut = com.studentgui.apphelpers.Helpers.studentPlotsDir(this.studentNameParam);
+                java.nio.file.Path reportsOut = com.studentgui.apphelpers.Helpers.studentReportsDir(this.studentNameParam);
+                java.nio.file.Files.createDirectories(plotsOut);
+                java.nio.file.Files.createDirectories(reportsOut);
                 java.time.format.DateTimeFormatter df = java.time.format.DateTimeFormatter.ISO_DATE;
                 String dateStr = this.dateParam != null ? this.dateParam.format(df) : java.time.LocalDate.now().toString();
                 String baseName = "DigitalLiteracy-" + sessionId + "-" + dateStr;
@@ -233,7 +237,7 @@ public class DigitalLiteracy extends JPanel implements com.studentgui.app.DateCh
                 }
                 if (rwd != null && rwd.rows != null && !rwd.rows.isEmpty()) {
                     lineGraph.updateWithGroupedDataByDate(rwd.dates, rwd.rows, codes, labels);
-                    groups = lineGraph.saveGroupedCharts(out, baseName, 1000, 240);
+                    groups = lineGraph.saveGroupedCharts(plotsOut, baseName, 1000, 240);
                     java.time.LocalDate headerDate = rwd.dates.get(rwd.dates.size() - 1);
                     dateStr = headerDate.format(df);
                 } else {
@@ -242,17 +246,19 @@ public class DigitalLiteracy extends JPanel implements com.studentgui.app.DateCh
                     for (int v : scores) latest.add(v);
                     rowsList.add(latest);
                     lineGraph.updateWithGroupedData(rowsList, codes);
-                    groups = lineGraph.saveGroupedCharts(out, baseName, 1000, 240);
+                    groups = lineGraph.saveGroupedCharts(plotsOut, baseName, 1000, 240);
                 }
 
-                if (groups == null) groups = new java.util.LinkedHashMap<>();
+                if (groups == null) {
+                    groups = new java.util.LinkedHashMap<>();
+                }
                 StringBuilder md = new StringBuilder();
                 md.append("# ").append(this.studentNameParam == null ? "Unknown Student" : this.studentNameParam).append(" - ").append(dateStr).append("\n\n");
                 for (java.util.Map.Entry<String, java.nio.file.Path> e : groups.entrySet()) {
                     md.append("## ").append(e.getKey()).append("\n\n");
-                    md.append("![](./").append(e.getValue().getFileName().toString()).append(")\n\n");
+                    md.append("![](../plots/").append(e.getValue().getFileName().toString()).append(")\n\n");
                 }
-                java.nio.file.Path mdFile = out.resolve(baseName + ".md");
+                java.nio.file.Path mdFile = reportsOut.resolve(baseName + ".md");
                 java.nio.file.Files.writeString(mdFile, md.toString(), java.nio.charset.StandardCharsets.UTF_8);
 
                 try {
@@ -273,7 +279,7 @@ public class DigitalLiteracy extends JPanel implements com.studentgui.app.DateCh
                         String grp = e2.getKey();
                         String imgName = e2.getValue().getFileName().toString();
                         html.append("<h2>").append(grp).append("</h2>");
-                        html.append("<div class=\"plot\"><img src=\"./").append(imgName).append("\" alt=\"").append(grp).append("\"></div>");
+                        html.append("<div class=\"plot\"><img src=\"../plots/").append(imgName).append("\" alt=\"").append(grp).append("\"></div>");
                         java.util.List<Integer> idxs = groupsIdx.getOrDefault(grp, new java.util.ArrayList<>());
                         html.append("<div class=\"legend\">");
                         for (int s = 0; s < idxs.size(); s++) {
@@ -293,7 +299,7 @@ public class DigitalLiteracy extends JPanel implements com.studentgui.app.DateCh
                         html.append("</div>");
                     }
                     html.append("</body></html>");
-                    java.nio.file.Path htmlFile = out.resolve(baseName + ".html");
+                    java.nio.file.Path htmlFile = reportsOut.resolve(baseName + ".html");
                     java.nio.file.Files.writeString(htmlFile, html.toString(), java.nio.charset.StandardCharsets.UTF_8);
                     LOG.info("Wrote DigitalLiteracy HTML session report {}", htmlFile);
                 } catch (java.io.IOException ioex) {
@@ -335,7 +341,7 @@ public class DigitalLiteracy extends JPanel implements com.studentgui.app.DateCh
     }
 
     @Override
-    public void dateChanged(LocalDate newDate) {
+    public void dateChanged(final LocalDate newDate) {
         this.dateParam = newDate;
         SwingUtilities.invokeLater(() -> {
             refreshGraph();
@@ -344,7 +350,7 @@ public class DigitalLiteracy extends JPanel implements com.studentgui.app.DateCh
     }
 
     @Override
-    public void studentChanged(String newStudent) {
+    public void studentChanged(final String newStudent) {
         this.studentNameParam = newStudent;
         SwingUtilities.invokeLater(() -> {
             refreshGraph();
