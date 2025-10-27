@@ -5,10 +5,10 @@ import java.awt.FlowLayout;
 import java.awt.Frame;
 
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JCheckBox;
 import javax.swing.JTextField;
 
 import com.studentgui.apphelpers.Settings;
@@ -22,6 +22,13 @@ import com.studentgui.apphelpers.Settings;
 public final class PreferencesDialog {
     private PreferencesDialog() { throw new AssertionError(); }
 
+    /**
+     * Show the modal preferences dialog. The dialog persists changes to
+     * {@link com.studentgui.apphelpers.Settings} and notifies runtime
+     * listeners via {@link Main#notifySettingsChanged()}.
+     *
+     * @param owner optional parent frame for dialog positioning
+     */
     public static void showDialog(final Frame owner) {
         final JDialog dlg = new JDialog(owner, "Preferences", true);
         dlg.setLayout(new BorderLayout());

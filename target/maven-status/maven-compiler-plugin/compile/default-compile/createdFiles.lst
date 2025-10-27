@@ -19,6 +19,7 @@ com\studentgui\apphelpers\dto\ContactPayload.class
 com\studentgui\apptheming\Theme$13.class
 com\studentgui\test\BrailleSmokeTest.class
 com\studentgui\tools\QueryStudentData.class
+.gitkeep
 com\studentgui\apppages\Homepage.class
 com\studentgui\apphelpers\SqlGenerate.class
 com\studentgui\apphelpers\UiNotifier.class
@@ -29,8 +30,8 @@ com\studentgui\apptheming\Theme$4.class
 com\studentgui\apppages\IOS.class
 com\studentgui\tools\SmokeTest.class
 com\studentgui\apptheming\Theme$16.class
-com\studentgui\apppages\CVI.class
 com\studentgui\apphelpers\PythonPlotter.class
+com\studentgui\apppages\CVI.class
 com\studentgui\apppages\Keyboarding.class
 com\studentgui\tools\ProgrammaticPageSaveTest.class
 com\studentgui\apptheming\Theme$1.class
@@ -42,8 +43,8 @@ com\studentgui\apphelpers\dto\KeyboardingPayload.class
 com\studentgui\apptheming\Theme$8.class
 com\studentgui\apptheming\Theme$2.class
 com\studentgui\apptheming\Theme$15.class
-com\studentgui\apppages\ContactLog.class
 com\studentgui\apphelpers\Database$ResultsWithDates.class
+com\studentgui\apppages\ContactLog.class
 com\studentgui\apphelpers\dto\AssessmentPayload.class
 com\studentgui\apphelpers\Database.class
 com\studentgui\apptheming\Theme$9.class

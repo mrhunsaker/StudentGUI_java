@@ -306,6 +306,12 @@ public class Database {
     /**
      * Fetch the latest assessment rows along with their session dates.
      * Rows and dates are ordered oldest-first to facilitate time series plotting.
+     *
+     * @param studentName student display name to filter results for
+     * @param progressTypeName progress type display name (e.g., "Braille")
+     * @param limit maximum number of recent sessions to return
+     * @return ResultsWithDates holding an ordered list of session dates and parallel rows of scores
+     * @throws SQLException on database errors
      */
     public static ResultsWithDates fetchLatestAssessmentResultsWithDates(final String studentName, final String progressTypeName, final int limit) throws SQLException {
         java.util.List<java.util.List<Integer>> result = new ArrayList<>();

@@ -167,22 +167,42 @@ public class Main {
     // Settings change listeners
     private static final java.util.List<SettingsChangeListener> settingsListeners = new java.util.concurrent.CopyOnWriteArrayList<>();
 
+    /**
+     * Register a listener to be notified when application settings change.
+     * Implementations should read values from {@link com.studentgui.apphelpers.Settings}
+     * when {@link SettingsChangeListener#settingsChanged()} is invoked.
+     *
+     * @param l listener to register (ignored when null)
+     */
     public static void addSettingsChangeListener(final SettingsChangeListener l) {
         if (l != null) {
             settingsListeners.add(l);
         }
     }
 
+    /**
+     * Remove a previously registered settings change listener.
+     *
+     * @param l listener to remove (ignored when null)
+     */
     public static void removeSettingsChangeListener(final SettingsChangeListener l) {
         if (l != null) {
             settingsListeners.remove(l);
         }
     }
 
+    /**
+     * Clear all registered settings change listeners.
+     */
     public static void clearSettingsChangeListeners() {
         settingsListeners.clear();
     }
 
+    /**
+     * Notify all registered settings listeners that application settings have been changed.
+     * This is typically invoked after persisting preferences through
+     * {@link com.studentgui.apphelpers.Settings}.
+     */
     public static void notifySettingsChanged() {
         for (SettingsChangeListener l : settingsListeners) {
             try {
