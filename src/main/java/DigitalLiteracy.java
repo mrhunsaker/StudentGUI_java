@@ -1,2 +1,2 @@
-// Root-level placeholder for DigitalLiteracy.java - replaced by packaged class com.studentgui.apppages.DigitalLiteracy
-import javax.swing.*;
+// Removed root-level placeholder for DigitalLiteracy.java.
+// The canonical class lives in package com.studentgui.apppages and is the source of truth.

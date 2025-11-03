@@ -1,5 +1,7 @@
 com\studentgui\apphelpers\SqlGenerateTest.class
 com\studentgui\apphelpers\SessionJsonWriterTest.class
+com\studentgui\apppages\JLineGraphDeterministicJitterTest.class
+com\studentgui\test\ExportBrailleReportsTest.class
 com\studentgui\apphelpers\DatabaseContactLogTest.class
 com\studentgui\test\BrailleDatabaseTest.class
 com\studentgui\test\DatabaseTest.class

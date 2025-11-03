@@ -1,1 +1,2 @@
-// Root-level placeholder for Keyboarding.java - replaced by packaged class com.studentgui.apppages.Keyboarding
+// Removed root-level placeholder for Keyboarding.java.
+// The canonical class lives in package com.studentgui.apppages and is the source of truth.

@@ -29,26 +29,26 @@ public class ContactPayload implements SessionPayload {
     /**
      * Create a contact payload.
      *
-     * @param sessionId database session id
-     * @param guardian guardian/parent name
-     * @param method method of contact (Phone/Email/etc)
-     * @param phone phone number
-     * @param email email address
-     * @param response brief response summary
-     * @param general high-level general notes
-     * @param specific specific action items or points
-     * @param notes full notes text
+    * @param sessionIdParam database session id
+    * @param guardianParam guardian/parent name
+    * @param methodParam method of contact (Phone/Email/etc)
+    * @param phoneParam phone number
+    * @param emailParam email address
+    * @param responseParam brief response summary
+    * @param generalParam high-level general notes
+    * @param specificParam specific action items or points
+    * @param notesParam full notes text
      */
-    public ContactPayload(int sessionId, String guardian, String method, String phone, String email, String response, String general, String specific, String notes) {
-        this.sessionId = sessionId;
-        this.guardian = guardian;
-        this.method = method;
-        this.phone = phone;
-        this.email = email;
-        this.response = response;
-        this.general = general;
-        this.specific = specific;
-        this.notes = notes;
+    public ContactPayload(final int sessionIdParam, final String guardianParam, final String methodParam, final String phoneParam, final String emailParam, final String responseParam, final String generalParam, final String specificParam, final String notesParam) {
+        this.sessionId = sessionIdParam;
+        this.guardian = guardianParam;
+        this.method = methodParam;
+        this.phone = phoneParam;
+        this.email = emailParam;
+        this.response = responseParam;
+        this.general = generalParam;
+        this.specific = specificParam;
+        this.notes = notesParam;
     }
 
     @Override

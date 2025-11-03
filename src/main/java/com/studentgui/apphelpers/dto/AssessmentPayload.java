@@ -19,14 +19,14 @@ public class AssessmentPayload implements SessionPayload {
     /**
      * Create an assessment payload.
      *
-     * @param sessionId numeric DB session id
-     * @param codes array of part codes
-     * @param scores array of scores
+    * @param sessionIdParam numeric DB session id
+    * @param codesParam array of part codes
+    * @param scoresParam array of scores
      */
-    public AssessmentPayload(int sessionId, String[] codes, int[] scores) {
-        this.sessionId = sessionId;
-        this.codes = codes;
-        this.scores = scores;
+    public AssessmentPayload(final int sessionIdParam, final String[] codesParam, final int[] scoresParam) {
+        this.sessionId = sessionIdParam;
+        this.codes = codesParam;
+        this.scores = scoresParam;
     }
 
     @Override

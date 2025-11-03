@@ -40,10 +40,9 @@ public class Observations extends JPanel {
      *
      * @param studentName student display name (may be null when no student selected)
      * @param date        the date this observation applies to
-     * @param graph       a preconfigured JLineGraph instance shown under the form
      */
-    public Observations(String studentName, LocalDate date, JLineGraph graph) {
-        this.studentNameParam = studentName;
+    public Observations(String studentName, LocalDate date) {
+    this.studentNameParam = (studentName == null || studentName.trim().isEmpty()) ? com.studentgui.apphelpers.Helpers.defaultStudent() : studentName;
         this.dateParam = date;
         setLayout(new BorderLayout());
 
@@ -63,15 +62,23 @@ public class Observations extends JPanel {
     gbc.gridy=2; gbc.gridx=0; notesArea = new JTextArea(8,40); notesArea.setLineWrap(true); notesArea.setWrapStyleWord(true); notesArea.setToolTipText("Enter observational notes for the student"); notesArea.getAccessibleContext().setAccessibleName("Observations notes"); p.add(notesArea, gbc);
     notesLabel.setLabelFor(notesArea);
 
-    gbc.gridy=3; JButton submit = new JButton("Save Notes");
+    // Filler so the scroll content has room and the form is visible (prevents
+    // the shared graph in SOUTH from visually dominating the view)
+    gbc.gridy = 3; gbc.gridx = 0; gbc.gridwidth = GridBagConstraints.REMAINDER; gbc.weighty = 1.0;
+    p.add(new JPanel(), gbc);
+    gbc.weighty = 0.0; gbc.gridwidth = 1;
+
+    gbc.gridy = 4; JButton submit = new JButton("Save Notes");
     submit.addActionListener((ActionEvent e)-> saveNotes());
     submit.setMnemonic(KeyEvent.VK_S);
     submit.setToolTipText("Save observational notes (Alt+S)");
     submit.getAccessibleContext().setAccessibleName("Save Observations Notes");
+    gbc.gridx = 0; gbc.anchor = GridBagConstraints.WEST;
     p.add(submit, gbc);
+    // consume remaining columns so layout stays consistent
+    gbc.gridx = 1; gbc.gridwidth = GridBagConstraints.REMAINDER; p.add(new JPanel(), gbc);
 
-        add(scroll, BorderLayout.CENTER);
-        add(graph, BorderLayout.SOUTH);
+    add(scroll, BorderLayout.CENTER);
 
         SwingUtilities.invokeLater(()->{ p.setPreferredSize(p.getPreferredSize()); revalidate(); });
 
@@ -100,7 +107,9 @@ public class Observations extends JPanel {
             com.studentgui.apphelpers.UiNotifier.show("Observations saved.");
             com.studentgui.apphelpers.dto.NotesPayload payload = new com.studentgui.apphelpers.dto.NotesPayload(sessionId, notes);
             java.nio.file.Path jsonOut = com.studentgui.apphelpers.SessionJsonWriter.writeSessionJson(this.studentNameParam, "Observations", payload, sessionId);
-            if (jsonOut == null) LOG.warn("Unable to save Observations session JSON for sessionId={}", sessionId);
+            if (jsonOut == null) {
+                LOG.warn("Unable to save Observations session JSON for sessionId={}", sessionId);
+            }
         } catch (SQLException ex) {
             LOG.error("Error saving observations", ex);
             JOptionPane.showMessageDialog(this, "Database error saving observations: " + ex.getMessage(), "Database error", JOptionPane.ERROR_MESSAGE);

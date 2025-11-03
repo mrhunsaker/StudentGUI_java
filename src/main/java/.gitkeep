@@ -1,0 +1,3 @@
+# .gitkeep placeholder to avoid committing empty directories
+# Root-level placeholder files (e.g., Abacus.java, Braille.java) were removed
+# Packaged classes live under `com/studentgui/apppages` and are the canonical sources.

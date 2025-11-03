@@ -48,19 +48,23 @@ public class Database {
      * @return id of the existing or newly created student
      * @throws SQLException on database errors
      */
-    public static int getOrCreateStudent(String name) throws SQLException {
+    public static int getOrCreateStudent(final String name) throws SQLException {
         try (Connection c = getConnection()) {
             try (PreparedStatement ps = c.prepareStatement("SELECT id FROM Student WHERE name = ?")) {
                 ps.setString(1, name);
                 try (ResultSet rs = ps.executeQuery()) {
-                    if (rs.next()) return rs.getInt(1);
+                    if (rs.next()) {
+                        return rs.getInt(1);
+                    }
                 }
             }
             try (PreparedStatement ps = c.prepareStatement("INSERT INTO Student(name) VALUES (?)", Statement.RETURN_GENERATED_KEYS)) {
                 ps.setString(1, name);
                 ps.executeUpdate();
                 try (ResultSet keys = ps.getGeneratedKeys()) {
-                    if (keys.next()) return keys.getInt(1);
+                    if (keys.next()) {
+                        return keys.getInt(1);
+                    }
                 }
             }
         }
@@ -74,19 +78,23 @@ public class Database {
      * @return database id of the progress type
      * @throws SQLException on database errors
      */
-    public static int getOrCreateProgressType(String name) throws SQLException {
+    public static int getOrCreateProgressType(final String name) throws SQLException {
         try (Connection c = getConnection()) {
             try (PreparedStatement ps = c.prepareStatement("SELECT id FROM ProgressType WHERE name = ?")) {
                 ps.setString(1, name);
                 try (ResultSet rs = ps.executeQuery()) {
-                    if (rs.next()) return rs.getInt(1);
+                    if (rs.next()) {
+                        return rs.getInt(1);
+                    }
                 }
             }
             try (PreparedStatement ps = c.prepareStatement("INSERT INTO ProgressType(name) VALUES (?)", Statement.RETURN_GENERATED_KEYS)) {
                 ps.setString(1, name);
                 ps.executeUpdate();
                 try (ResultSet keys = ps.getGeneratedKeys()) {
-                    if (keys.next()) return keys.getInt(1);
+                    if (keys.next()) {
+                        return keys.getInt(1);
+                    }
                 }
             }
         }
@@ -101,7 +109,7 @@ public class Database {
      * @param codes array of part codes to ensure
      * @throws SQLException on database errors
      */
-    public static void ensureAssessmentParts(int progressTypeId, String[] codes) throws SQLException {
+    public static void ensureAssessmentParts(final int progressTypeId, final String[] codes) throws SQLException {
         try (Connection c = getConnection()) {
             try (PreparedStatement ps = c.prepareStatement("INSERT OR IGNORE INTO AssessmentPart(progress_type_id, code, description) VALUES (?, ?, NULL)")) {
                 for (String code : codes) {
@@ -123,12 +131,14 @@ public class Database {
      * @param allowedCodes canonical set of codes to keep
      * @throws SQLException on database errors
      */
-    public static void cleanupAssessmentParts(int progressTypeId, String[] allowedCodes) throws SQLException {
-        if (allowedCodes == null || allowedCodes.length == 0) return;
+    public static void cleanupAssessmentParts(final int progressTypeId, final String[] allowedCodes) throws SQLException {
+        if (allowedCodes == null || allowedCodes.length == 0) {
+            return;
+        }
         try (Connection c = getConnection()) {
             StringBuilder sb = new StringBuilder();
             for (int i = 0; i < allowedCodes.length; i++) {
-                if (i > 0) sb.append(',');
+                if (i > 0) { sb.append(','); }
                 sb.append('?');
             }
             String sql = "DELETE FROM AssessmentPart WHERE progress_type_id = ? AND code NOT IN (" + sb.toString() + ")";
@@ -151,7 +161,7 @@ public class Database {
      * @return generated ProgressSession id
      * @throws SQLException on database errors
      */
-    public static int createProgressSession(int studentId, int progressTypeId, LocalDate date) throws SQLException {
+    public static int createProgressSession(final int studentId, final int progressTypeId, final LocalDate date) throws SQLException {
         try (Connection c = getConnection()) {
             try (PreparedStatement ps = c.prepareStatement("INSERT INTO ProgressSession(student_id, progress_type_id, date, notes) VALUES (?, ?, ?, NULL)", Statement.RETURN_GENERATED_KEYS)) {
                 ps.setInt(1, studentId);
@@ -159,7 +169,7 @@ public class Database {
                 ps.setString(3, date.toString());
                 ps.executeUpdate();
                 try (ResultSet keys = ps.getGeneratedKeys()) {
-                    if (keys.next()) return keys.getInt(1);
+                    if (keys.next()) { return keys.getInt(1); }
                 }
             }
         }
@@ -177,8 +187,8 @@ public class Database {
      * @param scores array of integer scores
      * @throws SQLException on database errors
      */
-    public static void insertAssessmentResults(int sessionId, int progressTypeId, String[] codes, int[] scores) throws SQLException {
-        if (codes.length != scores.length) throw new IllegalArgumentException("codes and scores length mismatch");
+    public static void insertAssessmentResults(final int sessionId, final int progressTypeId, final String[] codes, final int[] scores) throws SQLException {
+        if (codes.length != scores.length) { throw new IllegalArgumentException("codes and scores length mismatch"); }
         try (Connection c = getConnection()) {
             // cache part ids
             Map<String, Integer> partIdMap = new HashMap<>();
@@ -218,35 +228,33 @@ public class Database {
      * @return list of rows, each row is a list of integer scores
      * @throws SQLException on database errors
      */
-    public static List<List<Integer>> fetchLatestAssessmentResults(String studentName, String progressTypeName, int limit) throws SQLException {
+    public static List<List<Integer>> fetchLatestAssessmentResults(final String studentName, final String progressTypeName, final int limit) throws SQLException {
         List<List<Integer>> result = new ArrayList<>();
         try (Connection c = getConnection()) {
             Integer studentId = null;
             try (PreparedStatement ps = c.prepareStatement("SELECT id FROM Student WHERE name = ?")) {
                 ps.setString(1, studentName);
                 try (ResultSet rs = ps.executeQuery()) {
-                    if (rs.next()) studentId = rs.getInt(1);
+                    if (rs.next()) { studentId = rs.getInt(1); }
                 }
             }
-            if (studentId == null) return result;
+            if (studentId == null) { return result; }
 
             Integer progressTypeId = null;
             try (PreparedStatement ps = c.prepareStatement("SELECT id FROM ProgressType WHERE name = ?")) {
                 ps.setString(1, progressTypeName);
                 try (ResultSet rs = ps.executeQuery()) {
-                    if (rs.next()) progressTypeId = rs.getInt(1);
+                    if (rs.next()) { progressTypeId = rs.getInt(1); }
                 }
             }
-            if (progressTypeId == null) return result;
+            if (progressTypeId == null) { return result; }
 
             // get parts in canonical order (by id)
             List<Integer> partIds = new ArrayList<>();
             try (PreparedStatement ps = c.prepareStatement("SELECT id, code FROM AssessmentPart WHERE progress_type_id = ? ORDER BY id ASC")) {
                 ps.setInt(1, progressTypeId);
                 try (ResultSet rs = ps.executeQuery()) {
-                    while (rs.next()) {
-                        partIds.add(rs.getInt("id"));
-                    }
+                    while (rs.next()) { partIds.add(rs.getInt("id")); }
                 }
             }
 
@@ -257,7 +265,7 @@ public class Database {
                 ps.setInt(2, progressTypeId);
                 ps.setInt(3, limit);
                 try (ResultSet rs = ps.executeQuery()) {
-                    while (rs.next()) sessionIds.add(rs.getInt(1));
+                    while (rs.next()) { sessionIds.add(rs.getInt(1)); }
                 }
             }
 
@@ -284,6 +292,127 @@ public class Database {
     }
 
     /**
+     * Simple, immutable holder for time-series assessment results.
+     *
+     * <p>Contains a chronologically ordered list of session {@code dates}
+     * and a parallel list of integer score rows. Each entry in {@code rows}
+     * corresponds to the parts for a progress type in canonical order.
+     */
+    public static class ResultsWithDates {
+        /**
+         * Ordered session dates (oldest first). Can be empty when no sessions exist.
+         */
+        public final java.util.List<java.time.LocalDate> dates;
+
+        /**
+         * Parallel rows of integer scores. Each inner list corresponds to the
+         * assessment parts for a single session in canonical part order. May be
+         * empty when there are no sessions.
+         */
+        public final java.util.List<java.util.List<Integer>> rows;
+
+        /**
+         * Create a ResultsWithDates instance.
+         *
+         * @param dates ordered session dates (oldest-first)
+         * @param rows parallel list of score rows matching {@code dates}
+         */
+        public ResultsWithDates(java.util.List<java.time.LocalDate> dates, java.util.List<java.util.List<Integer>> rows) {
+            this.dates = dates;
+            this.rows = rows;
+        }
+    }
+
+    /**
+     * Fetch the latest assessment rows along with their session dates.
+     * Rows and dates are ordered oldest-first to facilitate time series plotting.
+     *
+     * @param studentName student display name to filter results for
+     * @param progressTypeName progress type display name (e.g., "Braille")
+     * @param limit maximum number of recent sessions to return
+     * @return ResultsWithDates holding an ordered list of session dates and parallel rows of scores
+     * @throws SQLException on database errors
+     */
+    public static ResultsWithDates fetchLatestAssessmentResultsWithDates(final String studentName, final String progressTypeName, final int limit) throws SQLException {
+        java.util.List<java.util.List<Integer>> result = new ArrayList<>();
+        java.util.List<java.time.LocalDate> dates = new ArrayList<>();
+        try (Connection c = getConnection()) {
+            Integer studentId = null;
+            try (PreparedStatement ps = c.prepareStatement("SELECT id FROM Student WHERE name = ?")) {
+                ps.setString(1, studentName);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        studentId = rs.getInt(1);
+                    }
+                }
+            }
+            if (studentId == null) { return new ResultsWithDates(dates, result); }
+
+            Integer progressTypeId = null;
+            try (PreparedStatement ps = c.prepareStatement("SELECT id FROM ProgressType WHERE name = ?")) {
+                ps.setString(1, progressTypeName);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        progressTypeId = rs.getInt(1);
+                    }
+                }
+            }
+            if (progressTypeId == null) {
+                return new ResultsWithDates(dates, result);
+            }
+
+            // get parts in canonical order (by id)
+            java.util.List<Integer> partIds = new ArrayList<>();
+            try (PreparedStatement ps = c.prepareStatement("SELECT id, code FROM AssessmentPart WHERE progress_type_id = ? ORDER BY id ASC")) {
+                ps.setInt(1, progressTypeId);
+                try (ResultSet rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        partIds.add(rs.getInt("id"));
+                    }
+                }
+            }
+
+            // get latest session ids and dates for this student and progress type
+            java.util.List<java.lang.Integer> sessionIds = new ArrayList<>();
+            java.util.List<java.time.LocalDate> sessionDates = new ArrayList<>();
+            try (PreparedStatement ps = c.prepareStatement("SELECT id, date FROM ProgressSession WHERE student_id = ? AND progress_type_id = ? ORDER BY id DESC LIMIT ?")) {
+                ps.setInt(1, studentId); ps.setInt(2, progressTypeId); ps.setInt(3, limit);
+                try (ResultSet rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        sessionIds.add(rs.getInt("id"));
+                        sessionDates.add(java.time.LocalDate.parse(rs.getString("date")));
+                    }
+                }
+            }
+
+            // We want chronological order (oldest first)
+            java.util.Collections.reverse(sessionIds);
+            java.util.Collections.reverse(sessionDates);
+
+            // For each session, fetch scores mapped to parts and append row
+            for (Integer sid : sessionIds) {
+                Map<Integer, Integer> scoreByPart = new HashMap<>();
+                try (PreparedStatement ps = c.prepareStatement("SELECT part_id, score FROM AssessmentResult WHERE session_id = ?")) {
+                    ps.setInt(1, sid);
+                    try (ResultSet rs = ps.executeQuery()) {
+                        while (rs.next()) {
+                            scoreByPart.put(rs.getInt("part_id"), rs.getInt("score"));
+                        }
+                    }
+                }
+                java.util.List<Integer> row = new ArrayList<>();
+                for (Integer pid : partIds) {
+                    Integer s = scoreByPart.get(pid);
+                    row.add(s == null ? 0 : s);
+                }
+                result.add(row);
+            }
+            dates.addAll(sessionDates);
+        }
+        return new ResultsWithDates(dates, result);
+    }
+
+    /**
      * Insert a keyboarding-specific result linked to a ProgressSession.
      *
      * @param sessionId existing session id
@@ -293,7 +422,7 @@ public class Database {
      * @param accuracy accuracy percent
      * @throws SQLException on database errors
      */
-    public static void insertKeyboardingResult(int sessionId, String program, String topic, int speed, int accuracy) throws SQLException {
+    public static void insertKeyboardingResult(final int sessionId, final String program, final String topic, final int speed, final int accuracy) throws SQLException {
         try (Connection c = getConnection()) {
             try (PreparedStatement ps = c.prepareStatement("INSERT INTO KeyboardingResult(session_id, program, topic, speed, accuracy) VALUES (?, ?, ?, ?, ?)")) {
                 ps.setInt(1, sessionId);
@@ -313,7 +442,7 @@ public class Database {
      * @param notes free-form notes text
      * @throws SQLException on database errors
      */
-    public static void saveSessionNotes(int sessionId, String notes) throws SQLException {
+    public static void saveSessionNotes(final int sessionId, final String notes) throws SQLException {
         try (Connection c = getConnection()) {
             try (PreparedStatement ps = c.prepareStatement("UPDATE ProgressSession SET notes = ? WHERE id = ?")) {
                 ps.setString(1, notes);
@@ -340,7 +469,7 @@ public class Database {
      * @param contactNotes free-form notes
      * @throws SQLException on database errors
      */
-    public static void saveContactLog(int sessionId, String studentName, String date, String guardianName, String contactMethod, String phoneNumber, String emailAddress, String contactResponse, String contactGeneral, String contactSpecific, String contactNotes) throws SQLException {
+    public static void saveContactLog(final int sessionId, final String studentName, final String date, final String guardianName, final String contactMethod, final String phoneNumber, final String emailAddress, final String contactResponse, final String contactGeneral, final String contactSpecific, final String contactNotes) throws SQLException {
         try (Connection c = getConnection()) {
             try (PreparedStatement ps = c.prepareStatement("INSERT OR REPLACE INTO ContactLog(session_id, student_name, date, guardian_name, contact_method, phone_number, email_address, contact_response, contact_general, contact_specific, contact_notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)") ) {
                 ps.setInt(1, sessionId);
@@ -367,36 +496,48 @@ public class Database {
     * @return map of contact log columns to values or null when not found
     * @throws SQLException on database errors
      */
-    public static com.studentgui.apphelpers.dto.ContactPayload fetchLatestContactLog(String studentName) throws SQLException {
+    public static com.studentgui.apphelpers.dto.ContactPayload fetchLatestContactLog(final String studentName) throws SQLException {
         try (Connection c = getConnection()) {
             Integer studentId = null;
             try (PreparedStatement ps = c.prepareStatement("SELECT id FROM Student WHERE name = ?")) {
                 ps.setString(1, studentName);
                 try (ResultSet rs = ps.executeQuery()) {
-                    if (rs.next()) studentId = rs.getInt(1);
+                    if (rs.next()) {
+                        studentId = rs.getInt(1);
+                    }
                 }
             }
-            if (studentId == null) return null;
+            if (studentId == null) {
+                return null;
+            }
 
             // Find the latest session id for ProgressType 'ContactLog'
             Integer ptId = null;
             try (PreparedStatement ps = c.prepareStatement("SELECT id FROM ProgressType WHERE name = ?")) {
                 ps.setString(1, "ContactLog");
                 try (ResultSet rs = ps.executeQuery()) {
-                    if (rs.next()) ptId = rs.getInt(1);
+                    if (rs.next()) {
+                        ptId = rs.getInt(1);
+                    }
                 }
             }
-            if (ptId == null) return null;
+            if (ptId == null) {
+                return null;
+            }
 
             Integer sessionId = null;
             try (PreparedStatement ps = c.prepareStatement("SELECT id FROM ProgressSession WHERE student_id = ? AND progress_type_id = ? ORDER BY id DESC LIMIT 1")) {
                 ps.setInt(1, studentId);
                 ps.setInt(2, ptId);
                 try (ResultSet rs = ps.executeQuery()) {
-                    if (rs.next()) sessionId = rs.getInt(1);
+                    if (rs.next()) {
+                        sessionId = rs.getInt(1);
+                    }
                 }
             }
-            if (sessionId == null) return null;
+            if (sessionId == null) {
+                return null;
+            }
 
             try (PreparedStatement ps = c.prepareStatement("SELECT student_name, date, guardian_name, contact_method, phone_number, email_address, contact_response, contact_general, contact_specific, contact_notes FROM ContactLog WHERE session_id = ? ORDER BY id DESC LIMIT 1")) {
                 ps.setInt(1, sessionId);

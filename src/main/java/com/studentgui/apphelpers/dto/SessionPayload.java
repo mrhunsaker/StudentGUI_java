@@ -5,6 +5,8 @@ package com.studentgui.apphelpers.dto;
  */
 public interface SessionPayload {
     /**
+     * Return the database session id associated with this payload.
+     *
      * @return the database session id for this payload (may be 0 when unknown)
      */
     int getSessionId();

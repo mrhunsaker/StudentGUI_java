@@ -2,7 +2,11 @@ D:\GitHubRepos\StudentGUI_java\src\main\java\Abacus.java
 D:\GitHubRepos\StudentGUI_java\src\main\java\Braille.java
 D:\GitHubRepos\StudentGUI_java\src\main\java\BrailleNote.java
 D:\GitHubRepos\StudentGUI_java\src\main\java\BrailleSense.java
+D:\GitHubRepos\StudentGUI_java\src\main\java\com\studentgui\app\DateChangeListener.java
 D:\GitHubRepos\StudentGUI_java\src\main\java\com\studentgui\app\Main.java
+D:\GitHubRepos\StudentGUI_java\src\main\java\com\studentgui\app\PreferencesDialog.java
+D:\GitHubRepos\StudentGUI_java\src\main\java\com\studentgui\app\SettingsChangeListener.java
+D:\GitHubRepos\StudentGUI_java\src\main\java\com\studentgui\app\StudentChangeListener.java
 D:\GitHubRepos\StudentGUI_java\src\main\java\com\studentgui\apphelpers\Database.java
 D:\GitHubRepos\StudentGUI_java\src\main\java\com\studentgui\apphelpers\dto\AssessmentPayload.java
 D:\GitHubRepos\StudentGUI_java\src\main\java\com\studentgui\apphelpers\dto\ContactPayload.java
@@ -31,9 +35,12 @@ D:\GitHubRepos\StudentGUI_java\src\main\java\com\studentgui\apppages\Observation
 D:\GitHubRepos\StudentGUI_java\src\main\java\com\studentgui\apppages\ScreenReader.java
 D:\GitHubRepos\StudentGUI_java\src\main\java\com\studentgui\apppages\SessionNotes.java
 D:\GitHubRepos\StudentGUI_java\src\main\java\com\studentgui\apptheming\Theme.java
+D:\GitHubRepos\StudentGUI_java\src\main\java\com\studentgui\bootstrap\Bootstrap.java
 D:\GitHubRepos\StudentGUI_java\src\main\java\com\studentgui\test\BrailleSmokeTest.java
 D:\GitHubRepos\StudentGUI_java\src\main\java\com\studentgui\tools\GroupedSmoke.java
 D:\GitHubRepos\StudentGUI_java\src\main\java\com\studentgui\tools\ProgrammaticPageSaveTest.java
+D:\GitHubRepos\StudentGUI_java\src\main\java\com\studentgui\tools\QueryStudentData.java
+D:\GitHubRepos\StudentGUI_java\src\main\java\com\studentgui\tools\RenderStudentProgress.java
 D:\GitHubRepos\StudentGUI_java\src\main\java\com\studentgui\tools\SmokeTest.java
 D:\GitHubRepos\StudentGUI_java\src\main\java\com\studentgui\uicomp\PhaseScoreField.java
 D:\GitHubRepos\StudentGUI_java\src\main\java\CVI.java

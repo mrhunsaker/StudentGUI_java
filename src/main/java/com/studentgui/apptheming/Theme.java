@@ -48,7 +48,7 @@ public class Theme {
         // Home
         JMenuItem home = new JMenuItem(new AbstractAction("Home") {
             @Override
-            public void actionPerformed(ActionEvent e) { Main.showPage("homepage", null); }
+            public void actionPerformed(final ActionEvent e) { Main.showPage("homepage", null); }
         });
         home.setMnemonic('H');
         home.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_H, InputEvent.CTRL_DOWN_MASK | InputEvent.ALT_DOWN_MASK));
@@ -61,7 +61,7 @@ public class Theme {
         // Tactile section (alphabetical)
         JMenu tactile = new JMenu("Tactile");
         JMenuItem abacus = new JMenuItem(new AbstractAction("Abacus") {
-            @Override public void actionPerformed(ActionEvent e) { Main.showPage("abacus", null); }
+            @Override public void actionPerformed(final ActionEvent e) { Main.showPage("abacus", null); }
         });
         abacus.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_A, InputEvent.CTRL_DOWN_MASK | InputEvent.ALT_DOWN_MASK));
         abacus.setIcon(makeIcon(new Color(0xF5A623), 12));
@@ -70,7 +70,7 @@ public class Theme {
         tactile.add(abacus);
 
         JMenuItem braille = new JMenuItem(new AbstractAction("Braille") {
-            @Override public void actionPerformed(ActionEvent e) { Main.showPage("braille", null); }
+            @Override public void actionPerformed(final ActionEvent e) { Main.showPage("braille", null); }
         });
         braille.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_B, InputEvent.CTRL_DOWN_MASK | InputEvent.ALT_DOWN_MASK));
         braille.setIcon(makeIcon(new Color(0x50E3C2), 12));
@@ -84,7 +84,7 @@ public class Theme {
         // Technology section (alphabetical)
         JMenu tech = new JMenu("Technology");
         JMenuItem brailleNote = new JMenuItem(new AbstractAction("BrailleNote Touch") {
-            @Override public void actionPerformed(ActionEvent e) { Main.showPage("braillenote", null); }
+            @Override public void actionPerformed(final ActionEvent e) { Main.showPage("braillenote", null); }
         });
         brailleNote.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_G, InputEvent.CTRL_DOWN_MASK | InputEvent.ALT_DOWN_MASK));
         brailleNote.setIcon(makeIcon(new Color(0x7B61FF), 12));
@@ -93,7 +93,7 @@ public class Theme {
         tech.add(brailleNote);
 
         JMenuItem brailleSense = new JMenuItem(new AbstractAction("Braille Sense") {
-            @Override public void actionPerformed(ActionEvent e) { Main.showPage("braillesense", null); }
+            @Override public void actionPerformed(final ActionEvent e) { Main.showPage("braillesense", null); }
         });
         brailleSense.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_DOWN_MASK | InputEvent.ALT_DOWN_MASK));
         brailleSense.setIcon(makeIcon(new Color(0xF8E71C), 12));
@@ -102,7 +102,7 @@ public class Theme {
         tech.add(brailleSense);
 
         JMenuItem dl = new JMenuItem(new AbstractAction("Digital Literacy") {
-            @Override public void actionPerformed(ActionEvent e) { Main.showPage("digitalliteracy", null); }
+            @Override public void actionPerformed(final ActionEvent e) { Main.showPage("digitalliteracy", null); }
         });
         dl.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_D, InputEvent.CTRL_DOWN_MASK | InputEvent.ALT_DOWN_MASK));
         dl.setIcon(makeIcon(new Color(0x7ED321), 12));
@@ -111,7 +111,7 @@ public class Theme {
         tech.add(dl);
 
         JMenuItem ios = new JMenuItem(new AbstractAction("iOS") {
-            @Override public void actionPerformed(ActionEvent e) { Main.showPage("ios", null); }
+            @Override public void actionPerformed(final ActionEvent e) { Main.showPage("ios", null); }
         });
         ios.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_I, InputEvent.CTRL_DOWN_MASK | InputEvent.ALT_DOWN_MASK));
         ios.setIcon(makeIcon(new Color(0x00A5E0), 12));
@@ -120,7 +120,7 @@ public class Theme {
         tech.add(ios);
 
         JMenuItem keyboarding = new JMenuItem(new AbstractAction("Keyboarding") {
-            @Override public void actionPerformed(ActionEvent e) { Main.showPage("keyboarding", null); }
+            @Override public void actionPerformed(final ActionEvent e) { Main.showPage("keyboarding", null); }
         });
         keyboarding.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_K, InputEvent.CTRL_DOWN_MASK | InputEvent.ALT_DOWN_MASK));
         keyboarding.setIcon(makeIcon(new Color(0x8B572A), 12));
@@ -129,7 +129,7 @@ public class Theme {
         tech.add(keyboarding);
 
         JMenuItem screenReader = new JMenuItem(new AbstractAction("Screen Reader") {
-            @Override public void actionPerformed(ActionEvent e) { Main.showPage("screenreader", null); }
+            @Override public void actionPerformed(final ActionEvent e) { Main.showPage("screenreader", null); }
         });
         screenReader.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_R, InputEvent.CTRL_DOWN_MASK | InputEvent.ALT_DOWN_MASK));
         screenReader.setIcon(makeIcon(new Color(0x417505), 12));
@@ -143,7 +143,7 @@ public class Theme {
         // Misc (alphabetical)
         JMenu misc = new JMenu("Misc");
         JMenuItem contactLog = new JMenuItem(new AbstractAction("Contact Log") {
-            @Override public void actionPerformed(ActionEvent e) { Main.showPage("contactlog", null); }
+            @Override public void actionPerformed(final ActionEvent e) { Main.showPage("contactlog", null); }
         });
         contactLog.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.CTRL_DOWN_MASK | InputEvent.ALT_DOWN_MASK));
         contactLog.setIcon(makeIcon(new Color(0xF18805), 12));
@@ -152,7 +152,7 @@ public class Theme {
         misc.add(contactLog);
 
         JMenuItem observations = new JMenuItem(new AbstractAction("Observations") {
-            @Override public void actionPerformed(ActionEvent e) { Main.showPage("observations", null); }
+            @Override public void actionPerformed(final ActionEvent e) { Main.showPage("observations", null); }
         });
         observations.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.CTRL_DOWN_MASK | InputEvent.ALT_DOWN_MASK));
         observations.setIcon(makeIcon(new Color(0x50E3C2), 12));
@@ -161,7 +161,7 @@ public class Theme {
         misc.add(observations);
 
         JMenuItem sessionNotes = new JMenuItem(new AbstractAction("Session Notes") {
-            @Override public void actionPerformed(ActionEvent e) { Main.showPage("sessionnotes", null); }
+            @Override public void actionPerformed(final ActionEvent e) { Main.showPage("sessionnotes", null); }
         });
         sessionNotes.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, InputEvent.CTRL_DOWN_MASK | InputEvent.ALT_DOWN_MASK));
         sessionNotes.setIcon(makeIcon(new Color(0xD0021B), 12));
@@ -181,32 +181,38 @@ public class Theme {
         javax.swing.ButtonGroup themeGroup = new javax.swing.ButtonGroup();
 
         javax.swing.JRadioButtonMenuItem light = new javax.swing.JRadioButtonMenuItem(new AbstractAction("Light") {
-            @Override public void actionPerformed(ActionEvent e) { Main.setTheme("light"); com.studentgui.apphelpers.Settings.put("theme", "light"); }
+            @Override public void actionPerformed(final ActionEvent e) { Main.setTheme("light"); com.studentgui.apphelpers.Settings.put("theme", "light"); }
         });
         light.setIcon(makeIcon(new Color(0x000000), 12));
         light.getAccessibleContext().setAccessibleName("Light theme");
         light.getAccessibleContext().setAccessibleDescription("Switch to the light theme");
-        if ("light".equalsIgnoreCase(currentTheme) || "flatlightlaf".equalsIgnoreCase(currentTheme)) light.setSelected(true);
+        if ("light".equalsIgnoreCase(currentTheme) || "flatlightlaf".equalsIgnoreCase(currentTheme)) {
+            light.setSelected(true);
+        }
         themeGroup.add(light);
         themesMenu.add(light);
 
         javax.swing.JRadioButtonMenuItem dark = new javax.swing.JRadioButtonMenuItem(new AbstractAction("Dark") {
-            @Override public void actionPerformed(ActionEvent e) { Main.setTheme("dark"); com.studentgui.apphelpers.Settings.put("theme", "dark"); }
+            @Override public void actionPerformed(final ActionEvent e) { Main.setTheme("dark"); com.studentgui.apphelpers.Settings.put("theme", "dark"); }
         });
         dark.setIcon(makeIcon(new Color(0x2C2C2C), 12));
         dark.getAccessibleContext().setAccessibleName("Dark theme");
         dark.getAccessibleContext().setAccessibleDescription("Switch to the dark theme");
-        if ("dark".equalsIgnoreCase(currentTheme) || "flatdarklaf".equalsIgnoreCase(currentTheme)) dark.setSelected(true);
+        if ("dark".equalsIgnoreCase(currentTheme) || "flatdarklaf".equalsIgnoreCase(currentTheme)) {
+            dark.setSelected(true);
+        }
         themeGroup.add(dark);
         themesMenu.add(dark);
 
         javax.swing.JRadioButtonMenuItem intellij = new javax.swing.JRadioButtonMenuItem(new AbstractAction("IntelliJ (Darcula)") {
-            @Override public void actionPerformed(ActionEvent e) { Main.setTheme("darcula"); com.studentgui.apphelpers.Settings.put("theme", "darcula"); }
+            @Override public void actionPerformed(final ActionEvent e) { Main.setTheme("darcula"); com.studentgui.apphelpers.Settings.put("theme", "darcula"); }
         });
         intellij.setIcon(makeIcon(new Color(0x4A4A4A), 12));
         intellij.getAccessibleContext().setAccessibleName("IntelliJ Darcula");
         intellij.getAccessibleContext().setAccessibleDescription("Switch to the IntelliJ Darcula theme");
-        if ("darcula".equalsIgnoreCase(currentTheme)) intellij.setSelected(true);
+        if ("darcula".equalsIgnoreCase(currentTheme)) {
+            intellij.setSelected(true);
+        }
         themeGroup.add(intellij);
         themesMenu.add(intellij);
         themesMenu.addSeparator();
@@ -219,7 +225,7 @@ public class Theme {
             for (String cls : intellijThemes) {
                 final String className = cls;
                     JMenuItem mi = new JMenuItem(new AbstractAction(simpleName(className)) {
-                    @Override public void actionPerformed(ActionEvent e) { Main.setTheme(className); com.studentgui.apphelpers.Settings.put("theme", className); }
+                    @Override public void actionPerformed(final ActionEvent e) { Main.setTheme(className); com.studentgui.apphelpers.Settings.put("theme", className); }
                 });
                 mi.setIcon(makeIcon(new Color(0x888888), 10));
                 mi.getAccessibleContext().setAccessibleName(className);
@@ -235,7 +241,7 @@ public class Theme {
         for (String cls : materialThemes) {
             final String className = cls;
             JMenuItem mi = new JMenuItem(new AbstractAction(simpleName(className)) {
-                @Override public void actionPerformed(ActionEvent e) { Main.setTheme(className); com.studentgui.apphelpers.Settings.put("theme", className); }
+                @Override public void actionPerformed(final ActionEvent e) { Main.setTheme(className); com.studentgui.apphelpers.Settings.put("theme", className); }
             });
             mi.setIcon(makeIcon(new Color(0x666666), 10));
             mi.getAccessibleContext().setAccessibleName(className);
@@ -243,6 +249,65 @@ public class Theme {
             materialGroup.add(mi);
         }
         themesMenu.add(materialGroup);
+
+        // Material Theme UI Lite (popular collection) - add specific known classes when available
+        JMenu materialLiteGroup = new JMenu("Material Theme UI Lite");
+        String[][] lite = new String[][]{
+            {"Arc Dark (Material)", "com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatArcDarkIJTheme"},
+            {"Arc Dark Contrast (Material)", "com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatArcDarkContrastIJTheme"},
+            {"Atom One Dark (Material)", "com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatAtomOneDarkIJTheme"},
+            {"Atom One Dark Contrast (Material)", "com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatAtomOneDarkContrastIJTheme"},
+            {"Atom One Light (Material)", "com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatAtomOneLightIJTheme"},
+            {"Atom One Light Contrast (Material)", "com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatAtomOneLightContrastIJTheme"},
+            {"Dracula (Material)", "com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatDraculaIJTheme"},
+            {"Dracula Contrast (Material)", "com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatDraculaContrastIJTheme"},
+            {"GitHub (Material)", "com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatGitHubIJTheme"},
+            {"GitHub Contrast (Material)", "com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatGitHubContrastIJTheme"},
+            {"GitHub Dark (Material)", "com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatGitHubDarkIJTheme"},
+            {"GitHub Dark Contrast (Material)", "com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatGitHubDarkContrastIJTheme"},
+            {"Light Owl (Material)", "com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatLightOwlIJTheme"},
+            {"Light Owl Contrast (Material)", "com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatLightOwlContrastIJTheme"},
+            {"Material Darker (Material)", "com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatMaterialDarkerIJTheme"},
+            {"Material Darker Contrast (Material)", "com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatMaterialDarkerContrastIJTheme"},
+            {"Material Deep Ocean (Material)", "com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatMaterialDeepOceanIJTheme"},
+            {"Material Deep Ocean Contrast (Material)", "com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatMaterialDeepOceanContrastIJTheme"},
+            {"Material Lighter (Material)", "com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatMaterialLighterIJTheme"},
+            {"Material Lighter Contrast (Material)", "com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatMaterialLighterContrastIJTheme"},
+            {"Material Oceanic (Material)", "com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatMaterialOceanicIJTheme"},
+            {"Material Oceanic Contrast (Material)", "com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatMaterialOceanicContrastIJTheme"},
+            {"Material Palenight (Material)", "com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatMaterialPalenightIJTheme"},
+            {"Material Palenight Contrast (Material)", "com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatMaterialPalenightContrastIJTheme"},
+            {"Monokai Pro (Material)", "com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatMonokaiProIJTheme"},
+            {"Monokai Pro Contrast (Material)", "com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatMonokaiProContrastIJTheme"},
+            {"Moonlight (Material)", "com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatMoonlightIJTheme"},
+            {"Moonlight Contrast (Material)", "com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatMoonlightContrastIJTheme"},
+            {"Night Owl (Material)", "com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatNightOwlIJTheme"},
+            {"Night Owl Contrast (Material)", "com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatNightOwlContrastIJTheme"},
+            {"Solarized Dark (Material)", "com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatSolarizedDarkIJTheme"},
+            {"Solarized Dark Contrast (Material)", "com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatSolarizedDarkContrastIJTheme"},
+            {"Solarized Light (Material)", "com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatSolarizedLightIJTheme"},
+            {"Solarized Light Contrast (Material)", "com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatSolarizedLightContrastIJTheme"}
+        };
+        for (String[] entry : lite) {
+            final String label = entry[0];
+            final String className = entry[1];
+            try {
+                Class.forName(className);
+                JMenuItem mi = new JMenuItem(new AbstractAction(label) {
+                    @Override public void actionPerformed(final ActionEvent e) { Main.setTheme(className); com.studentgui.apphelpers.Settings.put("theme", className); }
+                });
+                mi.setIcon(makeIcon(new Color(0x666666), 10));
+                mi.getAccessibleContext().setAccessibleName(className);
+                mi.getAccessibleContext().setAccessibleDescription("Apply " + className);
+                materialLiteGroup.add(mi);
+            } catch (ClassNotFoundException cnfe) {
+                // class not on classpath - ignore
+            }
+        }
+        // Only add the group if at least one theme was found
+        if (materialLiteGroup.getMenuComponentCount() > 0) {
+            themesMenu.add(materialLiteGroup);
+        }
 
         mb.add(themesMenu);
         return mb;
@@ -259,7 +324,7 @@ public class Theme {
      * Create a small square color icon used for menu items. Kept local to avoid
      * needing external resources; a simple filled rounded rectangle is drawn.
      */
-    private static ImageIcon makeIcon(Color color, int size) {
+    private static ImageIcon makeIcon(final Color color, final int size) {
         BufferedImage img = new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);
         Graphics2D g = img.createGraphics();
         try {
@@ -273,14 +338,14 @@ public class Theme {
     }
 
     // Return the simple class name from a fully-qualified class name
-    private static String simpleName(String fqcn) {
+    private static String simpleName(final String fqcn) {
         int idx = fqcn.lastIndexOf('.');
         return idx >= 0 ? fqcn.substring(idx + 1) : fqcn;
     }
 
     // List classes in a package by scanning classpath entries. This is a best-effort
     // method: it handles classes inside jars and on the filesystem.
-    private static List<String> listClassesInPackage(String packageName) {
+    private static List<String> listClassesInPackage(final String packageName) {
         List<String> results = new ArrayList<>();
         String path = packageName.replace('.', '/');
         try {
@@ -308,10 +373,12 @@ public class Theme {
                         File folder = new File(uri);
                         if (folder.isDirectory()) {
                             File[] files = folder.listFiles();
-                            if (files != null) for (File f : files) {
-                                if (f.isFile() && f.getName().endsWith(".class")) {
-                                    String cls = packageName + "." + f.getName().replaceAll("\\.class$", "");
-                                    results.add(cls);
+                            if (files != null) {
+                                for (File f : files) {
+                                    if (f.isFile() && f.getName().endsWith(".class")) {
+                                        String cls = packageName + "." + f.getName().replaceAll("\\.class$", "");
+                                        results.add(cls);
+                                    }
                                 }
                             }
                         }

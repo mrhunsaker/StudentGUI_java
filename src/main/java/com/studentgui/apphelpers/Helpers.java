@@ -137,8 +137,10 @@ public class Helpers {
      * Make a filesystem-safe folder name by stripping or replacing forbidden
      * characters.
      */
-    private static String sanitize(String s) {
-        if (s == null) return "";
+    private static String sanitize(final String s) {
+        if (s == null) {
+            return "";
+        }
         String t = s.trim();
         // remove control characters (newline, carriage return, etc.)
         t = t.replaceAll("[\\p{Cntrl}]", "");
@@ -150,7 +152,9 @@ public class Helpers {
         // collapse runs of whitespace into single space
         t = t.replaceAll("\\s+", " ").trim();
         // prevent names that are just dots
-        if (t.matches("^[.]+$")) t = "_";
+        if (t.matches("^[.]+$")) {
+            t = "_";
+        }
         return t;
     }
 
@@ -161,8 +165,10 @@ public class Helpers {
      * @param s input display name
      * @return sanitized filesystem-safe name (never null)
      */
-    public static String safeName(String s) {
-        if (s == null) return "";
+    public static String safeName(final String s) {
+        if (s == null) {
+            return "";
+        }
         return sanitize(s);
     }
 
@@ -174,19 +180,26 @@ public class Helpers {
     * @param prefix file prefix such as "iOS" or "ScreenReader"
     * @return path to the most recently modified matching PNG, or null
      */
-    public static java.nio.file.Path latestPlotPath(String studentName, String prefix) {
-        if (studentName == null || studentName.trim().isEmpty()) return null;
-        java.nio.file.Path dir = APP_HOME.resolve("StudentDataFiles").resolve(safeName(studentName)).resolve("plots");
-        if (!java.nio.file.Files.exists(dir)) return null;
+    public static java.nio.file.Path latestPlotPath(final String studentName, final String prefix) {
+        if (studentName == null || studentName.trim().isEmpty()) {
+            return null;
+        }
+        java.nio.file.Path dir = studentPlotsDir(studentName);
+        if (!java.nio.file.Files.exists(dir)) {
+            return null;
+        }
         java.nio.file.Path latest = null;
         try (java.nio.file.DirectoryStream<java.nio.file.Path> ds = java.nio.file.Files.newDirectoryStream(dir, prefix + "-*.png")) {
             for (java.nio.file.Path p : ds) {
                 try {
-                    if (latest == null) latest = p;
-                    else {
+                    if (latest == null) {
+                        latest = p;
+                    } else {
                         java.nio.file.attribute.FileTime t1 = java.nio.file.Files.getLastModifiedTime(p);
                         java.nio.file.attribute.FileTime t2 = java.nio.file.Files.getLastModifiedTime(latest);
-                        if (t1.compareTo(t2) > 0) latest = p;
+                        if (t1.compareTo(t2) > 0) {
+                            latest = p;
+                        }
                     }
                 } catch (IOException ioe) {
                     LOG.debug("Error reading file metadata for {}", p, ioe);
@@ -196,6 +209,36 @@ public class Helpers {
             LOG.debug("Error listing plot directory {}", dir, ioe);
         }
         return latest;
+    }
+
+    /**
+     * Return the per-student plots directory path (APP_HOME/StudentDataFiles/{safeName}/plots).
+     *
+     * @param studentName display name of the student
+     * @return path to the student's plots directory (never null)
+     */
+    public static java.nio.file.Path studentPlotsDir(final String studentName) {
+        return APP_HOME.resolve("StudentDataFiles").resolve(safeName(studentName)).resolve("plots");
+    }
+
+    /**
+     * Return the per-student reports directory path (APP_HOME/StudentDataFiles/{safeName}/reports).
+     *
+     * @param studentName display name of the student
+     * @return path to the student's reports directory (never null)
+     */
+    public static java.nio.file.Path studentReportsDir(final String studentName) {
+        return APP_HOME.resolve("StudentDataFiles").resolve(safeName(studentName)).resolve("reports");
+    }
+
+    /**
+     * Return the per-student collected data directory path (APP_HOME/StudentDataFiles/{safeName}/collected_data).
+     *
+     * @param studentName display name of the student
+     * @return path to the student's collected data directory (never null)
+     */
+    public static java.nio.file.Path studentCollectedDataDir(final String studentName) {
+        return APP_HOME.resolve("StudentDataFiles").resolve(safeName(studentName)).resolve("collected_data");
     }
 
     /**
@@ -219,7 +262,9 @@ public class Helpers {
                 java.util.regex.Matcher m = pat.matcher(body);
                 while (m.find()) {
                     String candidate = m.group(1).trim();
-                    if (!candidate.isEmpty()) list.add(candidate);
+                    if (!candidate.isEmpty()) {
+                        list.add(candidate);
+                    }
                 }
             } catch (IOException ioe) {
                 LOG.debug("Unable to read students.json {}", p, ioe);
@@ -230,5 +275,25 @@ public class Helpers {
             list.add("Test Student");
         }
         return list;
+    }
+
+    /**
+     * Return the default student to use when none is provided by the caller.
+     * This is the first entry from getStudents() or a sensible fallback when
+     * the roster is empty.
+     *
+     * @return display name of the default student (never null)
+     */
+    public static String defaultStudent() {
+        /**
+         * Note: UI pages use this helper to provide a non-null default student
+         * when constructed with a null/empty student name so that charts and
+         * page logic can operate without requiring an immediate user selection.
+         */
+        List<String> s = getStudents();
+        if (s == null || s.isEmpty()) {
+            return "Demo Student";
+        }
+        return s.get(0);
     }
 }

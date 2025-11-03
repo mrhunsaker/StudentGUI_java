@@ -63,10 +63,222 @@ import com.studentgui.apptheming.Theme;
  * panels under a CardLayout.
  */
 public class Main {
+    /**
+     * Bootstrap logging/system properties very early so Logback can resolve
+     * file locations and the per-run timestamp before any logger is
+     * initialized. This static block sets APP_HOME and LOG_TS and performs
+     * a cleanup of old log files older than 7 days.
+     */
+    static {
+        try {
+            // Ensure Helpers.APP_HOME is initialized and use it for logging
+            String appHome = com.studentgui.apphelpers.Helpers.APP_HOME.toString();
+            System.setProperty("APP_HOME", appHome);
+            // unix epoch seconds appended to per-run log filename
+            String ts = String.valueOf(java.time.Instant.now().getEpochSecond());
+            System.setProperty("LOG_TS", ts);
+
+            // create logs dir
+            java.nio.file.Path logs = java.nio.file.Paths.get(appHome).resolve("logs");
+            java.nio.file.Files.createDirectories(logs);
+
+            // Cleanup: remove log files older than 7 days (by last modified time)
+            long cutoff = java.time.Instant.now().minus(java.time.Duration.ofDays(7)).toEpochMilli();
+            try (java.nio.file.DirectoryStream<java.nio.file.Path> ds = java.nio.file.Files.newDirectoryStream(logs, "log_*.log")) {
+                for (java.nio.file.Path p : ds) {
+                    try {
+                        java.nio.file.attribute.FileTime ft = java.nio.file.Files.getLastModifiedTime(p);
+                        if (ft.toMillis() < cutoff) {
+                            java.nio.file.Files.deleteIfExists(p);
+                        }
+                    } catch (Exception ex) {
+                        // Swallow cleanup exceptions; logging isn't available yet.
+                    }
+                }
+            } catch (Exception ex) {
+                // ignore
+            }
+            // also remove consolidated data dump files older than retention
+            try (java.nio.file.DirectoryStream<java.nio.file.Path> ds2 = java.nio.file.Files.newDirectoryStream(logs, "data_dumps_*.log")) {
+                for (java.nio.file.Path p : ds2) {
+                    try {
+                        java.nio.file.attribute.FileTime ft = java.nio.file.Files.getLastModifiedTime(p);
+                        if (ft.toMillis() < cutoff) {
+                            java.nio.file.Files.deleteIfExists(p);
+                        }
+                    } catch (Exception ex) {
+                        // Swallow cleanup exceptions; logging isn't available yet.
+                    }
+                }
+            } catch (Exception ex) {
+                // ignore
+            }
+        } catch (Exception ex) {
+            // If anything here fails, continue — logging may not be configured yet.
+        }
+    }
+
     private static final Logger LOG = LoggerFactory.getLogger(Main.class);
     private static JFrame frame;
     private static JPanel contentPanel;
     private static JLineGraph sharedGraph;
+    /**
+     * Shared JLineGraph instance used across pages.
+     *
+     * Pages are constructed with the shared graph passed into their
+     * constructors (see recreatePages). The shared graph is registered
+     * with {@link #addSettingsChangeListener(SettingsChangeListener)} so
+     * it receives runtime preference updates. If a page creates its own
+     * page-local JLineGraph instance it should register it with
+     * {@link #addSettingsChangeListener(SettingsChangeListener)} and remove
+     * it when disposed to ensure it receives preference changes and to
+     * avoid leaking listeners.
+     */
+    // current date used by the top bar (can be updated without recreating pages)
+    private static java.time.LocalDate currentDate;
+    private static String currentStudent;
+    // Listeners to notify when the top-bar date changes
+    private static final java.util.List<DateChangeListener> dateListeners = new java.util.concurrent.CopyOnWriteArrayList<>();
+
+    /**
+     * Register a listener to be notified when the application date is changed via the top bar.
+     *
+     * @param l listener to register (ignored when null)
+     */
+    public static void addDateChangeListener(final DateChangeListener l) { 
+        if (l != null) {
+            dateListeners.add(l);
+        }
+    }
+
+    /**
+     * Remove a previously registered date change listener.
+     *
+     * @param l listener to remove (ignored when null)
+     */
+    public static void removeDateChangeListener(final DateChangeListener l) { 
+        if (l != null) {
+            dateListeners.remove(l);
+        }
+    }
+
+    /**
+     * Clear all registered date change listeners.
+     */
+    public static void clearDateChangeListeners() { 
+        dateListeners.clear();
+    }
+
+    /**
+     * Notify all registered date listeners that the application date has changed.
+     *
+     * @param d new application date
+     */
+    private static void notifyDateChanged(final java.time.LocalDate d) {
+        for (DateChangeListener l : dateListeners) {
+            try {
+                l.dateChanged(d);
+            } catch (Exception ex) {
+                LOG.warn("DateChangeListener threw: {}", ex.toString());
+            }
+        }
+    }
+    // Student change listeners
+    private static final java.util.List<StudentChangeListener> studentListeners = new java.util.concurrent.CopyOnWriteArrayList<>();
+    /**
+     * Register a listener to be notified when the selected student is changed.
+     *
+     * @param l listener to register (ignored when null)
+     */
+    public static void addStudentChangeListener(final StudentChangeListener l) {
+        if (l != null) {
+            studentListeners.add(l);
+        }
+    }
+
+    /**
+     * Remove a previously registered student change listener.
+     *
+     * @param l listener to remove (ignored when null)
+     */
+    public static void removeStudentChangeListener(final StudentChangeListener l) {
+        if (l != null) {
+            studentListeners.remove(l);
+        }
+    }
+
+    /**
+     * Clear all registered student change listeners.
+     */
+    public static void clearStudentChangeListeners() {
+        studentListeners.clear();
+    }
+
+    /**
+     * Notify registered student change listeners that the selected student has changed.
+     *
+     * @param s new selected student name
+     */
+    private static void notifyStudentChanged(final String s) {
+        currentStudent = s;
+        for (StudentChangeListener l : studentListeners) {
+            try {
+                l.studentChanged(s);
+            } catch (Exception ex) {
+                LOG.warn("StudentChangeListener threw: {}", ex.toString());
+            }
+        }
+    }
+
+
+    // Settings change listeners
+    private static final java.util.List<SettingsChangeListener> settingsListeners = new java.util.concurrent.CopyOnWriteArrayList<>();
+
+    /**
+     * Register a listener to be notified when application settings change.
+     * Implementations should read values from {@link com.studentgui.apphelpers.Settings}
+     * when {@link SettingsChangeListener#settingsChanged()} is invoked.
+     *
+     * @param l listener to register (ignored when null)
+     */
+    public static void addSettingsChangeListener(final SettingsChangeListener l) {
+        if (l != null) {
+            settingsListeners.add(l);
+        }
+    }
+
+    /**
+     * Remove a previously registered settings change listener.
+     *
+     * @param l listener to remove (ignored when null)
+     */
+    public static void removeSettingsChangeListener(final SettingsChangeListener l) {
+        if (l != null) {
+            settingsListeners.remove(l);
+        }
+    }
+
+    /**
+     * Clear all registered settings change listeners.
+     */
+    public static void clearSettingsChangeListeners() {
+        settingsListeners.clear();
+    }
+
+    /**
+     * Notify all registered settings listeners that application settings have been changed.
+     * This is typically invoked after persisting preferences through
+     * {@link com.studentgui.apphelpers.Settings}.
+     */
+    public static void notifySettingsChanged() {
+        for (SettingsChangeListener l : settingsListeners) {
+            try {
+                l.settingsChanged();
+            } catch (Exception ex) {
+                LOG.warn("SettingsChangeListener threw: {}", ex.toString());
+            }
+        }
+    }
 
     /**
      * Application entry point. Initializes helpers, database, and launches the
@@ -74,7 +286,7 @@ public class Main {
      *
      * @param args command-line arguments (unused)
      */
-    public static void main(String[] args) {
+    public static void main(final String[] args) {
         // Apply saved look and feel (default to light)
         // Settings.get and setTheme handle any expected failures internally;
         // call directly so we avoid a broad RuntimeException catch.
@@ -94,12 +306,16 @@ public class Main {
 
             // Menu bar: obtain the app menu bar from Theme, insert a File->Exit menu at the far left
             javax.swing.JMenuBar themeBar = Theme.createMenuBar();
-            if (themeBar == null) themeBar = new javax.swing.JMenuBar();
+            if (themeBar == null) {
+                themeBar = new javax.swing.JMenuBar();
+            }
             javax.swing.JMenu fileMenu = new javax.swing.JMenu("File");
             javax.swing.JMenuItem exitItem = new javax.swing.JMenuItem("Exit");
             exitItem.addActionListener(e -> {
                 LOG.info("Exit requested via File->Exit");
-                if (frame != null) frame.dispose();
+                if (frame != null) {
+                    frame.dispose();
+                }
                 System.exit(0);
             });
             fileMenu.add(exitItem);
@@ -128,9 +344,12 @@ public class Main {
 
             // Create initial shared graph and pages for the first student
             sharedGraph = new JLineGraph();
+            // Register shared graph to receive settings change notifications
+            addSettingsChangeListener(sharedGraph);
             List<String> students = Helpers.getStudents();
             String demoStudent = students.isEmpty() ? "Demo Student" : students.get(0);
             LocalDate today = LocalDate.now();
+            currentDate = today;
             recreatePages(demoStudent, today);
 
             frame.setVisible(true);
@@ -143,7 +362,7 @@ public class Main {
     *
     * @param theme human-friendly theme name or fully-qualified LookAndFeel class name
      */
-    public static void setTheme(String theme) {
+    public static void setTheme(final String theme) {
         try {
             String t = theme == null ? "light" : theme;
             // Common keywords for bundled themes
@@ -224,7 +443,7 @@ public class Main {
         bar.add(dateField);
         bar.add(goBtn);
 
-        goBtn.addActionListener(e -> {
+            goBtn.addActionListener(e -> {
             String selected = (String) studentBox.getSelectedItem();
             LocalDate date = LocalDate.now();
             try {
@@ -232,7 +451,16 @@ public class Main {
             } catch (DateTimeParseException ex) {
                 // keep today
             }
-            recreatePages(selected, date);
+            // Update the app's current date and selected student without recreating pages; show a confirmation dialog.
+            currentDate = date;
+            currentStudent = selected;
+            javax.swing.JOptionPane.showMessageDialog(frame,
+                    "The date has been updated to " + date.toString(),
+                    "Date Updated",
+                    javax.swing.JOptionPane.INFORMATION_MESSAGE);
+            // Notify registered pages so they can update any internal state
+            notifyDateChanged(date);
+            notifyStudentChanged(selected);
         });
 
     // Navigation buttons removed from top bar per UI request; pages can still be selected via menu
@@ -251,26 +479,94 @@ public class Main {
      * @param student selected student's display name
      * @param date the session date for newly created pages
      */
-    private static void recreatePages(String student, LocalDate date) {
+    private static void recreatePages(final String student, final LocalDate date) {
         // recreate the pages with a fresh sharedGraph so the graph is reset for the selected student/date
-        if (sharedGraph == null) sharedGraph = new JLineGraph();
-        else sharedGraph = new JLineGraph();
+        if (sharedGraph == null) {
+            sharedGraph = new JLineGraph();
+        } else {
+            sharedGraph = new JLineGraph();
+        }
+
+    // Clear any previous listeners to avoid stale references
+    clearDateChangeListeners();
+    clearStudentChangeListeners();
 
         contentPanel.removeAll();
         contentPanel.add(Homepage.create(), "homepage");
-        contentPanel.add(new Braille(student, date, sharedGraph), "braille");
-        contentPanel.add(new Abacus(student, date, sharedGraph), "abacus");
-        contentPanel.add(new BrailleNote(student, date, sharedGraph), "braillenote");
-        contentPanel.add(new DigitalLiteracy(student, date, sharedGraph), "digitalliteracy");
-    contentPanel.add(new BrailleSense(student, date, sharedGraph), "braillesense");
-    contentPanel.add(new CVI(student, date, sharedGraph), "cvi");
-    contentPanel.add(new IOS(student, date, sharedGraph), "ios");
-    contentPanel.add(new Keyboarding(student, date, sharedGraph), "keyboarding");
-    contentPanel.add(new Observations(student, date, sharedGraph), "observations");
-    contentPanel.add(new ScreenReader(student, date, sharedGraph), "screenreader");
+
+        // Instantiate pages into locals so we can register listeners if they implement the interface
+        Braille braille = new Braille(student, date, sharedGraph);
+        contentPanel.add(braille, "braille");
+    if (braille instanceof DateChangeListener d) {
+        addDateChangeListener(d);
+    }
+    if (braille instanceof StudentChangeListener s) {
+        addStudentChangeListener(s);
+    }
+
+        Abacus abacus = new Abacus(student, date, sharedGraph);
+        contentPanel.add(abacus, "abacus");
+    if (abacus instanceof DateChangeListener d2) {
+        addDateChangeListener(d2);
+    }
+    if (abacus instanceof StudentChangeListener s2) {
+        addStudentChangeListener(s2);
+    }
+
+        BrailleNote brailleNote = new BrailleNote(student, date, sharedGraph);
+        contentPanel.add(brailleNote, "braillenote");
+    if (brailleNote instanceof DateChangeListener d3) {
+        addDateChangeListener(d3);
+    }
+    if (brailleNote instanceof StudentChangeListener s3) {
+        addStudentChangeListener(s3);
+    }
+
+        DigitalLiteracy dl = new DigitalLiteracy(student, date, sharedGraph);
+        contentPanel.add(dl, "digitalliteracy");
+    if (dl instanceof DateChangeListener d4) {
+        addDateChangeListener(d4);
+    }
+    if (dl instanceof StudentChangeListener s4) {
+        addStudentChangeListener(s4);
+    }
+
+        // pages that don't currently need date-driven updates remain created inline
+        contentPanel.add(new BrailleSense(student, date, sharedGraph), "braillesense");
+        contentPanel.add(new CVI(student, date, sharedGraph), "cvi");
+
+        IOS ios = new IOS(student, date, sharedGraph);
+        contentPanel.add(ios, "ios");
+    if (ios instanceof DateChangeListener d5) {
+        addDateChangeListener(d5);
+    }
+    if (ios instanceof StudentChangeListener s5) {
+        addStudentChangeListener(s5);
+    }
+
+        Keyboarding keyboarding = new Keyboarding(student, date, sharedGraph);
+        contentPanel.add(keyboarding, "keyboarding");
+    if (keyboarding instanceof DateChangeListener d6) {
+        addDateChangeListener(d6);
+    }
+    if (keyboarding instanceof StudentChangeListener s6) {
+        addStudentChangeListener(s6);
+    }
+
+        contentPanel.add(new Observations(student, date), "observations");
+
+        ScreenReader sr = new ScreenReader(student, date, sharedGraph);
+        contentPanel.add(sr, "screenreader");
+    if (sr instanceof DateChangeListener d7) {
+        addDateChangeListener(d7);
+    }
+    if (sr instanceof StudentChangeListener s7) {
+        addStudentChangeListener(s7);
+    }
+
     contentPanel.add(new SessionNotes(student, date, sharedGraph), "sessionnotes");
     contentPanel.add(new ContactLog(student, date, sharedGraph), "contactlog");
-    contentPanel.add(new InstructionalMaterials(), "instructionalmaterials");
+        contentPanel.add(new InstructionalMaterials(), "instructionalmaterials");
 
         contentPanel.revalidate();
         contentPanel.repaint();
@@ -284,7 +580,7 @@ public class Main {
      * @param name registration name for the page
      * @param comp optional component instance to add (may be null)
      */
-    public static void showPage(String name, JComponent comp) {
+    public static void showPage(final String name, final JComponent comp) {
         CardLayout cl = (CardLayout) contentPanel.getLayout();
         if (comp != null && comp.getParent() == null) {
             contentPanel.add(comp, name);

@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
  * shared {@link JLineGraph} to visualize recent results for the selected
  * student.
  */
-public class Braille extends JPanel {
+public class Braille extends JPanel implements com.studentgui.app.DateChangeListener, com.studentgui.app.StudentChangeListener {
     private static final Logger LOG = LoggerFactory.getLogger(Braille.class);
 
     /** Array of input components representing each Braille skill. */
@@ -41,9 +41,13 @@ public class Braille extends JPanel {
     /** Shared graph used to plot recent results. */
     private final JLineGraph lineGraph; // Reference to the JLineGraph instance
     /** Selected student display name (may be null or placeholder). */
-    private final String studentNameParam;
+    private String studentNameParam;
     /** Session date used when creating progress sessions. */
-    private final LocalDate dateParam;
+    private LocalDate dateParam;
+    /** Title label component displayed in the page header. */
+    private JLabel titleLabel;
+    /** Base title text for the Braille page; a date suffix may be appended for display. */
+    private final String baseTitle = "Braille Skills Progression";
 
     /**
      * Construct the Braille skills page for a given student and date.
@@ -52,9 +56,9 @@ public class Braille extends JPanel {
      * @param date the session date to use when creating a progress session
      * @param lineGraph shared graph component used to display recent results
      */
-    public Braille(String studentName, LocalDate date, JLineGraph lineGraph) {
+    public Braille(final String studentName, final LocalDate date, final JLineGraph lineGraph) {
         this.lineGraph = lineGraph; // Use the passed in graph instance
-        this.studentNameParam = studentName != null ? studentName : "Unknown Student";
+    this.studentNameParam = (studentName == null || studentName.trim().isEmpty()) ? com.studentgui.apphelpers.Helpers.defaultStudent() : studentName;
         this.dateParam = date != null ? date : LocalDate.now();
         setLayout(new BorderLayout());
 
@@ -79,7 +83,9 @@ public class Braille extends JPanel {
             {"P8_5","8.5. Calculus: Differentiation"},{"P8_6","8.6. Calculus: Integration"},{"P8_7","8.7. Vertical Bars"}
         };
         this.partCodes = new String[this.parts.length];
-        for (int i = 0; i < this.parts.length; i++) this.partCodes[i] = this.parts[i][0];
+        for (int i = 0; i < this.parts.length; i++) {
+            this.partCodes[i] = this.parts[i][0];
+        }
 
         // Panel for data entry
         JPanel dataEntryPanel = new JPanel();
@@ -98,12 +104,12 @@ public class Braille extends JPanel {
         gbc.weightx = 1.0;
         gbc.weighty = 0.0;
 
-    JLabel titleLabel = new JLabel("Braille Skills Progression");
-        titleLabel.setFont(titleLabel.getFont().deriveFont(Font.BOLD, 16));
+    this.titleLabel = new JLabel(baseTitle);
+        this.titleLabel.setFont(this.titleLabel.getFont().deriveFont(Font.BOLD, 16));
         gbc.gridx = 0;
         gbc.gridy = 0;
         gbc.gridwidth = GridBagConstraints.REMAINDER;
-        dataEntryPanel.add(titleLabel, gbc);
+        dataEntryPanel.add(this.titleLabel, gbc);
 
         gbc.gridy = 1;
         gbc.gridwidth = GridBagConstraints.REMAINDER;
@@ -155,8 +161,15 @@ public class Braille extends JPanel {
     openLatestBtn.setPreferredSize(new java.awt.Dimension(0, 32));
     openLatestBtn.addActionListener((ActionEvent e) -> {
         java.nio.file.Path p = com.studentgui.apphelpers.Helpers.latestPlotPath(this.studentNameParam, "Braille");
-        if (p == null) com.studentgui.apphelpers.UiNotifier.show("No Braille plot found for student");
-    else { try { java.awt.Desktop.getDesktop().open(p.toFile()); } catch (java.io.IOException | UnsupportedOperationException | SecurityException ex) { com.studentgui.apphelpers.UiNotifier.show("Unable to open plot: " + p.getFileName().toString()); } }
+        if (p == null) {
+            com.studentgui.apphelpers.UiNotifier.show("No Braille plot found for student");
+        } else {
+            try {
+                java.awt.Desktop.getDesktop().open(p.toFile());
+            } catch (java.io.IOException | UnsupportedOperationException | SecurityException ex) {
+                com.studentgui.apphelpers.UiNotifier.show("Unable to open plot: " + p.getFileName().toString());
+            }
+        }
     });
     dataEntryPanel.add(openLatestBtn, gbc);
 
@@ -171,6 +184,7 @@ public class Braille extends JPanel {
 
         SwingUtilities.invokeLater(() -> {
             dataEntryPanel.setPreferredSize(dataEntryPanel.getPreferredSize());
+            updateTitleDate();
             revalidate();
         });
 
@@ -196,7 +210,13 @@ public class Braille extends JPanel {
 
     /**
      * Read entered skill values and persist them as a new progress session.
-     * Performs integer validation and informs the user on invalid input.
+    * Performs integer validation and informs the user on invalid input.
+    *
+    * Implementation note: arrays used to call {@code insertAssessmentResults}
+    * are allocated dynamically based on the actual number of parts
+    * ({@code partCodes.length}) so that the stored columns exactly match the
+    * plotted series. This fixes a previous issue where fixed-size arrays
+    * could become out-of-sync with the parts list.
      */
     private void submitData() {
         if (this.studentNameParam == null || this.studentNameParam.trim().isEmpty()) {
@@ -209,9 +229,11 @@ public class Braille extends JPanel {
             int ptId = com.studentgui.apphelpers.Database.getOrCreateProgressType("Braille");
             int sessionId = com.studentgui.apphelpers.Database.createProgressSession(studentId, ptId, this.dateParam);
 
-            String[] codes = new String[28];
-            int[] scores = new int[28];
-            for (int i = 0; i < 28; i++) {
+            // Allocate arrays based on the actual number of parts so that
+            // the submitted data and plotted series stay in sync.
+            String[] codes = new String[this.partCodes.length];
+            int[] scores = new int[this.partCodes.length];
+            for (int i = 0; i < this.partCodes.length; i++) {
                 codes[i] = this.partCodes[i];
                 scores[i] = skillFields[i].getValue();
             }
@@ -220,15 +242,104 @@ public class Braille extends JPanel {
             com.studentgui.apphelpers.UiNotifier.show("Braille data saved.");
             com.studentgui.apphelpers.dto.AssessmentPayload payload = new com.studentgui.apphelpers.dto.AssessmentPayload(sessionId, codes, scores);
             java.nio.file.Path jsonOut = com.studentgui.apphelpers.SessionJsonWriter.writeSessionJson(this.studentNameParam, "Braille", payload, sessionId);
-            if (jsonOut == null) LOG.warn("Unable to save Braille session JSON for sessionId={}", sessionId);
+            if (jsonOut == null) {
+                LOG.warn("Unable to save Braille session JSON for sessionId={}", sessionId);
+            }
             try {
-                java.nio.file.Path out = com.studentgui.apphelpers.Helpers.APP_HOME.resolve("StudentDataFiles").resolve(com.studentgui.apphelpers.Helpers.safeName(this.studentNameParam)).resolve("plots");
+                java.nio.file.Path plotsOut = com.studentgui.apphelpers.Helpers.studentPlotsDir(this.studentNameParam);
+                java.nio.file.Path reportsOut = com.studentgui.apphelpers.Helpers.studentReportsDir(this.studentNameParam);
+                java.nio.file.Files.createDirectories(plotsOut);
+                java.nio.file.Files.createDirectories(reportsOut);
                 java.time.format.DateTimeFormatter df = java.time.format.DateTimeFormatter.ISO_DATE;
-                java.nio.file.Path file = out.resolve("Braille-" + this.dateParam.format(df) + ".png");
-                lineGraph.saveChart(file, 800, 400);
-                LOG.info("Saved Braille plot to {}", file);
-            } catch (java.io.IOException ex) {
-                LOG.warn("Unable to save Braille plot image: {}", ex.toString());
+                String dateStr = this.dateParam != null ? this.dateParam.format(df) : java.time.LocalDate.now().toString();
+                String baseName = "Braille-" + sessionId + "-" + dateStr;
+
+                com.studentgui.apphelpers.Database.ResultsWithDates rwd = com.studentgui.apphelpers.Database.fetchLatestAssessmentResultsWithDates(this.studentNameParam, "Braille", Integer.MAX_VALUE);
+                java.util.Map<String, java.nio.file.Path> groups = null;
+                String[] labels = new String[this.parts.length];
+                for (int i = 0; i < this.parts.length; i++) {
+                    labels[i] = this.parts[i][1];
+                }
+                if (rwd != null && rwd.rows != null && !rwd.rows.isEmpty()) {
+                    lineGraph.updateWithGroupedDataByDate(rwd.dates, rwd.rows, this.partCodes, labels);
+                    groups = lineGraph.saveGroupedCharts(plotsOut, baseName, 1000, 240);
+                    java.time.LocalDate headerDate = rwd.dates.get(rwd.dates.size() - 1);
+                    dateStr = headerDate.format(df);
+                } else {
+                    java.util.List<java.util.List<Integer>> rowsList = new java.util.ArrayList<>();
+                    java.util.List<Integer> latest = new java.util.ArrayList<>();
+                    for (int v : scores) {
+                        latest.add(v);
+                    }
+                    rowsList.add(latest);
+                    lineGraph.updateWithGroupedData(rowsList, this.partCodes);
+                    groups = lineGraph.saveGroupedCharts(plotsOut, baseName, 1000, 240);
+                }
+
+                if (groups == null) {
+                    groups = new java.util.LinkedHashMap<>();
+                }
+                StringBuilder md = new StringBuilder();
+                md.append("# ").append(this.studentNameParam == null ? "Unknown Student" : this.studentNameParam).append(" - ").append(dateStr).append("\n\n");
+                for (java.util.Map.Entry<String, java.nio.file.Path> e : groups.entrySet()) {
+                    md.append("## ").append(e.getKey()).append("\n\n");
+                    md.append("![](./").append(e.getValue().getFileName().toString()).append(")\n\n");
+                }
+                java.nio.file.Path mdFile = reportsOut.resolve(baseName + ".md");
+                // images live in ../plots relative to reports
+                String mdText = md.toString().replace("![](./", "![](../plots/");
+                java.nio.file.Files.writeString(mdFile, mdText, java.nio.charset.StandardCharsets.UTF_8);
+
+                // HTML report using shared palette
+                try {
+                    String[] palette = JLineGraph.PALETTE_HEX;
+                    java.util.LinkedHashMap<String, java.util.List<Integer>> groupsIdx = new java.util.LinkedHashMap<>();
+                    for (int i = 0; i < this.partCodes.length; i++) {
+                        String code = this.partCodes[i];
+                        String grp = code != null && code.contains("_") ? code.split("_")[0] : code;
+                        groupsIdx.computeIfAbsent(grp, k -> new java.util.ArrayList<>()).add(i);
+                    }
+                    StringBuilder html = new StringBuilder();
+                    html.append("<!doctype html><html><head><meta charset=\"utf-8\"><title>");
+                    html.append(this.studentNameParam == null ? "Student Report" : this.studentNameParam).append(" - ").append(dateStr).append("</title>");
+                    html.append("<style>body{font-family:sans-serif;margin:20px;} img{max-width:100%;height:auto;border:1px solid #ccc;margin-bottom:8px;} .legend{max-height:160px;overflow:auto;border:1px solid #ddd;padding:8px;margin-bottom:24px;} .legend-item{display:flex;align-items:center;gap:8px;padding:4px 0;} .swatch{width:18px;height:12px;border:1px solid #333;display:inline-block}</style>");
+                    html.append("</head><body>");
+                    html.append("<h1>").append(this.studentNameParam == null ? "Unknown Student" : this.studentNameParam).append(" - ").append(dateStr).append("</h1>");
+                    for (java.util.Map.Entry<String, java.nio.file.Path> e2 : groups.entrySet()) {
+                        String grp = e2.getKey();
+                        String imgName = e2.getValue().getFileName().toString();
+                        html.append("<h2>").append(grp).append("</h2>");
+                        html.append("<div class=\"plot\"><img src=\"./").append(imgName).append("\" alt=\"").append(grp).append("\"></div>");
+                        java.util.List<Integer> idxs = groupsIdx.getOrDefault(grp, new java.util.ArrayList<>());
+                        html.append("<div class=\"legend\">");
+                        for (int s = 0; s < idxs.size(); s++) {
+                            int idx = idxs.get(s);
+                            String code = this.partCodes[idx];
+                            String human = this.parts[idx][1];
+                            String seriesName = code + " - " + human;
+                            String color = palette[s % palette.length];
+                            html.append("<div class=\"legend-item\">");
+                            html.append("<span class=\"swatch\" style=\"background:");
+                            html.append(color);
+                            html.append(";\"></span>");
+                            html.append("<div>");
+                            html.append(seriesName);
+                            html.append("</div></div>");
+                        }
+                        html.append("</div>");
+                    }
+                    html.append("</body></html>");
+                    java.nio.file.Path htmlFile = reportsOut.resolve(baseName + ".html");
+                    String htmlStr = html.toString().replace("src=\"./", "src=\"../plots/");
+                    java.nio.file.Files.writeString(htmlFile, htmlStr, java.nio.charset.StandardCharsets.UTF_8);
+                    LOG.info("Wrote Braille HTML session report {}", htmlFile);
+                } catch (java.io.IOException ioex) {
+                    LOG.warn("Unable to write Braille HTML report: {}", ioex.toString());
+                }
+
+                LOG.info("Wrote Braille session report {} with {} group images", mdFile, groups.size());
+            } catch (java.io.IOException | SQLException ex) {
+                LOG.warn("Unable to save Braille per-phase plots or markdown report: {}", ex.toString());
             }
         } catch (SQLException e) {
             LOG.error("Unexpected error submitting braille data", e);
@@ -246,28 +357,58 @@ public class Braille extends JPanel {
             // For now use a placeholder when no student is selected.
             if (allSkillValues != null && !allSkillValues.isEmpty()) {
                 lineGraph.updateWithGroupedData(allSkillValues, this.partCodes);
-                LOG.debug("Graph updated with data: {}", allSkillValues);
-                // Save static PNG to student's plots folder and open it
-                if (this.studentNameParam != null && !this.studentNameParam.trim().isEmpty()) {
+                // Write to the consolidated per-run data dumps file when enabled
+                if (Boolean.parseBoolean(com.studentgui.apphelpers.Settings.get("dump.enabled", "false"))) {
                     try {
-                        java.nio.file.Path out = com.studentgui.apphelpers.Helpers.APP_HOME.resolve("StudentDataFiles").resolve(com.studentgui.apphelpers.Helpers.safeName(this.studentNameParam)).resolve("plots");
-                        java.nio.file.Files.createDirectories(out);
-                        java.time.format.DateTimeFormatter df = java.time.format.DateTimeFormatter.ISO_DATE;
-                        String dateStr = (this.dateParam != null ? this.dateParam.format(df) : java.time.LocalDate.now().toString());
-                        java.nio.file.Path file = out.resolve("Braille-" + dateStr + ".png");
-                        lineGraph.saveChart(file, 800, 400);
-                        LOG.info("Saved Braille plot to {}", file);
-                        try { java.awt.Desktop.getDesktop().open(file.toFile()); } catch (java.io.IOException | UnsupportedOperationException | SecurityException ex) { LOG.debug("Could not open Braille plot file: {}", ex.toString()); }
-                        com.studentgui.apphelpers.UiNotifier.show("Braille plot saved to " + file.toString());
-                    } catch (java.io.IOException ex) {
-                        LOG.warn("Unable to save Braille plot image: {}", ex.toString());
+                        String appHome = System.getProperty("APP_HOME", com.studentgui.apphelpers.Helpers.APP_HOME.toString());
+                        String ts = System.getProperty("LOG_TS", String.valueOf(java.time.Instant.now().getEpochSecond()));
+                        java.nio.file.Path logDir = java.nio.file.Paths.get(appHome).resolve("logs");
+                        java.nio.file.Files.createDirectories(logDir);
+                        java.nio.file.Path logFile = logDir.resolve("data_dumps_" + ts + ".log");
+                        StringBuilder sb = new StringBuilder();
+                        java.time.format.DateTimeFormatter dtf = java.time.format.DateTimeFormatter.ISO_DATE_TIME;
+                        sb.append("[Braille]").append(System.lineSeparator());
+                        sb.append(java.time.LocalDateTime.now().format(dtf)).append(" - student=").append(this.studentNameParam).append(System.lineSeparator());
+                        sb.append("data=").append(allSkillValues.toString()).append(System.lineSeparator());
+                        sb.append(System.lineSeparator());
+                        java.nio.file.Files.writeString(logFile, sb.toString(), java.nio.charset.StandardCharsets.UTF_8, java.nio.file.StandardOpenOption.CREATE, java.nio.file.StandardOpenOption.APPEND);
+                    } catch (java.io.IOException ioe) {
+                        LOG.trace("Unable to write braille load log: {}", ioe.toString());
                     }
                 }
             } else {
-                LOG.info("No data to plot.");
+                LOG.info("No data to plot; showing grouped placeholders.");
+                lineGraph.showEmptyGrouped(this.partCodes);
             }
         } catch (SQLException e) {
             LOG.error("SQL error refreshing braille graph", e);
+        }
+    }
+
+    @Override
+    public void dateChanged(final LocalDate newDate) {
+        this.dateParam = newDate;
+        SwingUtilities.invokeLater(() -> {
+            refreshGraph();
+            updateTitleDate();
+        });
+    }
+    
+    @Override
+    public void studentChanged(final String newStudent) {
+        this.studentNameParam = newStudent != null ? newStudent : "Unknown Student";
+        SwingUtilities.invokeLater(() -> {
+            refreshGraph();
+            updateTitleDate();
+        });
+    }
+    
+    private void updateTitleDate() {
+        try {
+            String dateStr = this.dateParam != null ? this.dateParam.toString() : java.time.LocalDate.now().toString();
+            this.titleLabel.setText(baseTitle + " - " + dateStr);
+        } catch (Exception ex) {
+            this.titleLabel.setText(baseTitle);
         }
     }
     

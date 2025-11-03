@@ -32,7 +32,7 @@ public final class SessionJsonWriter {
      * @param payload arbitrary payload object to serialize (Map or POJO)
      * @return the path to the written file, or null on failure
      */
-    public static Path writeSessionJson(String student, String pageName, Object payload) {
+    public static Path writeSessionJson(final String student, final String pageName, final Object payload) {
         return writeSessionJson(student, pageName, payload, null);
     }
 
@@ -50,10 +50,12 @@ public final class SessionJsonWriter {
      * @param explicitSessionId optional session id to use in the envelope and filename
      * @return the path to the written file, or null on failure
      */
-    public static Path writeSessionJson(String student, String pageName, Object payload, String explicitSessionId) {
-        if (student == null || student.trim().isEmpty() || pageName == null) return null;
+    public static Path writeSessionJson(final String student, final String pageName, final Object payload, final String explicitSessionId) {
+        if (student == null || student.trim().isEmpty() || pageName == null) {
+            return null;
+        }
         try {
-            Path outDir = Helpers.APP_HOME.resolve("StudentDataFiles").resolve(Helpers.safeName(student));
+            Path outDir = Helpers.studentCollectedDataDir(student);
             Files.createDirectories(outDir);
             long ts = Instant.now().toEpochMilli();
             // format for readability too
@@ -63,7 +65,9 @@ public final class SessionJsonWriter {
             String sid = explicitSessionId;
             if (sid == null && payload instanceof com.studentgui.apphelpers.dto.SessionPayload) {
                 int s = ((com.studentgui.apphelpers.dto.SessionPayload) payload).getSessionId();
-                if (s != 0) sid = Integer.toString(s);
+                if (s != 0) {
+                    sid = Integer.toString(s);
+                }
             }
 
             String filename = String.format("%s-%d-%s%s.json", pageName, ts, readable, (sid != null ? "-session-" + sid : ""));
@@ -74,7 +78,9 @@ public final class SessionJsonWriter {
             envelope.put("timestamp", ts);
             envelope.put("timestampIso", readable);
             envelope.put("page", pageName);
-            if (sid != null) envelope.put("sessionId", sid);
+            if (sid != null) {
+                envelope.put("sessionId", sid);
+            }
             envelope.put("payload", payload);
 
             byte[] bytes = MAPPER.writerWithDefaultPrettyPrinter().writeValueAsBytes(envelope);
@@ -97,7 +103,7 @@ public final class SessionJsonWriter {
      * @param explicitSessionId numeric session id
      * @return written file path or null
      */
-    public static Path writeSessionJson(String student, String pageName, Object payload, int explicitSessionId) {
+    public static Path writeSessionJson(final String student, final String pageName, final Object payload, final int explicitSessionId) {
         return writeSessionJson(student, pageName, payload, Integer.toString(explicitSessionId));
     }
 
@@ -112,7 +118,7 @@ public final class SessionJsonWriter {
      * @param scores array of scores corresponding to the codes
      * @return path to the written JSON file, or null on failure
      */
-    public static Path writeSessionJson(String student, String pageName, String[] codes, int[] scores) {
+    public static Path writeSessionJson(final String student, final String pageName, final String[] codes, final int[] scores) {
         com.studentgui.apphelpers.dto.AssessmentPayload payload = new com.studentgui.apphelpers.dto.AssessmentPayload(0, codes, scores);
         return writeSessionJson(student, pageName, payload);
     }

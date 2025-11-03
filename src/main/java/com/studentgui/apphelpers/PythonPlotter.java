@@ -28,11 +28,13 @@ public class PythonPlotter {
      * @param studentName student display name used by the plotter (non-null)
      * @param onComplete optional consumer receiving process output when complete; may be null
      */
-    public static void runPlotAsync(String moduleName, String studentName, Consumer<String> onComplete) {
+    public static void runPlotAsync(final String moduleName, final String studentName, final Consumer<String> onComplete) {
         if (studentName == null || studentName.trim().isEmpty()) {
             String msg = "No student selected for plot generation";
             LOG.warn(msg);
-            if (onComplete != null) onComplete.accept(msg);
+            if (onComplete != null) {
+                onComplete.accept(msg);
+            }
             return;
         }
 
@@ -56,7 +58,9 @@ public class PythonPlotter {
             } catch (java.io.IOException | InterruptedException e) {
                 LOG.error("Error running python plot runner", e);
                 out.append("Error: ").append(e.toString()).append(System.lineSeparator());
-                if (e instanceof InterruptedException) Thread.currentThread().interrupt();
+                if (e instanceof InterruptedException) {
+                    Thread.currentThread().interrupt();
+                }
             }
             if (onComplete != null) {
                 try {
@@ -67,7 +71,7 @@ public class PythonPlotter {
                     LOG.warn("onComplete consumer threw an exception; continuing. Output length={}", out.length(), ex);
                 }
             }
-        }, "PythonPlotter-" + moduleName);
+    }, "PythonPlotter-" + moduleName);
         t.setDaemon(true);
         t.start();
     }

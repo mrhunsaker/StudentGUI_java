@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
  * persists them to a dedicated keyboarding result table via the
  * {@code Database} helper.
  */
-public class Keyboarding extends JPanel {
+public class Keyboarding extends JPanel implements com.studentgui.app.DateChangeListener, com.studentgui.app.StudentChangeListener {
     private static final Logger LOG = LoggerFactory.getLogger(Keyboarding.class);
     /** Text field for the program or curriculum name. */
     private final JTextField programField, topicField, speedField, accuracyField;
@@ -36,10 +36,14 @@ public class Keyboarding extends JPanel {
     private final JLineGraph lineGraph;
 
     /** Selected student's display name for saves/refreshes (may be null). */
-    private final String studentNameParam;
+    private String studentNameParam;
+    /** Page header label. */
+    private JLabel titleLabel;
+    /** Base title text for the Keyboarding page; date suffix appended in UI. */
+    private final String baseTitle = "Keyboarding Skills";
 
     /** Session date associated with persisted keyboarding results. */
-    private final LocalDate dateParam;
+    private LocalDate dateParam;
 
     /**
      * Construct the Keyboarding page for a specific student and session date.
@@ -49,7 +53,7 @@ public class Keyboarding extends JPanel {
      * @param lineGraph shared graph component (unused for keyboarding results)
      */
     public Keyboarding(String studentName, LocalDate date, JLineGraph lineGraph) {
-        this.studentNameParam = studentName;
+    this.studentNameParam = (studentName == null || studentName.trim().isEmpty()) ? com.studentgui.apphelpers.Helpers.defaultStudent() : studentName;
         this.dateParam = date;
         this.lineGraph = lineGraph;
         setLayout(new BorderLayout());
@@ -62,10 +66,10 @@ public class Keyboarding extends JPanel {
     scroll.getAccessibleContext().setAccessibleName("Keyboarding data entry scroll pane");
     p.setBorder(javax.swing.BorderFactory.createEmptyBorder(20,20,20,20));
         GridBagConstraints gbc = new GridBagConstraints(); gbc.insets=new Insets(2,2,2,2); gbc.fill = GridBagConstraints.HORIZONTAL; gbc.anchor = GridBagConstraints.NORTHWEST;
-    JLabel title = new JLabel("Keyboarding Skills", JLabel.LEFT);
-    title.setFont(title.getFont().deriveFont(Font.BOLD,16));
-    title.getAccessibleContext().setAccessibleName("Keyboarding Skills Title");
-    gbc.gridx=0; gbc.gridy=0; gbc.gridwidth=2; p.add(title, gbc);
+    this.titleLabel = new JLabel(baseTitle, JLabel.LEFT);
+    this.titleLabel.setFont(this.titleLabel.getFont().deriveFont(Font.BOLD,16));
+    this.titleLabel.getAccessibleContext().setAccessibleName("Keyboarding Skills Title");
+    gbc.gridx=0; gbc.gridy=0; gbc.gridwidth=2; p.add(this.titleLabel, gbc);
 
     gbc.gridwidth=1;
     // Normalize label width to the PhaseScoreField global width so inputs align
@@ -89,7 +93,7 @@ public class Keyboarding extends JPanel {
     add(scroll, BorderLayout.CENTER);
     add(this.lineGraph, BorderLayout.SOUTH);
 
-        SwingUtilities.invokeLater(()->{ p.setPreferredSize(p.getPreferredSize()); revalidate(); });
+    SwingUtilities.invokeLater(()->{ p.setPreferredSize(p.getPreferredSize()); updateTitleDate(); revalidate(); });
 
         com.studentgui.apphelpers.Helpers.createFolderHierarchy();
         initDatabase();
@@ -146,7 +150,51 @@ public class Keyboarding extends JPanel {
             com.studentgui.apphelpers.UiNotifier.show("Keyboarding data saved.");
             com.studentgui.apphelpers.dto.KeyboardingPayload payload = new com.studentgui.apphelpers.dto.KeyboardingPayload(sessionId, program, topic, speed, accuracy);
             java.nio.file.Path jsonOut = com.studentgui.apphelpers.SessionJsonWriter.writeSessionJson(this.studentNameParam, "Keyboarding", payload, sessionId);
-            if (jsonOut == null) LOG.warn("Unable to save Keyboarding session JSON for sessionId={}", sessionId);
+            if (jsonOut == null) {
+                LOG.warn("Unable to save Keyboarding session JSON for sessionId={}", sessionId);
+            }
+            try {
+                java.nio.file.Path plotsOut = com.studentgui.apphelpers.Helpers.studentPlotsDir(this.studentNameParam);
+                java.nio.file.Path reportsOut = com.studentgui.apphelpers.Helpers.studentReportsDir(this.studentNameParam);
+                java.nio.file.Files.createDirectories(plotsOut);
+                java.nio.file.Files.createDirectories(reportsOut);
+                java.time.format.DateTimeFormatter df = java.time.format.DateTimeFormatter.ISO_DATE;
+                String dateStr = this.dateParam != null ? this.dateParam.format(df) : java.time.LocalDate.now().toString();
+                String baseName = "Keyboarding-" + sessionId + "-" + dateStr;
+
+                // Keyboarding doesn't have grouped codes; produce a small HTML/MD with metadata
+                StringBuilder md = new StringBuilder();
+                md.append("# ").append(this.studentNameParam == null ? "Unknown Student" : this.studentNameParam).append(" - ").append(dateStr).append("\n\n");
+                md.append("**Program:** ").append(program == null || program.isEmpty() ? "(none)" : program).append("  \n\n");
+                md.append("**Topic:** ").append(topic == null || topic.isEmpty() ? "(none)" : topic).append("  \n\n");
+                md.append("**Speed (WPM):** ").append(String.valueOf(speed)).append("  \n\n");
+                md.append("**Accuracy (%):** ").append(String.valueOf(accuracy)).append("  \n\n");
+                java.nio.file.Path mdFile = reportsOut.resolve(baseName + ".md");
+                java.nio.file.Files.writeString(mdFile, md.toString(), java.nio.charset.StandardCharsets.UTF_8);
+
+                try {
+                    StringBuilder html = new StringBuilder();
+                    html.append("<!doctype html><html><head><meta charset=\"utf-8\"><title>");
+                    html.append(this.studentNameParam == null ? "Student Report" : this.studentNameParam).append(" - ").append(dateStr).append("</title>");
+                    html.append("<style>body{font-family:sans-serif;margin:20px;} .meta{margin-bottom:12px;} .swatch{width:18px;height:12px;border:1px solid #333;display:inline-block;vertical-align:middle;margin-right:8px;}</style>");
+                    html.append("</head><body>");
+                    html.append("<h1>").append(this.studentNameParam == null ? "Unknown Student" : this.studentNameParam).append(" - ").append(dateStr).append("</h1>");
+                    html.append("<div class=\"meta\">\n");
+                    html.append("<p><strong>Program:</strong> ").append(program == null || program.isEmpty() ? "(none)" : program).append("</p>");
+                    html.append("<p><strong>Topic:</strong> ").append(topic == null || topic.isEmpty() ? "(none)" : topic).append("</p>");
+                    html.append("<p><strong>Speed (WPM):</strong> ").append(String.valueOf(speed)).append("</p>");
+                    html.append("<p><strong>Accuracy (%):</strong> ").append(String.valueOf(accuracy)).append("</p>");
+                    html.append("</div>");
+                    html.append("</body></html>");
+                    java.nio.file.Path htmlFile = reportsOut.resolve(baseName + ".html");
+                    java.nio.file.Files.writeString(htmlFile, html.toString(), java.nio.charset.StandardCharsets.UTF_8);
+                    LOG.info("Wrote Keyboarding session report {}", htmlFile);
+                } catch (java.io.IOException ioex) {
+                    LOG.warn("Unable to write Keyboarding HTML report: {}", ioex.toString());
+                }
+            } catch (java.io.IOException ioe) {
+                LOG.warn("Unable to save Keyboarding report: {}", ioe.toString());
+            }
         } catch (SQLException ex) {
             LOG.error("DB error saving keyboarding data", ex);
             JOptionPane.showMessageDialog(this, "Database error saving keyboarding data: " + ex.getMessage(), "Database error", JOptionPane.ERROR_MESSAGE);
@@ -159,5 +207,32 @@ public class Keyboarding extends JPanel {
      */
     private void refreshGraph() {
         LOG.info("Keyboarding refresh requested for {}", studentNameParam);
+    }
+
+    @Override
+    public void dateChanged(LocalDate newDate) {
+        this.dateParam = newDate;
+        SwingUtilities.invokeLater(() -> {
+            refreshGraph();
+            updateTitleDate();
+        });
+    }
+
+    @Override
+    public void studentChanged(String newStudent) {
+        this.studentNameParam = newStudent;
+        SwingUtilities.invokeLater(() -> {
+            refreshGraph();
+            updateTitleDate();
+        });
+    }
+
+    private void updateTitleDate() {
+        try {
+            String dateStr = this.dateParam != null ? this.dateParam.toString() : java.time.LocalDate.now().toString();
+            this.titleLabel.setText(baseTitle + " - " + dateStr);
+        } catch (Exception ex) {
+            this.titleLabel.setText(baseTitle);
+        }
     }
 }

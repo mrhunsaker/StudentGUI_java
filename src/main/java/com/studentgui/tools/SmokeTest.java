@@ -23,7 +23,7 @@ public class SmokeTest {
      * @param args ignored
      * @throws Exception on IO or chart errors
      */
-    public static void main(String[] args) throws Exception {
+    public static void main(final String[] args) throws Exception {
         Helpers.createFolderHierarchy();
         JLineGraph graph = new JLineGraph();
 
