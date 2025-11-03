@@ -41,7 +41,9 @@ public class DigitalLiteracy extends JPanel implements com.studentgui.app.DateCh
 
     /** Selected student's display name (may be null) for saving/fetching data. */
     private String studentNameParam;
+    /** Title label shown at the top of the Digital Literacy page. */
     private JLabel titleLabel;
+    /** Base title text for the page; used when building the header string. */
     private final String baseTitle = "Digital Literacy Skills Progression";
 
     /** Session date to associate with persisted digital literacy progress. */
@@ -327,11 +329,25 @@ public class DigitalLiteracy extends JPanel implements com.studentgui.app.DateCh
                 for (int i = 0; i < this.parts.length; i++) {
                     codes[i] = this.parts[i][0];
                 }
-                lineGraph.updateWithGroupedData(allSkillValues, codes);
-                LOG.debug("Graph updated with data: {}", allSkillValues);
-                // Skip automatic saving of DigitalLiteracy plot during refresh to avoid
-                // creating files during application startup.
-                LOG.debug("Skipping auto-save of DigitalLiteracy chart during refresh for student={}", this.studentNameParam);
+                    lineGraph.updateWithGroupedData(allSkillValues, codes);
+                    // Write to the consolidated per-run data dumps file when enabled
+                    if (Boolean.parseBoolean(com.studentgui.apphelpers.Settings.get("dump.enabled", "false"))) {
+                        try {
+                            String appHome = System.getProperty("APP_HOME", com.studentgui.apphelpers.Helpers.APP_HOME.toString());
+                            String ts = System.getProperty("LOG_TS", String.valueOf(java.time.Instant.now().getEpochSecond()));
+                            java.nio.file.Path logDir = java.nio.file.Paths.get(appHome).resolve("logs");
+                            java.nio.file.Files.createDirectories(logDir);
+                            java.nio.file.Path logFile = logDir.resolve("data_dumps_" + ts + ".log");
+                            StringBuilder sb = new StringBuilder();
+                            sb.append("[DigitalLiteracy]").append(System.lineSeparator());
+                            sb.append(java.time.Instant.now().toString()).append(" - student=").append(this.studentNameParam).append(System.lineSeparator());
+                            sb.append("data=").append(allSkillValues.toString()).append(System.lineSeparator());
+                            sb.append(System.lineSeparator());
+                            java.nio.file.Files.writeString(logFile, sb.toString(), java.nio.charset.StandardCharsets.UTF_8, java.nio.file.StandardOpenOption.CREATE, java.nio.file.StandardOpenOption.APPEND);
+                        } catch (java.io.IOException ioe) {
+                            LOG.trace("Unable to write DigitalLiteracy load log: {}", ioe.toString());
+                        }
+                    }
             } else {
                 LOG.info("No data to plot.");
             }

@@ -63,10 +63,77 @@ import com.studentgui.apptheming.Theme;
  * panels under a CardLayout.
  */
 public class Main {
+    /**
+     * Bootstrap logging/system properties very early so Logback can resolve
+     * file locations and the per-run timestamp before any logger is
+     * initialized. This static block sets APP_HOME and LOG_TS and performs
+     * a cleanup of old log files older than 7 days.
+     */
+    static {
+        try {
+            // Ensure Helpers.APP_HOME is initialized and use it for logging
+            String appHome = com.studentgui.apphelpers.Helpers.APP_HOME.toString();
+            System.setProperty("APP_HOME", appHome);
+            // unix epoch seconds appended to per-run log filename
+            String ts = String.valueOf(java.time.Instant.now().getEpochSecond());
+            System.setProperty("LOG_TS", ts);
+
+            // create logs dir
+            java.nio.file.Path logs = java.nio.file.Paths.get(appHome).resolve("logs");
+            java.nio.file.Files.createDirectories(logs);
+
+            // Cleanup: remove log files older than 7 days (by last modified time)
+            long cutoff = java.time.Instant.now().minus(java.time.Duration.ofDays(7)).toEpochMilli();
+            try (java.nio.file.DirectoryStream<java.nio.file.Path> ds = java.nio.file.Files.newDirectoryStream(logs, "log_*.log")) {
+                for (java.nio.file.Path p : ds) {
+                    try {
+                        java.nio.file.attribute.FileTime ft = java.nio.file.Files.getLastModifiedTime(p);
+                        if (ft.toMillis() < cutoff) {
+                            java.nio.file.Files.deleteIfExists(p);
+                        }
+                    } catch (Exception ex) {
+                        // Swallow cleanup exceptions; logging isn't available yet.
+                    }
+                }
+            } catch (Exception ex) {
+                // ignore
+            }
+            // also remove consolidated data dump files older than retention
+            try (java.nio.file.DirectoryStream<java.nio.file.Path> ds2 = java.nio.file.Files.newDirectoryStream(logs, "data_dumps_*.log")) {
+                for (java.nio.file.Path p : ds2) {
+                    try {
+                        java.nio.file.attribute.FileTime ft = java.nio.file.Files.getLastModifiedTime(p);
+                        if (ft.toMillis() < cutoff) {
+                            java.nio.file.Files.deleteIfExists(p);
+                        }
+                    } catch (Exception ex) {
+                        // Swallow cleanup exceptions; logging isn't available yet.
+                    }
+                }
+            } catch (Exception ex) {
+                // ignore
+            }
+        } catch (Exception ex) {
+            // If anything here fails, continue — logging may not be configured yet.
+        }
+    }
+
     private static final Logger LOG = LoggerFactory.getLogger(Main.class);
     private static JFrame frame;
     private static JPanel contentPanel;
     private static JLineGraph sharedGraph;
+    /**
+     * Shared JLineGraph instance used across pages.
+     *
+     * Pages are constructed with the shared graph passed into their
+     * constructors (see recreatePages). The shared graph is registered
+     * with {@link #addSettingsChangeListener(SettingsChangeListener)} so
+     * it receives runtime preference updates. If a page creates its own
+     * page-local JLineGraph instance it should register it with
+     * {@link #addSettingsChangeListener(SettingsChangeListener)} and remove
+     * it when disposed to ensure it receives preference changes and to
+     * avoid leaking listeners.
+     */
     // current date used by the top bar (can be updated without recreating pages)
     private static java.time.LocalDate currentDate;
     private static String currentStudent;

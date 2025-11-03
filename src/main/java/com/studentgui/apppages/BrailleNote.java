@@ -40,7 +40,9 @@ public class BrailleNote extends JPanel implements com.studentgui.app.DateChange
     private final JLineGraph lineGraph; // Reference to the JLineGraph instance
     /** Display name of the selected student (may be null). */
     private String studentNameParam;
+    /** Header title label for this page. */
     private JLabel titleLabel;
+    /** Base page title string used when rendering the header (date appended). */
     private final String baseTitle = "BrailleNote Skills Progression";
     /** Session date associated with persisted progress. */
     private LocalDate dateParam;
@@ -331,10 +333,24 @@ public class BrailleNote extends JPanel implements com.studentgui.app.DateChange
                     codes[i] = this.parts[i][0];
                 }
                 lineGraph.updateWithGroupedData(allSkillValues, codes);
-                LOG.debug("Graph updated with data: {}", allSkillValues);
-                // Skip automatic saving of BrailleNote plot during refresh to avoid
-                // creating files during application startup.
-                LOG.debug("Skipping auto-save of BrailleNote chart during refresh for student={}", this.studentNameParam);
+                    // Write to the consolidated per-run data dumps file when enabled
+                    if (Boolean.parseBoolean(com.studentgui.apphelpers.Settings.get("dump.enabled", "false"))) {
+                        try {
+                            String appHome = System.getProperty("APP_HOME", com.studentgui.apphelpers.Helpers.APP_HOME.toString());
+                            String ts = System.getProperty("LOG_TS", String.valueOf(java.time.Instant.now().getEpochSecond()));
+                            java.nio.file.Path logDir = java.nio.file.Paths.get(appHome).resolve("logs");
+                            java.nio.file.Files.createDirectories(logDir);
+                            java.nio.file.Path logFile = logDir.resolve("data_dumps_" + ts + ".log");
+                            StringBuilder sb = new StringBuilder();
+                            sb.append("[BrailleNote]").append(System.lineSeparator());
+                            sb.append(java.time.Instant.now().toString()).append(" - student=").append(this.studentNameParam).append(System.lineSeparator());
+                            sb.append("data=").append(allSkillValues.toString()).append(System.lineSeparator());
+                            sb.append(System.lineSeparator());
+                            java.nio.file.Files.writeString(logFile, sb.toString(), java.nio.charset.StandardCharsets.UTF_8, java.nio.file.StandardOpenOption.CREATE, java.nio.file.StandardOpenOption.APPEND);
+                        } catch (java.io.IOException ioe) {
+                            LOG.trace("Unable to write BrailleNote load log: {}", ioe.toString());
+                        }
+                    }
             } else {
                 LOG.info("No data to plot.");
                 // Ensure the graph shows grouped placeholders matching the

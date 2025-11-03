@@ -37,13 +37,16 @@ public final class PreferencesDialog {
         boolean jitterEnabled = Boolean.parseBoolean(Settings.get("jitter.enabled", "true"));
         boolean deterministic = Boolean.parseBoolean(Settings.get("jitter.deterministic", "false"));
         String seed = Settings.get("jitter.seed", "");
+    boolean dumpsEnabled = Boolean.parseBoolean(Settings.get("dump.enabled", "false"));
 
         final JCheckBox jitterCb = new JCheckBox("Enable jitter", jitterEnabled);
         final JCheckBox detCb = new JCheckBox("Deterministic (seeded)", deterministic);
         final JTextField seedField = new JTextField(seed == null ? "" : seed, 12);
+    final JCheckBox dumpsCb = new JCheckBox("Enable per-page data dumps", dumpsEnabled);
 
         center.add(jitterCb);
         center.add(detCb);
+    center.add(dumpsCb);
         center.add(new JLabel("Seed:"));
         center.add(seedField);
 
@@ -55,6 +58,7 @@ public final class PreferencesDialog {
             Settings.put("jitter.enabled", String.valueOf(jitterCb.isSelected()));
             Settings.put("jitter.deterministic", String.valueOf(detCb.isSelected()));
             Settings.put("jitter.seed", seedField.getText().trim());
+            Settings.put("dump.enabled", String.valueOf(dumpsCb.isSelected()));
             // notify runtime listeners
             Main.notifySettingsChanged();
             dlg.dispose();

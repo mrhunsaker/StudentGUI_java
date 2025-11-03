@@ -42,7 +42,13 @@ public class Abacus extends JPanel implements com.studentgui.app.DateChangeListe
     private String studentNameParam;
     /** Session date associated with persisted progress. */
     private LocalDate dateParam;
+    /**
+     * Title label shown at the top of the page.
+     */
     private JLabel titleLabel;
+    /**
+     * Base title text used when rendering the page header (date suffixes are appended).
+     */
     private final String baseTitle = "Abacus Skills Progression";
 
     /**

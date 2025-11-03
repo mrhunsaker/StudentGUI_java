@@ -9,7 +9,18 @@ import java.util.List;
 import com.studentgui.apphelpers.Helpers;
 import com.studentgui.apppages.JLineGraph;
 
+/**
+ * Small command-line helper that renders a sample grouped chart and
+ * writes an output PNG to the app data folder. Intended for smoke
+ * testing chart rendering during development and CI.
+ */
 public class GroupedSmoke {
+    /**
+     * Entry point for the grouped smoke utility.
+     *
+     * @param args ignored
+     * @throws Exception on unexpected IO or charting errors
+     */
     public static void main(final String[] args) throws Exception {
         Helpers.createFolderHierarchy();
         JLineGraph graph = new JLineGraph();
@@ -35,5 +46,12 @@ public class GroupedSmoke {
         graph.saveChart(outFile, 800, 600);
         System.out.println("Grouped smoke wrote chart to: " + outFile.toAbsolutePath());
         System.out.println("Exists: " + java.nio.file.Files.exists(outFile));
+    }
+    /**
+     * Public no-arg constructor to document the utility nature of this class.
+     * Kept for completeness; all work is performed from {@link #main(String[])}.
+     */
+    public GroupedSmoke() {
+        // no state
     }
 }

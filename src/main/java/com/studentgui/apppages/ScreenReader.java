@@ -41,7 +41,9 @@ public class ScreenReader extends JPanel implements com.studentgui.app.DateChang
 
     /** Selected student's display name used for saves and plots (may be null). */
     private String studentNameParam;
+    /** Title label shown at the top of the page. */
     private JLabel titleLabel;
+    /** Base title used for the Screen Reader page header; date is appended when shown. */
     private final String baseTitle = "Screen Reader Skills Progression";
 
     /** Session date associated with entries made on this page. */

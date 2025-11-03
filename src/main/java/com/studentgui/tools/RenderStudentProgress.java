@@ -14,7 +14,18 @@ import com.studentgui.apphelpers.Database;
 import com.studentgui.apphelpers.Helpers;
 import com.studentgui.apppages.JLineGraph;
 
+/**
+ * Command-line tool to render a particular student's progress chart
+ * for a named progress type. Produces a PNG in the student's plots
+ * directory. Useful for offline rendering and debugging chart output.
+ */
 public class RenderStudentProgress {
+    /**
+     * Render and write a progress chart for the provided student and progress type.
+     *
+     * @param args first arg: student display name, second arg: progress type name
+     * @throws Exception on I/O or database access errors
+     */
     public static void main(final String[] args) throws Exception {
         if (args.length < 2) {
             System.out.println("Usage: RenderStudentProgress <Student Name> <ProgressTypeName>");
@@ -53,5 +64,11 @@ public class RenderStudentProgress {
         Path file = out.resolve(pt + "-render-" + LocalDate.now().format(df) + ".png");
         g.saveChart(file, 1000, 800);
         System.out.println("Wrote: " + file.toAbsolutePath());
+    }
+    /**
+     * Explicit no-arg constructor with documentation to avoid default-constructor javadoc warnings.
+     */
+    public RenderStudentProgress() {
+        // utility
     }
 }

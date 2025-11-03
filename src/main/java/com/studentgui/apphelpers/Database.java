@@ -292,11 +292,31 @@ public class Database {
     }
 
     /**
-     * Simple holder for the result rows and their corresponding session dates.
+     * Simple, immutable holder for time-series assessment results.
+     *
+     * <p>Contains a chronologically ordered list of session {@code dates}
+     * and a parallel list of integer score rows. Each entry in {@code rows}
+     * corresponds to the parts for a progress type in canonical order.
      */
     public static class ResultsWithDates {
+        /**
+         * Ordered session dates (oldest first). Can be empty when no sessions exist.
+         */
         public final java.util.List<java.time.LocalDate> dates;
+
+        /**
+         * Parallel rows of integer scores. Each inner list corresponds to the
+         * assessment parts for a single session in canonical part order. May be
+         * empty when there are no sessions.
+         */
         public final java.util.List<java.util.List<Integer>> rows;
+
+        /**
+         * Create a ResultsWithDates instance.
+         *
+         * @param dates ordered session dates (oldest-first)
+         * @param rows parallel list of score rows matching {@code dates}
+         */
         public ResultsWithDates(java.util.List<java.time.LocalDate> dates, java.util.List<java.util.List<Integer>> rows) {
             this.dates = dates;
             this.rows = rows;

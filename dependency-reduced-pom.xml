@@ -97,7 +97,7 @@
               </filters>
               <transformers>
                 <transformer>
-                  <mainClass>com.studentgui.app.Main</mainClass>
+                  <mainClass>com.studentgui.bootstrap.Bootstrap</mainClass>
                   <manifestEntries>
                     <Built-By>Michael Ryan Hunsaker, M.Ed., Ph.D.</Built-By>
                   </manifestEntries>

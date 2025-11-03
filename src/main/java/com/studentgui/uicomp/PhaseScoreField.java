@@ -85,7 +85,7 @@ public class PhaseScoreField extends JPanel {
             // Field may not exist on some LAF/editor implementations. Log this at most once
             // to avoid excessive noise during automated test runs.
             if (FONT_ADJUST_LOGGED.compareAndSet(false, true)) {
-                LOG.debug("Could not adjust spinner editor textField font (field missing or inaccessible)");
+                LOG.trace("Could not adjust spinner editor textField font (field missing or inaccessible)");
             }
         }
         editor.setPreferredSize(new Dimension(48, 20));
@@ -225,9 +225,9 @@ public class PhaseScoreField extends JPanel {
             java.awt.Component ed = spinner.getEditor();
             if (ed instanceof javax.swing.JSpinner.DefaultEditor editorComp) {
                 javax.swing.JFormattedTextField tf = editorComp.getTextField();
-                try { tf.commitEdit(); } catch (java.text.ParseException pe) { LOG.debug("Spinner editor parse error", pe); }
+                try { tf.commitEdit(); } catch (java.text.ParseException pe) { LOG.trace("Spinner editor parse error", pe); }
             }
-    } catch (IllegalArgumentException | IllegalStateException re) { LOG.debug("Unexpected error committing spinner edit", re); }
+    } catch (IllegalArgumentException | IllegalStateException re) { LOG.trace("Unexpected error committing spinner edit", re); }
         return (Integer) spinner.getValue();
     }
 

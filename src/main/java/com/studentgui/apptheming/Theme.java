@@ -250,6 +250,65 @@ public class Theme {
         }
         themesMenu.add(materialGroup);
 
+        // Material Theme UI Lite (popular collection) - add specific known classes when available
+        JMenu materialLiteGroup = new JMenu("Material Theme UI Lite");
+        String[][] lite = new String[][]{
+            {"Arc Dark (Material)", "com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatArcDarkIJTheme"},
+            {"Arc Dark Contrast (Material)", "com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatArcDarkContrastIJTheme"},
+            {"Atom One Dark (Material)", "com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatAtomOneDarkIJTheme"},
+            {"Atom One Dark Contrast (Material)", "com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatAtomOneDarkContrastIJTheme"},
+            {"Atom One Light (Material)", "com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatAtomOneLightIJTheme"},
+            {"Atom One Light Contrast (Material)", "com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatAtomOneLightContrastIJTheme"},
+            {"Dracula (Material)", "com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatDraculaIJTheme"},
+            {"Dracula Contrast (Material)", "com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatDraculaContrastIJTheme"},
+            {"GitHub (Material)", "com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatGitHubIJTheme"},
+            {"GitHub Contrast (Material)", "com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatGitHubContrastIJTheme"},
+            {"GitHub Dark (Material)", "com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatGitHubDarkIJTheme"},
+            {"GitHub Dark Contrast (Material)", "com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatGitHubDarkContrastIJTheme"},
+            {"Light Owl (Material)", "com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatLightOwlIJTheme"},
+            {"Light Owl Contrast (Material)", "com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatLightOwlContrastIJTheme"},
+            {"Material Darker (Material)", "com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatMaterialDarkerIJTheme"},
+            {"Material Darker Contrast (Material)", "com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatMaterialDarkerContrastIJTheme"},
+            {"Material Deep Ocean (Material)", "com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatMaterialDeepOceanIJTheme"},
+            {"Material Deep Ocean Contrast (Material)", "com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatMaterialDeepOceanContrastIJTheme"},
+            {"Material Lighter (Material)", "com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatMaterialLighterIJTheme"},
+            {"Material Lighter Contrast (Material)", "com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatMaterialLighterContrastIJTheme"},
+            {"Material Oceanic (Material)", "com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatMaterialOceanicIJTheme"},
+            {"Material Oceanic Contrast (Material)", "com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatMaterialOceanicContrastIJTheme"},
+            {"Material Palenight (Material)", "com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatMaterialPalenightIJTheme"},
+            {"Material Palenight Contrast (Material)", "com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatMaterialPalenightContrastIJTheme"},
+            {"Monokai Pro (Material)", "com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatMonokaiProIJTheme"},
+            {"Monokai Pro Contrast (Material)", "com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatMonokaiProContrastIJTheme"},
+            {"Moonlight (Material)", "com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatMoonlightIJTheme"},
+            {"Moonlight Contrast (Material)", "com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatMoonlightContrastIJTheme"},
+            {"Night Owl (Material)", "com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatNightOwlIJTheme"},
+            {"Night Owl Contrast (Material)", "com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatNightOwlContrastIJTheme"},
+            {"Solarized Dark (Material)", "com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatSolarizedDarkIJTheme"},
+            {"Solarized Dark Contrast (Material)", "com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatSolarizedDarkContrastIJTheme"},
+            {"Solarized Light (Material)", "com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatSolarizedLightIJTheme"},
+            {"Solarized Light Contrast (Material)", "com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatSolarizedLightContrastIJTheme"}
+        };
+        for (String[] entry : lite) {
+            final String label = entry[0];
+            final String className = entry[1];
+            try {
+                Class.forName(className);
+                JMenuItem mi = new JMenuItem(new AbstractAction(label) {
+                    @Override public void actionPerformed(final ActionEvent e) { Main.setTheme(className); com.studentgui.apphelpers.Settings.put("theme", className); }
+                });
+                mi.setIcon(makeIcon(new Color(0x666666), 10));
+                mi.getAccessibleContext().setAccessibleName(className);
+                mi.getAccessibleContext().setAccessibleDescription("Apply " + className);
+                materialLiteGroup.add(mi);
+            } catch (ClassNotFoundException cnfe) {
+                // class not on classpath - ignore
+            }
+        }
+        // Only add the group if at least one theme was found
+        if (materialLiteGroup.getMenuComponentCount() > 0) {
+            themesMenu.add(materialLiteGroup);
+        }
+
         mb.add(themesMenu);
         return mb;
     }

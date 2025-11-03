@@ -37,7 +37,9 @@ public class Keyboarding extends JPanel implements com.studentgui.app.DateChange
 
     /** Selected student's display name for saves/refreshes (may be null). */
     private String studentNameParam;
+    /** Page header label. */
     private JLabel titleLabel;
+    /** Base title text for the Keyboarding page; date suffix appended in UI. */
     private final String baseTitle = "Keyboarding Skills";
 
     /** Session date associated with persisted keyboarding results. */

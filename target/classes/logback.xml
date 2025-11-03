@@ -1,0 +1,50 @@
+<configuration>
+    <!-- Default application logging configuration: only WARN and ERROR will be emitted. -->
+
+    <!-- Application home used for file-based logs; falls back to relative app_home directory. -->
+    <property name="APP_HOME" value="app_home" />
+
+    <!-- Pattern used for console and file logging -->
+    <property name="PATTERN" value="%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n" />
+
+    <!-- Provide a logback-side timestamp for per-run naming when LOG_TS system property
+        is not available early. This creates a stable per-run identifier accessible as
+        ${LOG_TS} inside this configuration. -->
+    <timestamp key="LOG_TS" datePattern="yyyyMMddHHmmss"/>
+
+    <!-- Console appender -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${PATTERN}</pattern>
+        </encoder>
+    </appender>
+
+    <!-- Rolling file appender placed under ${APP_HOME}/logs/log_${LOG_TS}.log
+         The LOG_TS system property is set at startup to the unix epoch seconds
+         for the current run so each run writes to a distinct file. Older files
+         are cleaned up on startup by application code (retain last 7 days). -->
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${APP_HOME}/logs/log_${LOG_TS}.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <!-- keep indexed files per run; roll when > 10MB -->
+            <fileNamePattern>${APP_HOME}/logs/log_${LOG_TS}.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <maxFileSize>10MB</maxFileSize>
+            <maxHistory>30</maxHistory>
+            <totalSizeCap>1GB</totalSizeCap>
+        </rollingPolicy>
+        <encoder>
+            <pattern>${PATTERN}</pattern>
+        </encoder>
+    </appender>
+
+    <!-- Root logger at WARN: this will suppress INFO/DEBUG across the app. -->
+    <root level="WARN">
+        <appender-ref ref="CONSOLE" />
+        <appender-ref ref="FILE" />
+    </root>
+
+    <!-- Optional: keep framework noise low (jdbc, hibernate, etc) -->
+    <logger name="org.hibernate" level="WARN" />
+    <logger name="org.springframework" level="WARN" />
+    <logger name="org.apache" level="WARN" />
+</configuration>

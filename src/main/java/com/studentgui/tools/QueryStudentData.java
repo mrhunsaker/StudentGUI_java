@@ -9,7 +9,19 @@ import java.util.List;
 import com.studentgui.apphelpers.Database;
 import com.studentgui.apphelpers.Helpers;
 
+/**
+ * Development utility to inspect available students and their recent
+ * progress session rows. Prints basic statistics to stdout and is
+ * intended for debugging or manual data inspection.
+ */
 public class QueryStudentData {
+    /**
+     * Command-line entry point. Prints progress types and a sample row for
+     * the specified or first-known student.
+     *
+     * @param args optional first argument is student display name
+     * @throws Exception on database errors
+     */
     public static void main(final String[] args) throws Exception {
         Helpers.createFolderHierarchy();
         List<String> students = Helpers.getStudents();
@@ -56,5 +68,11 @@ public class QueryStudentData {
                 }
             }
         }
+    }
+    /**
+     * No-op public constructor to document this class as a small utility.
+     */
+    public QueryStudentData() {
+        // utility class; no state
     }
 }

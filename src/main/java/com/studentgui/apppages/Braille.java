@@ -44,7 +44,9 @@ public class Braille extends JPanel implements com.studentgui.app.DateChangeList
     private String studentNameParam;
     /** Session date used when creating progress sessions. */
     private LocalDate dateParam;
+    /** Title label component displayed in the page header. */
     private JLabel titleLabel;
+    /** Base title text for the Braille page; a date suffix may be appended for display. */
     private final String baseTitle = "Braille Skills Progression";
 
     /**
@@ -355,11 +357,25 @@ public class Braille extends JPanel implements com.studentgui.app.DateChangeList
             // For now use a placeholder when no student is selected.
             if (allSkillValues != null && !allSkillValues.isEmpty()) {
                 lineGraph.updateWithGroupedData(allSkillValues, this.partCodes);
-                LOG.debug("Graph updated with data: {}", allSkillValues);
-                // Save static PNG to student's plots folder and open it
-                // Skipping automatic saving of Braille plot during refresh to avoid
-                // creating files on application startup.
-                LOG.debug("Skipping auto-save of Braille chart during refresh for student={}", this.studentNameParam);
+                // Write to the consolidated per-run data dumps file when enabled
+                if (Boolean.parseBoolean(com.studentgui.apphelpers.Settings.get("dump.enabled", "false"))) {
+                    try {
+                        String appHome = System.getProperty("APP_HOME", com.studentgui.apphelpers.Helpers.APP_HOME.toString());
+                        String ts = System.getProperty("LOG_TS", String.valueOf(java.time.Instant.now().getEpochSecond()));
+                        java.nio.file.Path logDir = java.nio.file.Paths.get(appHome).resolve("logs");
+                        java.nio.file.Files.createDirectories(logDir);
+                        java.nio.file.Path logFile = logDir.resolve("data_dumps_" + ts + ".log");
+                        StringBuilder sb = new StringBuilder();
+                        java.time.format.DateTimeFormatter dtf = java.time.format.DateTimeFormatter.ISO_DATE_TIME;
+                        sb.append("[Braille]").append(System.lineSeparator());
+                        sb.append(java.time.LocalDateTime.now().format(dtf)).append(" - student=").append(this.studentNameParam).append(System.lineSeparator());
+                        sb.append("data=").append(allSkillValues.toString()).append(System.lineSeparator());
+                        sb.append(System.lineSeparator());
+                        java.nio.file.Files.writeString(logFile, sb.toString(), java.nio.charset.StandardCharsets.UTF_8, java.nio.file.StandardOpenOption.CREATE, java.nio.file.StandardOpenOption.APPEND);
+                    } catch (java.io.IOException ioe) {
+                        LOG.trace("Unable to write braille load log: {}", ioe.toString());
+                    }
+                }
             } else {
                 LOG.info("No data to plot; showing grouped placeholders.");
                 lineGraph.showEmptyGrouped(this.partCodes);
