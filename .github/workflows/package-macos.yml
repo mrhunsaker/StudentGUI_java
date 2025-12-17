@@ -1,0 +1,70 @@
+name: Package macOS (DMG)
+
+on:
+  workflow_dispatch: {}
+
+env:
+  APP_NAME: StudentDataGUI
+
+jobs:
+  macos-dmg:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21 (with jpackage)
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+
+      - name: Resolve project meta
+        id: meta
+        shell: bash
+        run: |
+          set -euo pipefail
+          VERSION=$(mvn -q -Dexec.cleanupDaemonThreads=false -DforceStdout help:evaluate -Dexpression=project.version)
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "vversion=v$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Build JAR
+        run: mvn -B -U -e -DskipTests package
+
+      - name: Generate .icns from PNG set
+        run: |
+          chmod +x examples/scripts/create-mac-iconset.sh
+          # Use the provided PNGs as source; output an icns in the workspace root
+          examples/scripts/create-mac-iconset.sh examples/icons scatter-plot.icns
+
+      - name: Locate built JAR
+        id: jar
+        run: |
+          set -euo pipefail
+          JAR=$(ls -t target/*-shaded.jar 2>/dev/null | head -n1)
+          if [ -z "$JAR" ]; then JAR=$(ls -t target/*.jar | grep -vE 'sources|original|tests' | head -n1); fi
+          if [ -z "$JAR" ]; then echo "No JAR found in target" >&2; exit 1; fi
+          echo "path=$JAR" >> "$GITHUB_OUTPUT"
+          echo "file=$(basename "$JAR")" >> "$GITHUB_OUTPUT"
+
+      - name: Create output directory
+        run: mkdir -p dist/macos
+
+      - name: Build DMG (jpackage)
+        run: |
+          "$JAVA_HOME/bin/jpackage" \
+            --type dmg \
+            --input target \
+            --main-jar "${{ steps.jar.outputs.file }}" \
+            --name "$APP_NAME" \
+            --app-version "${{ steps.meta.outputs.version }}" \
+            --icon scatter-plot.icns \
+            --dest dist/macos
+          f=$(ls -t dist/macos/*.dmg | head -n1); if [ -n "$f" ]; then mv "$f" "dist/macos/${APP_NAME}-${{ steps.meta.outputs.vversion }}.dmg"; fi
+
+      - name: Upload DMG artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-dmg
+          path: dist/macos/*.dmg

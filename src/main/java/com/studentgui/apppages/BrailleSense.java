@@ -24,12 +24,50 @@ import org.slf4j.LoggerFactory;
 import com.studentgui.uicomp.PhaseScoreField;
 
 /**
- * BrailleSense skills progression UI page.
- * <p>
- * Presents a compact set of inputs keyed by part code (e.g. P1_1) and allows
- * saving those values into the canonical database schema. A shared
- * {@link JLineGraph} instance is used to visualize recent results.
- * </p>
+ * HIMS BrailleSense productivity device proficiency assessment page.
+ *
+ * <p>Evaluates student competency with the HIMS BrailleSense family of refreshable braille
+ * notetakers (BrailleSense Polaris, BrailleSense 6, etc.) across 52 skills organized into
+ * 12 functional domains. The BrailleSense assessment structure mirrors {@link BrailleNote}
+ * to allow cross-device skill comparison.</p>
+ *
+ * <p><b>Device Family Context:</b> The BrailleSense is a portable braille notetaker with
+ * refreshable braille display, perkins-style keyboard, and integrated productivity software.
+ * It runs proprietary HIMS firmware and includes word processing, email, web browsing,
+ * media playback, and educational applications.</p>
+ *
+ * <p><b>Assessment Phases (12 domains, 52 skills):</b></p>
+ * <ul>
+ *   <li><b>Phase 1:</b> Device fundamentals (layout, setup, navigation, file management, core apps)</li>
+ *   <li><b>Phase 2:</b> Productivity suite (calendar, email, web, calculator, word processor)</li>
+ *   <li><b>Phase 3:</b> Advanced apps (presentations, code editor, third-party integration, braille I/O)</li>
+ *   <li><b>Phase 4:</b> Cloud integration and advanced file management</li>
+ *   <li><b>Phase 5:</b> Collaboration, export/import, printing, backup workflows</li>
+ *   <li><b>Phase 6:</b> App installation, updates, troubleshooting</li>
+ *   <li><b>Phase 7:</b> Automation (custom shortcuts, macros, scripting)</li>
+ *   <li><b>Phase 8:</b> Peripheral connectivity (Bluetooth, USB, displays, audio/video)</li>
+ *   <li><b>Phase 9:</b> Security, user accounts, parental controls, network settings</li>
+ *   <li><b>Phase 10:</b> Speech customization (TTS settings, voice profiles, languages)</li>
+ *   <li><b>Phase 11:</b> Device maintenance (firmware, diagnostics, logs, support, warranty)</li>
+ *   <li><b>Phase 12:</b> Community resources (online help, forums, feedback channels)</li>
+ * </ul>
+ *
+ * <p><b>Data Management and Report Generation:</b></p>
+ * <ul>
+ *   <li>Scores captured via {@link PhaseScoreField} components (integer 0–4 typical)</li>
+ *   <li>Persisted to normalized schema via {@link com.studentgui.apphelpers.Database#insertAssessmentResults}</li>
+ *   <li>JSON export: {@code StudentDataFiles/<student>/Sessions/BrailleSense/BrailleSense-<sessionId>-<timestamp>.json}</li>
+ *   <li>Phase-grouped time-series plots: {@code plots/BrailleSense-<sessionId>-<date>-P<N>.png} (12 phase groups)</li>
+ *   <li>Markdown and HTML reports with embedded plots and color-coded legends</li>
+ * </ul>
+ *
+ * <p>The shared {@link JLineGraph} visualizes recent session trends grouped by phase prefix.
+ * This page operates on static student/date parameters and does not implement listener interfaces.</p>
+ *
+ * @see com.studentgui.apphelpers.Database
+ * @see JLineGraph
+ * @see PhaseScoreField
+ * @see BrailleNote
  */
 public class BrailleSense extends JPanel {
     private static final Logger LOG = LoggerFactory.getLogger(BrailleSense.class);

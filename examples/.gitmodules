@@ -1,0 +1,3 @@
+[submodule "Julia_version"]
+	path = Julia_version
+	url = https://github.com/mrhunsaker/Graph_Digitizer.git

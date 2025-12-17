@@ -22,7 +22,34 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Observations page for recording freeform observational notes.
+ * Observational notes page for documenting unstructured student behaviors and progress.
+ *
+ * <p>Similar to {@link SessionNotes} but intended for ongoing observational records rather than
+ * post-session reflections. Provides a multi-line text area for educators to capture qualitative
+ * observations throughout or across multiple sessions.</p>
+ *
+ * <p><b>Typical Use Cases:</b></p>
+ * <ul>
+ *   <li>Recording specific skill demonstrations observed in real-time (e.g., "Student independently located Braille cell for letter 'G' after 2 attempts")</li>
+ *   <li>Documenting spontaneous behaviors or breakthroughs (e.g., "First time student used VoiceOver gestures without prompting")</li>
+ *   <li>Noting patterns over time (e.g., "Third session this week where student requested breaks during Abacus work")</li>
+ *   <li>Functional vision assessments and CVI-related observations</li>
+ * </ul>
+ *
+ * <p><b>Data Persistence:</b></p>
+ * <ul>
+ *   <li>Notes saved via {@link com.studentgui.apphelpers.Database#saveSessionNotes} to {@code ProgressSession.notes} column</li>
+ *   <li>Associated with an Observations progress type for categorization</li>
+ *   <li>Dummy assessment result (code="OBS_NOTE", score=0) inserted to satisfy schema constraints</li>
+ *   <li>JSON export: {@code StudentDataFiles/<student>/Sessions/Observations/Observations-<sessionId>-<timestamp>.json}</li>
+ * </ul>
+ *
+ * <p>No plots or quantitative reports are generated. This page does not implement listener interfaces
+ * and operates on static student/date parameters set at construction time.</p>
+ *
+ * @see com.studentgui.apphelpers.Database#saveSessionNotes
+ * @see com.studentgui.apphelpers.dto.NotesPayload
+ * @see SessionNotes
  */
 public class Observations extends JPanel {
     private static final Logger LOG = LoggerFactory.getLogger(Observations.class);

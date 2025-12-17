@@ -24,12 +24,76 @@ import org.slf4j.LoggerFactory;
 import com.studentgui.uicomp.PhaseScoreField;
 
 /**
- * iOS / iPadOS skills progression page.
- * <p>
- * Presents a map of device and app related skills keyed by part codes and
- * allows saving and plotting of recent assessment sessions using the shared
- * {@link JLineGraph} instance.
- * </p>
+ * iOS and iPadOS assistive technology proficiency assessment page.
+ *
+ * <p>Provides structured evaluation of iOS/iPadOS device usage skills across
+ * 41 competencies organized into 6 functional domains:</p>
+ *
+ * <ul>
+ *   <li><b>Phase 1 (P1_1–P1_9): Device Basics and VoiceOver Fundamentals</b>
+ *     <ul>
+ *       <li>Power management, VoiceOver activation/deactivation</li>
+ *       <li>Core gestures (tap, swipe, rotor) for icon navigation and interaction</li>
+ *       <li>Home screen management, document handling, keyboarding basics</li>
+ *       <li>Control Center, App Switcher, and system-level navigation</li>
+ *     </ul>
+ *   </li>
+ *   <li><b>Phase 2 (P2_1–P2_6): Word Processing and Document Creation</b>
+ *     <ul>
+ *       <li>Creating, editing, and saving text documents</li>
+ *       <li>Reading and navigating within documents using VoiceOver</li>
+ *       <li>Menu bar interaction, text/image copy-paste workflows</li>
+ *       <li>Proofreading and editing strategies with assistive technology</li>
+ *     </ul>
+ *   </li>
+ *   <li><b>Phase 3 (P3_1–P3_5): Spreadsheet and Data Visualization</b>
+ *     <ul>
+ *       <li>Spreadsheet concepts and terminology (rows, columns, cells, formulas)</li>
+ *       <li>Data entry, editing, and spreadsheet navigation with VoiceOver</li>
+ *       <li>Creating and interpreting charts/graphs from data</li>
+ *     </ul>
+ *   </li>
+ *   <li><b>Phase 4 (P4_1–P4_5): Presentation Software</b>
+ *     <ul>
+ *       <li>Creating and structuring presentations with accessible workflows</li>
+ *       <li>Editing slides, adding multimedia content (images, audio)</li>
+ *       <li>Presenting slides effectively using assistive technology</li>
+ *       <li>Sharing and exporting presentations</li>
+ *     </ul>
+ *   </li>
+ *   <li><b>Phase 5 (P5_1–P5_7): Digital Citizenship and Online Safety</b>
+ *     <ul>
+ *       <li>Acceptable Use Policies, digital citizenship principles</li>
+ *       <li>Online safety, privacy awareness, copyright/plagiarism concepts</li>
+ *       <li>Recognizing and responding to cyberbullying</li>
+ *     </ul>
+ *   </li>
+ *   <li><b>Phase 6 (P6_1–P6_11): Device Management and Connectivity</b>
+ *     <ul>
+ *       <li>App installation, updates, deletion, storage management</li>
+ *       <li>Accessibility settings configuration and customization</li>
+ *       <li>Screen Time controls, Parental Controls</li>
+ *       <li>Connectivity features: Bluetooth, Wi-Fi, AirDrop, Personal Hotspot</li>
+ *     </ul>
+ *   </li>
+ * </ul>
+ *
+ * <p><b>Data Management and Artifacts:</b></p>
+ * <ul>
+ *   <li>Scores captured via {@link PhaseScoreField} components (typically 0–4 integer range)</li>
+ *   <li>Persisted to normalized schema using {@link com.studentgui.apphelpers.Database#insertAssessmentResults}</li>
+ *   <li>JSON session export: {@code StudentDataFiles/<student>/Sessions/iOS/iOS-<sessionId>-<timestamp>.json}</li>
+ *   <li>Phase-grouped time-series PNG plots saved to {@code plots/} directory</li>
+ *   <li>Markdown and HTML reports generated with embedded plots and color-coded legends</li>
+ * </ul>
+ *
+ * <p>The shared {@link JLineGraph} visualizes recent session trends grouped by phase prefix
+ * to maintain chart readability. This page operates on static student/date parameters and
+ * does not implement listener interfaces for dynamic updates.</p>
+ *
+ * @see com.studentgui.apphelpers.Database
+ * @see JLineGraph
+ * @see PhaseScoreField
  */
 public class IOS extends JPanel {
     private static final Logger LOG = LoggerFactory.getLogger(IOS.class);

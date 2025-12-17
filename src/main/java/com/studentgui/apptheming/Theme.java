@@ -29,11 +29,55 @@ import javax.swing.KeyStroke;
 import com.studentgui.app.Main;
 
 /**
- * Application theming helpers (menu and look-and-feel wiring).
- */
-/**
- * Small theming and menu helper. Constructs a simple Navigate menu used by
- * the main application window.
+ * Application theming and menu bar construction utilities.
+ *
+ * <p>Provides centralized menu bar factory for the main application window with
+ * keyboard shortcuts, mnemonics, and accessibility support. The menu structure
+ * organizes assessment pages into logical categories:</p>
+ *
+ * <ul>
+ *   <li><b>Navigate Menu:</b> Primary navigation menu containing:
+ *     <ul>
+ *       <li><b>Home:</b> Returns to homepage (Ctrl+Alt+H)</li>
+ *       <li><b>Tactile Submenu:</b> Braille and Abacus skills pages (alphabetical)</li>
+ *       <li><b>Technology Submenu:</b> Device-specific pages (BrailleNote, BrailleSense, iOS, ScreenReader, etc.)</li>
+ *       <li><b>Communication Submenu:</b> Contact Log and Session Notes</li>
+ *       <li><b>Other Skills Submenu:</b> CVI, Digital Literacy, Keyboarding, Observations, Instructional Materials</li>
+ *     </ul>
+ *   </li>
+ * </ul>
+ *
+ * <p><b>Accessibility Features:</b></p>
+ * <ul>
+ *   <li>All menu items include accessible names and descriptions</li>
+ *   <li>Keyboard shortcuts use Ctrl+Alt+Letter combinations to avoid conflicts</li>
+ *   <li>Mnemonics provided for primary menu items (Alt+H for Home, etc.)</li>
+ *   <li>Color-coded icons generated programmatically via {@link #makeIcon(Color, int)}</li>
+ * </ul>
+ *
+ * <p><b>Icon Generation:</b> Menu items display small colored square icons for
+ * visual differentiation. Icons are generated at runtime as 12×12px {@link BufferedImage}
+ * instances with anti-aliased rendering for smooth appearance across themes.</p>
+ *
+ * <p><b>Menu Structure Rationale:</b></p>
+ * <ul>
+ *   <li>Tactile skills (Braille, Abacus) grouped separately from technology devices</li>
+ *   <li>Technology submenu organized by device type (notetakers, mobile OS, desktop screen readers)</li>
+ *   <li>Communication tools (Contact Log, Session Notes) kept together for workflow consistency</li>
+ *   <li>Remaining assessment pages grouped under "Other Skills" for flexibility</li>
+ * </ul>
+ *
+ * <p><b>Navigation Integration:</b> All menu items invoke the main navigation logic in {@link com.studentgui.app.Main}
+ * to switch the main content panel. Page identifiers are lowercase strings matching page class names
+ * (e.g., "braille", "abacus", "braillenote").</p>
+ *
+ * <p><b>Theme Management:</b> Currently limited to menu bar construction. Future expansion
+ * may include FlatLaf theme switching, custom color schemes, or icon set selection.</p>
+ *
+ * @see com.studentgui.app.Main
+ * @see javax.swing.JMenuBar
+ * @see javax.swing.JMenu
+ * @see javax.swing.JMenuItem
  */
 public class Theme {
     /**

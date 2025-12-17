@@ -21,7 +21,35 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Session notes editor page.
+ * Freeform session notes editor for general observations and reflections.
+ *
+ * <p>Provides a simple multi-line text area for educators to record unstructured notes
+ * about a student session. This complements the structured assessment pages (Braille, Abacus, etc.)
+ * by allowing qualitative observations, anecdotal records, and contextual details that don't
+ * fit into numeric scoring fields.</p>
+ *
+ * <p><b>Typical Use Cases:</b></p>
+ * <ul>
+ *   <li>Recording behavioral observations (e.g., "Student showed increased frustration with Nemeth fractions today")</li>
+ *   <li>Documenting environmental factors affecting performance (e.g., "Noisy classroom due to construction")</li>
+ *   <li>Noting equipment issues or accommodations used (e.g., "Switched to Braille Sense due to BrailleNote malfunction")</li>
+ *   <li>General reflections or instructional notes for future reference</li>
+ * </ul>
+ *
+ * <p><b>Data Storage:</b></p>
+ * <ul>
+ *   <li>Notes persisted via {@link com.studentgui.apphelpers.Database#saveSessionNotes} to {@code ProgressSession.notes} column</li>
+ *   <li>Associated with a SessionNotes progress type and session ID for consistent querying</li>
+ *   <li>JSON export: {@code StudentDataFiles/<student>/Sessions/SessionNotes/SessionNotes-<sessionId>-<timestamp>.json}</li>
+ *   <li>No plots or reports generated (text-only data)</li>
+ * </ul>
+ *
+ * <p>The shared {@link JLineGraph} component is present for UI layout consistency but remains
+ * empty (session notes are not quantitative data). This page does not implement listener interfaces
+ * as it operates on static student/date parameters provided at construction time.</p>
+ *
+ * @see com.studentgui.apphelpers.Database#saveSessionNotes
+ * @see com.studentgui.apphelpers.dto.NotesPayload
  */
 public class SessionNotes extends JPanel {
     private static final Logger LOG = LoggerFactory.getLogger(SessionNotes.class);

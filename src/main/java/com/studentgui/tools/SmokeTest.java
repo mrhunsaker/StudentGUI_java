@@ -10,11 +10,41 @@ import com.studentgui.apphelpers.Helpers;
 import com.studentgui.apppages.JLineGraph;
 
 /**
- * Minimal smoke test to exercise the chart rendering and file export.
- * <p>
- * Generates deterministic sample data, renders it via {@code JLineGraph}
- * and writes a PNG under the app_home plots directory.
- * </p>
+ * Minimal automated smoke test for chart rendering and PNG export functionality.
+ *
+ * <p>Generates deterministic synthetic assessment data, renders it via {@link JLineGraph},
+ * and writes a PNG to the app data folder. Used to verify:</p>
+ * <ul>
+ *   <li>JFreeChart rendering pipeline functions correctly</li>
+ *   <li>PNG export via {@link JLineGraph#saveChart} produces valid image files</li>
+ *   <li>File I/O permissions and folder creation work as expected</li>
+ *   <li>Chart layout and visual appearance match expectations (manual review)</li>
+ * </ul>
+ *
+ * <p><b>Usage:</b></p>
+ * <pre>{@code
+ * java -cp StudentDataGUI.jar com.studentgui.tools.SmokeTest
+ * }</pre>
+ *
+ * <p><b>Expected Output:</b></p>
+ * <pre>
+ * Smoke test wrote chart to: /path/to/app_home/StudentDataFiles/Smoke_Test/plots/SmokeTest-2024-01-15.png
+ * Exists: true
+ * </pre>
+ *
+ * <p><b>Test Data:</b> Generates 3 synthetic sessions with 28 skills each, using
+ * the formula {@code (skillIndex + sessionIndex) % 5} to produce deterministic
+ * values in the 0–4 range.</p>
+ *
+ * <p><b>Output Location:</b> {@code app_home/StudentDataFiles/Smoke_Test/plots/SmokeTest-<ISO_DATE>.png}</p>
+ *
+ * <p><b>Validation:</b> Success is indicated by "Exists: true" output and a valid
+ * 800×400px PNG file at the reported path. Visual inspection of the chart should show
+ * 3 line series (2 gray, 1 black) with colored background bands.</p>
+ *
+ * @see com.studentgui.apppages.JLineGraph#updateWithData
+ * @see com.studentgui.apppages.JLineGraph#saveChart
+ * @see com.studentgui.apphelpers.Helpers#createFolderHierarchy()
  */
 public class SmokeTest {
     /**

@@ -19,11 +19,31 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Instructional materials viewer panel.
- * <p>
- * Displays a read-only listing or links to instructional resources. This is
- * primarily a static help/documentation view and does not persist data.
- * </p>
+ * Instructional materials and resources reference page.
+ *
+ * <p>Provides a simple placeholder panel for displaying links, documentation, or references
+ * to external instructional resources. This is a static informational view without data
+ * persistence or assessment functionality.</p>
+ *
+ * <p><b>Current Implementation:</b></p>
+ * <ul>
+ *   <li>Read-only text area with placeholder content</li>
+ *   <li>Refresh button (currently logs action but performs no operation)</li>
+ *   <li>No database persistence or session tracking</li>
+ *   <li>Intended for future expansion with resource links, PDF viewers, or material management UI</li>
+ * </ul>
+ *
+ * <p><b>Potential Future Enhancements:</b></p>
+ * <ul>
+ *   <li>Dynamic listing of student-specific materials from {@code StudentDataFiles/<student>/InstructionalMaterials/}</li>
+ *   <li>PDF preview integration for viewing documents inline</li>
+ *   <li>File upload and organization capabilities</li>
+ *   <li>Links to online resources (curriculum guides, training videos, vendor documentation)</li>
+ *   <li>Material assignment workflow (track which materials were provided to student/family)</li>
+ * </ul>
+ *
+ * <p>This page does not implement listener interfaces and does not interact with the database.
+ * It serves as a navigation target and placeholder for future resource management features.</p>
  */
 public class InstructionalMaterials extends JPanel {
     private static final Logger LOG = LoggerFactory.getLogger(InstructionalMaterials.class);

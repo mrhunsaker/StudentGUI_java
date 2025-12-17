@@ -22,12 +22,47 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Braille skills progression UI page.
+ * Braille skills progression assessment page.
  *
- * Displays a list of braille-related skill input fields and provides controls
- * to persist entries to the normalized database schema. The page updates a
- * shared {@link JLineGraph} to visualize recent results for the selected
- * student.
+ * <p>Provides a comprehensive user interface for tracking student proficiency across
+ * 64 standardized Braille skills organized into 8 progressive phases following the
+ * Mangold Developmental Program sequence:</p>
+ *
+ * <ul>
+ *   <li><b>Phase 1 (P1_1–P1_4):</b> Foundational tracking and discrimination skills</li>
+ *   <li><b>Phase 2 (P2_1–P2_15):</b> Mangold letter progression (G C L → V J)</li>
+ *   <li><b>Phase 3 (P3_1–P3_15):</b> Contractions, wordsigns, and Grade 2 Braille basics</li>
+ *   <li><b>Phase 4 (P4_1–P4_4):</b> Indicators (Grade 1, capitals, numeric mode, typeform)</li>
+ *   <li><b>Phase 5 (P5_1–P5_4):</b> Document formatting (page numbers, headings, lists, poetry)</li>
+ *   <li><b>Phase 6 (P6_1–P6_7):</b> Basic Nemeth Math Code (operations, shapes, fractions)</li>
+ *   <li><b>Phase 7 (P7_1–P7_8):</b> Advanced Math (algebra, indices, radicals, functions, Greek)</li>
+ *   <li><b>Phase 8 (P8_1–P8_7):</b> Higher mathematics (modifiers, calculus, probability)</li>
+ * </ul>
+ *
+ * <p><b>Data Flow and Persistence:</b></p>
+ * <ul>
+ *   <li>Each skill is represented by a {@link com.studentgui.uicomp.PhaseScoreField} accepting integer scores (0–4 typical range)</li>
+ *   <li>On submission, values are persisted to the normalized schema via {@link com.studentgui.apphelpers.Database#insertAssessmentResults}</li>
+ *   <li>A timestamped JSON export is written to {@code StudentDataFiles/<student>/Sessions/Braille/}</li>
+ *   <li>Time-series plots are generated per phase group and saved as PNG images to {@code plots/}</li>
+ *   <li>Markdown and HTML reports are generated combining all phase plots with legend and metadata</li>
+ * </ul>
+ *
+ * <p><b>Generated Artifacts:</b></p>
+ * <ul>
+ *   <li><b>JSON session file:</b> {@code Braille-<sessionId>-<timestamp>.json}</li>
+ *   <li><b>Phase plots:</b> {@code Braille-<sessionId>-<date>-P<N>.png} (8 phase groups)</li>
+ *   <li><b>Markdown report:</b> {@code reports/Braille-<sessionId>-<date>.md}</li>
+ *   <li><b>HTML report:</b> {@code reports/Braille-<sessionId>-<date>.html} with embedded plots and color-coded legends</li>
+ * </ul>
+ *
+ * <p>The shared {@link JLineGraph} component visualizes recent session trends for the selected
+ * student, grouped by phase to prevent overcrowding. This page implements {@link com.studentgui.app.DateChangeListener}
+ * and {@link com.studentgui.app.StudentChangeListener} to refresh data when the global student or date selection changes.</p>
+ *
+ * @see com.studentgui.apphelpers.Database
+ * @see JLineGraph
+ * @see com.studentgui.uicomp.PhaseScoreField
  */
 public class Braille extends JPanel implements com.studentgui.app.DateChangeListener, com.studentgui.app.StudentChangeListener {
     private static final Logger LOG = LoggerFactory.getLogger(Braille.class);
@@ -403,6 +438,10 @@ public class Braille extends JPanel implements com.studentgui.app.DateChangeList
         });
     }
     
+    /**
+     * Update the page title label to include the current session date.
+     * Falls back to base title if date formatting fails.
+     */
     private void updateTitleDate() {
         try {
             String dateStr = this.dateParam != null ? this.dateParam.toString() : java.time.LocalDate.now().toString();

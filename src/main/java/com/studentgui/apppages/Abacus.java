@@ -21,13 +21,46 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Abacus skills progression UI page.
- * <p>
- * Presents a scrollable list of abacus-related skill input fields for a
- * particular student and date. Values entered here are persisted via the
- * centralized database helper into the normalized schema and can be plotted
- * using the shared {@link JLineGraph} component.
- * </p>
+ * Abacus computational skills assessment page.
+ *
+ * <p>Provides a structured interface for evaluating student proficiency with the Cranmer
+ * Abacus across 22 standardized skills organized into 8 progressive competency phases:</p>
+ *
+ * <ul>
+ *   <li><b>Phase 1 (P1_1–P1_4):</b> Foundational bead manipulation (setting, clearing, place value, vocabulary)</li>
+ *   <li><b>Phase 2 (P2_1–P2_3):</b> Single-digit addition (direct and indirect methods)</li>
+ *   <li><b>Phase 3 (P3_1–P3_3):</b> Single-digit subtraction (direct and indirect methods)</li>
+ *   <li><b>Phase 4 (P4_1–P4_2):</b> Multiplication with multi-digit operands</li>
+ *   <li><b>Phase 5 (P5_1–P5_2):</b> Division with multi-digit operands</li>
+ *   <li><b>Phase 6 (P6_1–P6_4):</b> Decimal arithmetic (all four operations)</li>
+ *   <li><b>Phase 7 (P7_1–P7_4):</b> Fraction arithmetic (all four operations)</li>
+ *   <li><b>Phase 8 (P8_1–P8_2):</b> Advanced operations (percentages, square roots)</li>
+ * </ul>
+ *
+ * <p><b>Data Persistence and Export:</b></p>
+ * <ul>
+ *   <li>Skill scores are captured via {@link com.studentgui.uicomp.PhaseScoreField} components (integer 0–4 typical)</li>
+ *   <li>Submit button persists values to normalized schema using {@link com.studentgui.apphelpers.Database#insertAssessmentResults}</li>
+ *   <li>Session data exported to timestamped JSON in {@code StudentDataFiles/<student>/Sessions/Abacus/}</li>
+ *   <li>Per-phase time-series plots generated and saved to {@code plots/} directory</li>
+ *   <li>Comprehensive Markdown and HTML reports generated with embedded phase plots and color-coded legends</li>
+ * </ul>
+ *
+ * <p><b>Report Artifacts:</b></p>
+ * <ul>
+ *   <li><b>JSON export:</b> {@code Abacus-<sessionId>-<timestamp>.json} with session envelope</li>
+ *   <li><b>Phase group plots:</b> {@code Abacus-<sessionId>-<date>-P<N>.png} (8 PNG images)</li>
+ *   <li><b>Markdown report:</b> {@code reports/Abacus-<sessionId>-<date>.md} with relative image links</li>
+ *   <li><b>HTML report:</b> {@code reports/Abacus-<sessionId>-<date>.html} with inline styles and legends</li>
+ * </ul>
+ *
+ * <p>The shared {@link JLineGraph} visualizes recent session trends, grouping skills by phase prefix
+ * to maintain chart readability. Implements {@link com.studentgui.app.DateChangeListener} and
+ * {@link com.studentgui.app.StudentChangeListener} for dynamic updates when global selections change.</p>
+ *
+ * @see com.studentgui.apphelpers.Database
+ * @see JLineGraph
+ * @see com.studentgui.uicomp.PhaseScoreField
  */
 public class Abacus extends JPanel implements com.studentgui.app.DateChangeListener, com.studentgui.app.StudentChangeListener {
     private static final Logger LOG = LoggerFactory.getLogger(Abacus.class);

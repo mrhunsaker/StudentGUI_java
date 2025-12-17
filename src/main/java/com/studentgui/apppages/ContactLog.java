@@ -24,11 +24,47 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Contact log page for storing freeform contact notes for a student.
- * <p>
- * Provides a multi-line text area for notes and persists them to the
- * normalized database as session notes using the {@code Database} helper.
- * </p>
+ * Structured parent/guardian contact log with validation and freeform notes.
+ *
+ * <p>Provides a comprehensive contact tracking form with structured fields for documenting
+ * communications with parents, guardians, and family members. Unlike the freeform notes pages
+ * ({@link SessionNotes}, {@link Observations}), this page captures both structured metadata
+ * and narrative details to support later reporting and documentation requirements.</p>
+ *
+ * <p><b>Structured Fields:</b></p>
+ * <ul>
+ *   <li><b>Guardian Name:</b> Full name of the parent/guardian contacted</li>
+ *   <li><b>Contact Method:</b> Dropdown selection (Phone, Email, In Person, Other)</li>
+ *   <li><b>Phone Number:</b> Contact phone number (validated format: 7-20 chars, digits/+/()-/space)</li>
+ *   <li><b>Email Address:</b> Contact email (validated format: basic email regex pattern)</li>
+ *   <li><b>Contact Response:</b> Brief summary of the guardian's response or concerns</li>
+ *   <li><b>Contact General:</b> High-level topic or category of the contact (e.g., "Progress Update", "IEP Discussion")</li>
+ *   <li><b>Contact Specific:</b> Specific items discussed or action points (e.g., "Discussed Braille materials order")</li>
+ *   <li><b>Notes:</b> Multi-line freeform notes area for detailed narrative</li>
+ * </ul>
+ *
+ * <p><b>Validation and Error Handling:</b></p>
+ * <ul>
+ *   <li>Email validation: Triggers warning if Contact Method is "Email" and email field doesn't match {@code ^[^@\s]+@[^@\s]+\.[^@\s]+$}</li>
+ *   <li>Phone validation: Triggers warning if Contact Method is "Phone" and phone doesn't match {@code ^[0-9+()\-\s]{7,20}$}</li>
+ *   <li>Validation failures display warning dialogs and do not persist data until corrected</li>
+ * </ul>
+ *
+ * <p><b>Data Persistence:</b></p>
+ * <ul>
+ *   <li>Structured fields persisted via {@link com.studentgui.apphelpers.Database#saveContactLog} to {@code ContactLog} table</li>
+ *   <li>Notes also saved to {@code ProgressSession.notes} column via {@link com.studentgui.apphelpers.Database#saveSessionNotes}</li>
+ *   <li>JSON export: {@code StudentDataFiles/<student>/Sessions/ContactLog/ContactLog-<sessionId>-<timestamp>.json}</li>
+ *   <li>Load Last Contact button retrieves most recent contact record via {@link com.studentgui.apphelpers.Database#fetchLatestContactLog}</li>
+ * </ul>
+ *
+ * <p>No plots are generated (contact logs are non-quantitative). The shared {@link JLineGraph} component
+ * is absent from this page's layout. This page does not implement listener interfaces and operates
+ * on static student/date parameters.</p>
+ *
+ * @see com.studentgui.apphelpers.Database#saveContactLog
+ * @see com.studentgui.apphelpers.Database#fetchLatestContactLog
+ * @see com.studentgui.apphelpers.dto.ContactPayload
  */
 public class ContactLog extends JPanel {
     private static final Logger LOG = LoggerFactory.getLogger(ContactLog.class);

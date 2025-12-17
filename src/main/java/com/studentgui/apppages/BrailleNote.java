@@ -21,13 +21,73 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Braille note-taking skills progression page.
- * <p>
- * Presents a scrollable list of skill fields for a student and allows
- * submission of scores into the canonical (normalized) SQLite schema.
- * The page also displays a shared {@link JLineGraph} instance to visualize
- * recent results.
- * </p>
+ * HumanWare BrailleNote Touch Plus (BNT+) proficiency assessment page.
+ *
+ * <p>Evaluates student competency with the BrailleNote Touch Plus refreshable braille notetaker
+ * and productivity device across 52 skills organized into 12 functional domains:</p>
+ *
+ * <ul>
+ *   <li><b>Phase 1 (P1_1–P1_9): Device Fundamentals and Core Applications</b>
+ *     <ul>
+ *       <li>Physical layout (braille keyboard, navigation keys, touchscreen, ports)</li>
+ *       <li>Setup procedures and universal commands (power, mode switching, context menus)</li>
+ *       <li>BNT+ navigation paradigm (gestures, quick keys, braille commands)</li>
+ *       <li>File management (folders, copy/paste, rename, delete)</li>
+ *       <li>Word processor (KeyWord): document creation, editing, formatting</li>
+ *       <li>Email (KeyMail): compose, send, receive, attachments</li>
+ *       <li>Internet browsing (KeyWeb): navigation, bookmarks, forms</li>
+ *       <li>Calculator and KeyMath (arithmetic, scientific functions)</li>
+ *     </ul>
+ *   </li>
+ *   <li><b>Phase 2 (P2_1–P2_7): Productivity Suite Applications</b>
+ *     <ul>
+ *       <li>Calendar management (appointments, reminders, recurring events)</li>
+ *       <li>KeyBRF (Braille file viewer/editor)</li>
+ *       <li>KeyFiles (file explorer and organizer)</li>
+ *       <li>KeyMail (advanced email features)</li>
+ *       <li>KeyWeb (advanced browsing, accessibility modes)</li>
+ *       <li>KeyCalc (spreadsheet concepts)</li>
+ *       <li>KeyWord (advanced formatting, styles, tables)</li>
+ *     </ul>
+ *   </li>
+ *   <li><b>Phase 3 (P3_1–P3_7): Advanced Applications and Accessibility</b>
+ *     <ul>
+ *       <li>KeySlides (presentation creation and delivery)</li>
+ *       <li>KeyCode (text editor with syntax highlighting for programming)</li>
+ *       <li>Third-party app integration (Dropbox, Google Drive, OneDrive)</li>
+ *       <li>Braille input configuration (computer braille, contracted, literary)</li>
+ *       <li>Braille output settings (display mode, translation tables)</li>
+ *       <li>Device settings and preferences</li>
+ *       <li>Accessibility features (speech output, magnification, contrast)</li>
+ *     </ul>
+ *   </li>
+ *   <li><b>Phase 4 (P4_1–P4_3): Advanced File and Cloud Management</b></li>
+ *   <li><b>Phase 5 (P5_1–P5_4): Collaboration and Export Workflows</b></li>
+ *   <li><b>Phase 6 (P6_1–P6_3): App Ecosystem and Troubleshooting</b></li>
+ *   <li><b>Phase 7 (P7_1–P7_4): Automation and Customization</b></li>
+ *   <li><b>Phase 8 (P8_1–P8_5): Peripheral Integration</b> (Bluetooth/USB devices, displays, audio/video)</li>
+ *   <li><b>Phase 9 (P9_1–P9_4): Security and Network Configuration</b></li>
+ *   <li><b>Phase 10 (P10_1–P10_3): Speech Engine Customization</b></li>
+ *   <li><b>Phase 11 (P11_1–P11_5): Maintenance and Support</b> (firmware, diagnostics, warranty)</li>
+ *   <li><b>Phase 12 (P12_1–P12_4): Community and Online Resources</b></li>
+ * </ul>
+ *
+ * <p><b>Data Management and Artifacts:</b></p>
+ * <ul>
+ *   <li>Scores captured via {@link com.studentgui.uicomp.PhaseScoreField} (integer 0–4 typical)</li>
+ *   <li>Persisted to normalized schema via {@link com.studentgui.apphelpers.Database#insertAssessmentResults}</li>
+ *   <li>JSON export: {@code StudentDataFiles/<student>/Sessions/BrailleNote/BrailleNote-<sessionId>-<timestamp>.json}</li>
+ *   <li>Phase-grouped time-series plots: {@code plots/BrailleNote-<sessionId>-<date>-P<N>.png} (12 phase groups)</li>
+ *   <li>Markdown and HTML reports with embedded plots and color-coded legends</li>
+ * </ul>
+ *
+ * <p>The shared {@link JLineGraph} visualizes recent session trends grouped by phase prefix.
+ * Implements {@link com.studentgui.app.DateChangeListener} and {@link com.studentgui.app.StudentChangeListener}
+ * for dynamic updates when global student/date selections change.</p>
+ *
+ * @see com.studentgui.apphelpers.Database
+ * @see JLineGraph
+ * @see com.studentgui.uicomp.PhaseScoreField
  */
 public class BrailleNote extends JPanel implements com.studentgui.app.DateChangeListener, com.studentgui.app.StudentChangeListener {
     private static final Logger LOG = LoggerFactory.getLogger(BrailleNote.class);

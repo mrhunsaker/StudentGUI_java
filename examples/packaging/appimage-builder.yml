@@ -1,0 +1,37 @@
+# AppImage Builder template for Graph Digitizer
+# Documentation: https://appimage-builder.readthedocs.io/
+
+version: 1
+app: 
+  id: graph-digitizer
+  name: Graph Digitizer
+  icon: build/icons/scatter-plot-256.png
+  # The executable produced by jpackage app-image (launcher script/binary name)
+  exec: graph-digitizer
+  exec_args: $@
+
+runtime:
+  # Use default runtime; set up necessary modules if missing
+  env:
+    APPDIR_LOG_LEVEL: info
+
+ingredients:
+  script:
+    - echo "Using jpackage app-image as ingredient"
+    - ls -al
+  paths:
+    # Point to the jpackage app-image output directory after build.
+    - target/GraphDigitizer
+
+script:
+  # Copy desktop file and icon to AppDir structure
+  - mkdir -p $APPDIR/usr/share/applications
+  - cp packaging/graph-digitizer.desktop $APPDIR/usr/share/applications/graph-digitizer.desktop
+  - mkdir -p $APPDIR/usr/share/icons/hicolor/256x256/apps
+  - cp build/icons/scatter-plot-256.png $APPDIR/usr/share/icons/hicolor/256x256/apps/graph-digitizer.png
+  - echo "AppDir prepared"
+
+AppImage:
+  arch: x86_64
+  update-information: "gh-releases-zsync|mrhunsaker|Graph_Digitizer_Java_Implementation|latest|GraphDigitizer*.AppImage.zsync"
+  sign-key: null

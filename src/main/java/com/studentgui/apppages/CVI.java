@@ -24,12 +24,54 @@ import org.slf4j.LoggerFactory;
 import com.studentgui.uicomp.PhaseScoreField;
 
 /**
- * Cortical Visual Impairment (CVI) progression page.
- * <p>
- * Presents a collection of named inputs for CVI-related observation scores
- * and supports saving and plotting recent sessions via the shared
- * {@link JLineGraph} component.
- * </p>
+ * Cortical Visual Impairment (CVI) assessment page.
+ *
+ * <p>Provides a structured scoring interface for evaluating the 10 characteristic behaviors
+ * associated with Cortical Visual Impairment as defined in the Roman-Lanzi CVI Range assessment
+ * framework. Skills are organized into two functional clusters:</p>
+ *
+ * <ul>
+ *   <li><b>Phase 1 (P1_1–P1_6): Primary CVI Characteristics</b>
+ *     <ul>
+ *       <li><b>Color Preference:</b> Preference for high-saturation colors (red, yellow)</li>
+ *       <li><b>Need for Movement:</b> Improved visual attention with motion</li>
+ *       <li><b>Latency:</b> Delayed visual response times</li>
+ *       <li><b>Field Preference:</b> Asymmetric visual field usage patterns</li>
+ *       <li><b>Visual Complexity:</b> Difficulty with cluttered/busy visual environments</li>
+ *       <li><b>Nonpurposeful Gaze:</b> Reduced sustained visual fixation</li>
+ *     </ul>
+ *   </li>
+ *   <li><b>Phase 2 (P2_1–P2_4): Secondary/Environmental Characteristics</b>
+ *     <ul>
+ *       <li><b>Distance Viewing:</b> Reduced effectiveness at distance</li>
+ *       <li><b>Atypical Reflexes:</b> Blink-to-threat, light reflex variations</li>
+ *       <li><b>Visual Novelty:</b> Preference for familiar objects/environments</li>
+ *       <li><b>Visual Reach:</b> Difficulty localizing and reaching toward objects</li>
+ *     </ul>
+ *   </li>
+ * </ul>
+ *
+ * <p><b>Scoring and Interpretation:</b> Each characteristic is typically scored on a 0–10 scale
+ * representing frequency/severity of the behavior. Higher scores may indicate greater impact
+ * depending on the specific assessment protocol in use. Consult the Roman-Lanzi CVI Range manual
+ * for standardized scoring guidelines.</p>
+ *
+ * <p><b>Data Management:</b></p>
+ * <ul>
+ *   <li>Scores captured via {@link PhaseScoreField} components with integer validation</li>
+ *   <li>Submit button persists to database via {@link com.studentgui.apphelpers.Database#insertAssessmentResults}</li>
+ *   <li>Session JSON exported to {@code StudentDataFiles/<student>/Sessions/CVI/CVI-<sessionId>-<timestamp>.json}</li>
+ *   <li>Time-series plots generated per phase group and saved to {@code plots/} directory</li>
+ *   <li>Markdown and HTML reports generated with embedded plots and color-coded legends</li>
+ * </ul>
+ *
+ * <p>The shared {@link JLineGraph} component visualizes trends across multiple sessions,
+ * grouped by phase to separate primary and secondary characteristics. This page does not
+ * implement listener interfaces as it operates on static student/date parameters.</p>
+ *
+ * @see com.studentgui.apphelpers.Database
+ * @see JLineGraph
+ * @see PhaseScoreField
  */
 public class CVI extends JPanel {
     private static final Logger LOG = LoggerFactory.getLogger(CVI.class);
