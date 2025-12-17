@@ -10,9 +10,46 @@ import com.studentgui.apphelpers.Database;
 import com.studentgui.apphelpers.Helpers;
 
 /**
- * Development utility to inspect available students and their recent
- * progress session rows. Prints basic statistics to stdout and is
- * intended for debugging or manual data inspection.
+ * Command-line inspection tool for viewing student database contents and schema statistics.
+ *
+ * <p>Provides a quick diagnostic view of database state without launching the GUI.
+ * Useful for:</p>
+ * <ul>
+ *   <li>Verifying student records exist in the database</li>
+ *   <li>Inspecting available progress types and their assessment part counts</li>
+ *   <li>Checking session data row sizes for debugging schema migrations</li>
+ *   <li>Quick manual data verification during development or troubleshooting</li>
+ * </ul>
+ *
+ * <p><b>Usage:</b></p>
+ * <pre>{@code
+ * # List all students and progress types with counts
+ * java -cp StudentDataGUI.jar com.studentgui.tools.QueryStudentData
+ *
+ * # Inspect specific student's progress types
+ * java -cp StudentDataGUI.jar com.studentgui.tools.QueryStudentData "Aaron A Aaronsson"
+ * }</pre>
+ *
+ * <p><b>Output Format:</b></p>
+ * <pre>
+ * Inspecting student: Aaron A Aaronsson
+ * ProgressType 'Braille' (id=1) parts=64 sessions=3
+ *  Sample row sizes: 64 values: [2, 3, 2, 3, 4, ...]
+ * ProgressType 'Abacus' (id=2) parts=22 sessions=1
+ *  Sample row sizes: 22 values: [0, 1, 2, 1, 3, ...]
+ * </pre>
+ *
+ * <p><b>Workflow:</b></p>
+ * <ol>
+ *   <li>Lists all known students via {@link Helpers#getStudents()}</li>
+ *   <li>Selects first student or uses command-line argument</li>
+ *   <li>Queries {@code ProgressType} table for all progress types</li>
+ *   <li>For each progress type: counts assessment parts and fetches sample session rows</li>
+ *   <li>Prints progress type name, ID, part count, session count, and sample row to stdout</li>
+ * </ol>
+ *
+ * @see com.studentgui.apphelpers.Database#fetchLatestAssessmentResults
+ * @see com.studentgui.apphelpers.Helpers#getStudents()
  */
 public class QueryStudentData {
     /**

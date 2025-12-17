@@ -1,0 +1,177 @@
+name: Build and Attach Installers on Release
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+env:
+  JAVA_VERSION: '21'
+  APP_NAME: StudentDataGUI
+
+jobs:
+  linux:
+    name: Linux packages (deb, rpm, AppImage)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ env.JAVA_VERSION }}
+          cache: maven
+      - name: Install packaging tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y rpm libfuse2 zsync
+      - name: Build JAR
+        run: mvn -B -U -e -DskipTests package
+      - name: Resolve meta
+        id: meta
+        run: |
+          set -euo pipefail
+          VERSION=$(mvn -q -Dexec.cleanupDaemonThreads=false -DforceStdout help:evaluate -Dexpression=project.version)
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "vversion=v$VERSION" >> "$GITHUB_OUTPUT"
+      - name: Find jar
+        id: jar
+        run: |
+          JAR=$(ls -t target/*-shaded.jar 2>/dev/null | head -n1)
+          if [ -z "$JAR" ]; then JAR=$(ls -t target/*.jar | grep -vE 'sources|original|tests' | head -n1); fi
+          echo "path=$JAR" >> "$GITHUB_OUTPUT"
+          echo "file=$(basename "$JAR")" >> "$GITHUB_OUTPUT"
+      - name: Build deb
+        run: |
+          mkdir -p dist/linux/deb
+          "$JAVA_HOME/bin/jpackage" --type deb --input target --main-jar "${{ steps.jar.outputs.file }}" --name "$APP_NAME" --app-version "${{ steps.meta.outputs.version }}" --icon examples/icons/scatter-plot-256.png --dest dist/linux/deb
+          f=$(ls -t dist/linux/deb/*.deb | head -n1); if [ -n "$f" ]; then mv "$f" "dist/linux/deb/${APP_NAME}-${{ steps.meta.outputs.vversion }}.deb"; fi
+      - name: Build rpm
+        run: |
+          mkdir -p dist/linux/rpm
+          "$JAVA_HOME/bin/jpackage" --type rpm --input target --main-jar "${{ steps.jar.outputs.file }}" --name "$APP_NAME" --app-version "${{ steps.meta.outputs.version }}" --icon examples/icons/scatter-plot-256.png --dest dist/linux/rpm
+          f=$(ls -t dist/linux/rpm/*.rpm | head -n1); if [ -n "$f" ]; then mv "$f" "dist/linux/rpm/${APP_NAME}-${{ steps.meta.outputs.vversion }}.rpm"; fi
+      - name: Build AppImage
+        run: |
+          set -euxo pipefail
+          APPDIR_ROOT="dist/linux/appimage"
+          "$JAVA_HOME/bin/jpackage" --type app-image --input target --main-jar "${{ steps.jar.outputs.file }}" --name "$APP_NAME" --app-version "${{ steps.meta.outputs.version }}" --icon examples/icons/scatter-plot-256.png --dest "$APPDIR_ROOT"
+          pushd "$APPDIR_ROOT"
+          APPDIR=$(find . -maxdepth 1 -type d -name "*${APP_NAME}*" | head -n1 | sed 's#^./##')
+          curl -fsSL https://github.com/AppImage/AppImageKit/releases/download/13/appimagetool-x86_64.AppImage -o appimagetool
+          chmod +x appimagetool || true
+          if ./appimagetool --appimage-extract-and-run "$APPDIR"; then
+            AI=$(ls -t *.AppImage 2>/dev/null | head -n1 || true)
+            if [ -n "$AI" ]; then mv "$AI" "${APP_NAME}-${{ steps.meta.outputs.vversion }}.AppImage"; fi
+            echo "Built AppImage"
+          else
+            zip -r "${APP_NAME}-${{ steps.meta.outputs.vversion }}-appimage.zip" "$APPDIR"
+          fi
+          popd
+      - name: Upload assets to release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/linux/**/*.deb
+            dist/linux/**/*.rpm
+            dist/linux/**/*.AppImage
+            dist/linux/**/*.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  windows:
+    name: Windows MSI
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ env.JAVA_VERSION }}
+          cache: maven
+      - name: Build JAR
+        run: mvn -B -U -e -DskipTests package
+      - name: Resolve meta
+        id: meta
+        shell: bash
+        run: |
+          set -euo pipefail
+          VERSION=$(mvn -q -Dexec.cleanupDaemonThreads=false -DforceStdout help:evaluate -Dexpression=project.version)
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "vversion=v$VERSION" >> "$GITHUB_OUTPUT"
+      - name: Find jar
+        id: jar
+        shell: pwsh
+        run: |
+          $jar = Get-ChildItem -Path target -Filter "*-shaded.jar" -File | Sort-Object LastWriteTime -Descending | Select-Object -First 1
+          if (-not $jar) { $jar = Get-ChildItem -Path target -Filter "*.jar" -File | Where-Object { $_.Name -notmatch 'sources|original|tests' } | Sort-Object LastWriteTime -Descending | Select-Object -First 1 }
+          if (-not $jar) { throw "No JAR found in target" }
+          "path=$($jar.FullName)" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+          "file=$($jar.Name)" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+      - name: Build MSI
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Path dist\windows -Force | Out-Null
+          & "$env:JAVA_HOME\bin\jpackage.exe" `
+            --type msi `
+            --input target `
+            --main-jar "${{ steps.jar.outputs.file }}" `
+            --name "$env:APP_NAME" `
+            --app-version "${{ steps.meta.outputs.version }}" `
+            --icon examples\icons\scatter-plot-256.ico `
+            --dest dist\windows `
+            --win-menu --win-shortcut --win-dir-chooser
+          $msi = Get-ChildItem -Path dist\windows -Filter "*.msi" -File | Sort-Object LastWriteTime -Descending | Select-Object -First 1
+          if ($msi) { Move-Item -Path $msi.FullName -Destination ("dist\windows\{0}-{1}.msi" -f $env:APP_NAME, "${{ steps.meta.outputs.vversion }}") -Force }
+      - name: Upload assets to release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/windows/*.msi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  macos:
+    name: macOS DMG
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ env.JAVA_VERSION }}
+          cache: maven
+      - name: Build JAR
+        run: mvn -B -U -e -DskipTests package
+      - name: Resolve meta
+        id: meta
+        run: |
+          set -euo pipefail
+          VERSION=$(mvn -q -Dexec.cleanupDaemonThreads=false -DforceStdout help:evaluate -Dexpression=project.version)
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "vversion=v$VERSION" >> "$GITHUB_OUTPUT"
+      - name: Generate .icns
+        run: |
+          chmod +x examples/scripts/create-mac-iconset.sh
+          examples/scripts/create-mac-iconset.sh examples/icons scatter-plot.icns
+      - name: Find jar
+        id: jar
+        run: |
+          JAR=$(ls -t target/*-shaded.jar 2>/dev/null | head -n1)
+          if [ -z "$JAR" ]; then JAR=$(ls -t target/*.jar | grep -vE 'sources|original|tests' | head -n1); fi
+          echo "path=$JAR" >> "$GITHUB_OUTPUT"
+          echo "file=$(basename "$JAR")" >> "$GITHUB_OUTPUT"
+      - name: Build DMG
+        run: |
+          mkdir -p dist/macos
+          "$JAVA_HOME/bin/jpackage" --type dmg --input target --main-jar "${{ steps.jar.outputs.file }}" --name "$APP_NAME" --app-version "${{ steps.meta.outputs.version }}" --icon scatter-plot.icns --dest dist/macos
+          f=$(ls -t dist/macos/*.dmg | head -n1); if [ -n "$f" ]; then mv "$f" "dist/macos/${APP_NAME}-${{ steps.meta.outputs.vversion }}.dmg"; fi
+      - name: Upload assets to release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/macos/*.dmg
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

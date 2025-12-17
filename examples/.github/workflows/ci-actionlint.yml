@@ -1,0 +1,39 @@
+name: Lint GitHub Workflows
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/**'
+  push:
+    branches: [ main ]
+    paths:
+      - '.github/workflows/**'
+
+permissions:
+  contents: read
+
+jobs:
+  actionlint:
+    name: actionlint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install ShellCheck (for shell script checks)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends shellcheck
+
+      - name: Install actionlint
+        run: |
+          set -euxo pipefail
+          tmpdir=$(mktemp -d)
+          curl -fsSL https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash -o "$tmpdir/download.sh"
+          bash "$tmpdir/download.sh" -b "$tmpdir"
+          sudo mv "$tmpdir"/actionlint /usr/local/bin/actionlint
+          actionlint -version
+
+      - name: Run actionlint
+        run: |
+          actionlint -color

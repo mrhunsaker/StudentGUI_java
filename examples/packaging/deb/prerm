@@ -1,0 +1,11 @@
+#!/bin/sh
+# prerm script for Graph Digitizer (Debian/Ubuntu)
+set -e
+case "$1" in
+    remove|upgrade|deconfigure)
+        # No special removal logic; desktop/icon cleaned by dpkg automatically if installed via postinst
+        ;;
+    *)
+        ;;
+fi
+exit 0

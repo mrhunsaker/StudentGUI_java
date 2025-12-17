@@ -22,12 +22,75 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * ScreenReader skills progression page.
+ * Screen reader proficiency assessment page for desktop/laptop environments.
  *
- * Displays a form of numeric fields representing screen reader skill codes
- * and provides persistence of those values to the canonical database. A
- * supplied {@link com.studentgui.apppages.JLineGraph} is used to render
- * recent results below the form.
+ * <p>Evaluates student competency with screen reading software (JAWS, NVDA, Narrator,
+ * VoiceOver macOS) across 28 standardized skills organized into 4 progressive competency phases:</p>
+ *
+ * <ul>
+ *   <li><b>Phase 1 (P1_1–P1_6): Fundamental Navigation and Interaction</b>
+ *     <ul>
+ *       <li>Basic keyboard navigation (Tab, arrow keys, application switching)</li>
+ *       <li>Reading and interpreting control labels and text content</li>
+ *       <li>Activating controls (buttons, links, checkboxes) via keyboard</li>
+ *       <li>Form entry (text fields, combo boxes, radio buttons)</li>
+ *       <li>Table navigation (row/column movement, header announcement)</li>
+ *       <li>Heading navigation (H key, heading list, semantic structure)</li>
+ *     </ul>
+ *   </li>
+ *   <li><b>Phase 2 (P2_1–P2_4): Web and Document Element Navigation</b>
+ *     <ul>
+ *       <li>Link navigation and link list usage</li>
+ *       <li>List navigation (ordered, unordered, nested lists)</li>
+ *       <li>Image handling (alt text, long descriptions, graphics navigation)</li>
+ *       <li>Annotation and metadata awareness (ARIA labels, landmarks)</li>
+ *     </ul>
+ *   </li>
+ *   <li><b>Phase 3 (P3_1–P3_11): Advanced Document Structures and Customization</b>
+ *     <ul>
+ *       <li>Document structure navigation (sections, articles, landmarks)</li>
+ *       <li>Style and formatting awareness (bold, italic, font changes)</li>
+ *       <li>Advanced table navigation (complex tables, merged cells, formulas)</li>
+ *       <li>Chart and graph interpretation with screen reader feedback</li>
+ *       <li>Advanced keyboard shortcuts and quick navigation commands</li>
+ *       <li>Scripting usage (JAWS scripts, NVDA add-ons)</li>
+ *       <li>Third-party application integration (Office, Adobe, IDEs)</li>
+ *       <li>Multimedia content handling (audio descriptions, video captions)</li>
+ *       <li>Braille display usage and synchronization</li>
+ *       <li>Braille table switching (Grade 1, Grade 2, computer braille)</li>
+ *       <li>Configuration and customization (speech rate, verbosity, sounds)</li>
+ *     </ul>
+ *   </li>
+ *   <li><b>Phase 4 (P4_1–P4_7): Efficiency, Troubleshooting, and Integration</b>
+ *     <ul>
+ *       <li>Performance optimization (adjusting verbosity, quick navigation mastery)</li>
+ *       <li>Error recovery strategies (finding lost focus, restarting speech)</li>
+ *       <li>Integration across multiple assistive technologies (magnification, braille, OCR)</li>
+ *       <li>Accessibility API awareness (UI Automation, MSAA, IAccessible2)</li>
+ *       <li>Settings management (profiles, application-specific configurations)</li>
+ *       <li>Profile creation and switching for different workflows/applications</li>
+ *       <li>Accessing vendor support resources and community forums</li>
+ *     </ul>
+ *   </li>
+ * </ul>
+ *
+ * <p><b>Data Persistence and Report Generation:</b></p>
+ * <ul>
+ *   <li>Scores captured via {@link com.studentgui.uicomp.PhaseScoreField} components (integer 0–4 typical)</li>
+ *   <li>Persisted to normalized schema via {@link com.studentgui.apphelpers.Database#insertAssessmentResults}</li>
+ *   <li>JSON export: {@code StudentDataFiles/<student>/Sessions/ScreenReader/ScreenReader-<sessionId>-<timestamp>.json}</li>
+ *   <li>Phase-grouped time-series PNG plots: {@code plots/ScreenReader-<sessionId>-<date>-P<N>.png} (4 phase groups)</li>
+ *   <li>Markdown report: {@code reports/ScreenReader-<sessionId>-<date>.md} with relative image links</li>
+ *   <li>HTML report: {@code reports/ScreenReader-<sessionId>-<date>.html} with inline styles and legends</li>
+ * </ul>
+ *
+ * <p>The shared {@link JLineGraph} visualizes recent session trends with phase-based grouping.
+ * Implements {@link com.studentgui.app.DateChangeListener} and {@link com.studentgui.app.StudentChangeListener}
+ * for dynamic refresh when global selections change.</p>
+ *
+ * @see com.studentgui.apphelpers.Database
+ * @see JLineGraph
+ * @see com.studentgui.uicomp.PhaseScoreField
  */
 public class ScreenReader extends JPanel implements com.studentgui.app.DateChangeListener, com.studentgui.app.StudentChangeListener {
     private static final Logger LOG = LoggerFactory.getLogger(ScreenReader.class);

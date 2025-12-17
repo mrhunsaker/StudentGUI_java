@@ -22,12 +22,82 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Digital literacy skills progression page UI.
- * <p>
- * Presents a set of numeric input fields for digital literacy skills and
- * persists entries to the normalized database. A provided {@link JLineGraph}
- * instance is used to visualize recent assessment sessions.
- * </p>
+ * Digital literacy and computer skills assessment page.
+ *
+ * <p>Evaluates foundational technology competencies required for academic and professional
+ * success in digital environments. Covers 27 skills organized into 5 progressive competency domains:</p>
+ *
+ * <ul>
+ *   <li><b>Phase 1 (P1_1–P1_9): Device Basics and Navigation</b>
+ *     <ul>
+ *       <li>Powering devices on/off, accessibility feature activation (VoiceOver/TalkBack/Narrator)</li>
+ *       <li>Touch/mouse gestures for app launching and navigation</li>
+ *       <li>Home screen organization, icon identification, and app launching</li>
+ *       <li>Document creation, saving, and retrieval workflows</li>
+ *       <li>Online resource access (web portals, learning management systems)</li>
+ *       <li>Basic keyboarding (home row, touch typing fundamentals)</li>
+ *       <li>UI element interaction (buttons, menus, text fields, sliders)</li>
+ *       <li>System-level navigation (Control Center, App Switcher, Task Manager, Dock)</li>
+ *     </ul>
+ *   </li>
+ *   <li><b>Phase 2 (P2_1–P2_6): Word Processing Fundamentals</b>
+ *     <ul>
+ *       <li>Creating, editing, and saving text documents</li>
+ *       <li>Reading and navigating documents using assistive technology or visual scanning</li>
+ *       <li>Menu bar and toolbar interaction for formatting and commands</li>
+ *       <li>Text selection, highlighting, copy/paste workflows</li>
+ *       <li>Image insertion and manipulation (copy, paste, resize, position)</li>
+ *       <li>Proofreading strategies and editing for clarity/correctness</li>
+ *     </ul>
+ *   </li>
+ *   <li><b>Phase 3 (P3_1–P3_3): Spreadsheet Fundamentals</b>
+ *     <ul>
+ *       <li>Describing spreadsheet structure (rows, columns, cells, sheets)</li>
+ *       <li>Spreadsheet terminology (cell references, formulas, functions, ranges)</li>
+ *       <li>Data entry and editing (typing, autofill, formula entry)</li>
+ *     </ul>
+ *   </li>
+ *   <li><b>Phase 4 (P4_1–P4_5): Presentation Software</b>
+ *     <ul>
+ *       <li>Presentation tool concepts (slides, layouts, templates)</li>
+ *       <li>Creating structured presentations (title, content, transitions)</li>
+ *       <li>Editing slides (text, formatting, reordering)</li>
+ *       <li>Presenting slides effectively (presenter view, navigation, notes)</li>
+ *       <li>Sharing presentations (export, cloud upload, email)</li>
+ *     </ul>
+ *   </li>
+ *   <li><b>Phase 5 (P5_1–P5_5): Digital Citizenship and Ethics</b>
+ *     <ul>
+ *       <li>Acceptable Use Policies (school/workplace technology guidelines)</li>
+ *       <li>Digital citizenship principles (respectful communication, netiquette)</li>
+ *       <li>Internet safety (phishing, malware, safe browsing)</li>
+ *       <li>Copyright awareness (fair use, attribution, Creative Commons)</li>
+ *       <li>Plagiarism recognition and avoidance (paraphrasing, citations, originality)</li>
+ *     </ul>
+ *   </li>
+ * </ul>
+ *
+ * <p><b>Data Persistence and Report Generation:</b></p>
+ * <ul>
+ *   <li>Scores captured via {@link com.studentgui.uicomp.PhaseScoreField} (integer 0–4 typical)</li>
+ *   <li>Persisted to normalized schema via {@link com.studentgui.apphelpers.Database#insertAssessmentResults}</li>
+ *   <li>JSON export: {@code StudentDataFiles/<student>/Sessions/DigitalLiteracy/DigitalLiteracy-<sessionId>-<timestamp>.json}</li>
+ *   <li>Phase-grouped time-series plots: {@code plots/DigitalLiteracy-<sessionId>-<date>-P<N>.png} (5 phase groups)</li>
+ *   <li>Markdown and HTML reports with embedded plots and color-coded legends</li>
+ * </ul>
+ *
+ * <p>The shared {@link JLineGraph} visualizes recent session trends grouped by phase prefix.
+ * Implements {@link com.studentgui.app.DateChangeListener} and {@link com.studentgui.app.StudentChangeListener}
+ * for dynamic updates when global selections change.</p>
+ *
+ * <p><b>Note:</b> Skill codes and phases intentionally overlap with {@link IOS} to allow
+ * cross-platform skill mapping. Some assessment items are device-agnostic and track the same
+ * underlying competencies across iOS, Windows, macOS, and ChromeOS environments.</p>
+ *
+ * @see com.studentgui.apphelpers.Database
+ * @see JLineGraph
+ * @see com.studentgui.uicomp.PhaseScoreField
+ * @see IOS
  */
 public class DigitalLiteracy extends JPanel implements com.studentgui.app.DateChangeListener, com.studentgui.app.StudentChangeListener {
     private static final Logger LOG = LoggerFactory.getLogger(DigitalLiteracy.class);

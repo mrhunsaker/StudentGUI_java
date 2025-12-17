@@ -1,0 +1,27 @@
+name: Maven Site
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  site:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+
+      - name: Generate site
+        run: mvn -B -U -e -V clean site
+
+      - name: Upload site artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: maven-site
+          path: target/site

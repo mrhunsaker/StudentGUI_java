@@ -15,9 +15,37 @@ import com.studentgui.apphelpers.Helpers;
 import com.studentgui.apppages.JLineGraph;
 
 /**
- * Command-line tool to render a particular student's progress chart
- * for a named progress type. Produces a PNG in the student's plots
- * directory. Useful for offline rendering and debugging chart output.
+ * Command-line utility for offline student progress chart rendering and export.
+ *
+ * <p>This standalone tool generates PNG charts for a specific student and progress type
+ * without launching the full GUI application. Useful for:</p>
+ * <ul>
+ *   <li>Batch chart generation for multiple students/progress types</li>
+ *   <li>Debugging chart rendering issues outside the GUI context</li>
+ *   <li>Automated report generation in CI/CD pipelines</li>
+ *   <li>Creating historical chart snapshots for archival purposes</li>
+ * </ul>
+ *
+ * <p><b>Usage:</b></p>
+ * <pre>{@code
+ * java -cp StudentDataGUI.jar com.studentgui.tools.RenderStudentProgress "Aaron A Aaronsson" "Braille"
+ * }</pre>
+ *
+ * <p><b>Workflow:</b></p>
+ * <ol>
+ *   <li>Ensures app folder hierarchy exists via {@link Helpers#createFolderHierarchy()}</li>
+ *   <li>Queries database for canonical assessment part codes for the specified progress type</li>
+ *   <li>Fetches up to 5 most recent assessment sessions via {@link Database#fetchLatestAssessmentResults}</li>
+ *   <li>Renders grouped chart using {@link JLineGraph#updateWithGroupedData}</li>
+ *   <li>Exports PNG to {@code StudentDataFiles/<student>/plots/<ProgressType>-render-<date>.png}</li>
+ * </ol>
+ *
+ * <p><b>Output:</b> PNG file written to student's plots directory with filename format:
+ * {@code <ProgressType>-render-<ISO_DATE>.png}</p>
+ *
+ * @see com.studentgui.apphelpers.Database#fetchLatestAssessmentResults
+ * @see com.studentgui.apppages.JLineGraph
+ * @see com.studentgui.apphelpers.Helpers#createFolderHierarchy()
  */
 public class RenderStudentProgress {
     /**

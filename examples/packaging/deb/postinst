@@ -1,0 +1,32 @@
+#!/bin/sh
+# postinst script for Graph Digitizer (Debian/Ubuntu)
+# Installed to /var/lib/dpkg/info/<package>.postinst by custom packaging flow (not jpackage default).
+# Responsibilities:
+# 1. Install desktop file if missing
+# 2. Update icon cache
+# 3. Print message
+set -e
+PKGNAME="graph-digitizer"
+DESKTOP="/usr/share/applications/graph-digitizer.desktop"
+ICON_SRC="/opt/graph-digitizer/lib/runtime/icons/scatter-plot-256.png"
+ICON_DEST="/usr/share/icons/hicolor/256x256/apps/graph-digitizer.png"
+
+case "$1" in
+    configure)
+        if [ -f "$ICON_SRC" ] && [ ! -f "$ICON_DEST" ]; then
+            install -D -m 0644 "$ICON_SRC" "$ICON_DEST" || true
+        fi
+        if [ -f "/opt/graph-digitizer/graph-digitizer.desktop" ]; then
+            install -D -m 0644 "/opt/graph-digitizer/graph-digitizer.desktop" "$DESKTOP" || true
+        fi
+        if command -v update-icon-caches >/dev/null 2>&1; then
+            update-icon-caches /usr/share/icons/hicolor || true
+        fi
+        echo "Graph Digitizer installed. Launch via system menu or 'graph-digitizer'."
+    ;;
+    abort-upgrade|abort-remove|abort-deconfigure)
+        ;;
+    *)
+        ;;
+fi
+exit 0

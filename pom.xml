@@ -69,12 +69,22 @@
         </dependency>
     </dependencies>
     <build>
-        <finalName>vision-skills-progression-tracker-${project.version}</finalName>
+        <finalName>StudentDataGUI-${project.version}</finalName>
         <plugins>
             <plugin>
                 <inherited>true</inherited>
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <version>3.8.0</version>
+                <configuration>
+                    <encoding>${project.build.sourceEncoding}</encoding>
+                    <show>protected</show>
+                    <failOnError>false</failOnError>
+                    <doclint>none</doclint>
+                    <additionalparam>-Xdoclint:none</additionalparam>
+                    <source>${maven.compiler.release}</source>
+                    <linksource>true</linksource>
+                    <quiet>true</quiet>
+                </configuration>
                 <executions>
                     <execution>
                         <id>attach-javadocs</id>
@@ -208,6 +218,50 @@
     </build>
     <reporting>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-project-info-reports-plugin</artifactId>
+                <version>3.4.5</version>
+                <reportSets>
+                    <reportSet>
+                        <reports>
+                            <report>index</report>
+                            <report>summary</report>
+                            <report>licenses</report>
+                            <report>scm</report>
+                            <report>dependencies</report>
+                            <report>dependency-info</report>
+                            <report>dependency-management</report>
+                            <report>modules</report>
+                            <report>plugins</report>
+                        </reports>
+                    </reportSet>
+                </reportSets>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.8.0</version>
+                <configuration>
+                    <encoding>${project.build.sourceEncoding}</encoding>
+                    <doclint>none</doclint>
+                    <failOnError>false</failOnError>
+                    <linksource>true</linksource>
+                    <quiet>true</quiet>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-report-plugin</artifactId>
+                <version>3.5.0</version>
+                <reportSets>
+                    <reportSet>
+                        <reports>
+                            <report>report</report>
+                        </reports>
+                    </reportSet>
+                </reportSets>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>

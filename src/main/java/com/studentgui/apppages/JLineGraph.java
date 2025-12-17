@@ -23,28 +23,77 @@ import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 
 /**
- * Lightweight line chart component used across pages to display recent
- * assessment sessions. Wraps a JFreeChart XY plot and exposes a small set
- * of convenience update methods used by the application pages:
+ * Reusable JFreeChart-based line chart component for visualizing student assessment progress.
+ *
+ * <p>This component is shared across all assessment pages (Braille, Abacus, iOS, ScreenReader, etc.)
+ * to display time-series data showing skill progression over multiple sessions. It supports three
+ * primary visualization modes:</p>
+ *
  * <ul>
- *   <li>{@link #updateWithData(java.util.List)}</li>
- *   <li>{@link #updateWithGroupedData(java.util.List, String[])}</li>
- *   <li>{@link #updateWithGroupedDataByDate(java.util.List, java.util.List, String[], String[])}</li>
+ *   <li><b>Single-chart mode:</b> {@link #updateWithData(java.util.List)} - Plots all skills on one
+ *       chart with historical sessions in gray and the latest session highlighted in black</li>
+ *   <li><b>Grouped mode (session indices):</b> {@link #updateWithGroupedData(java.util.List, String[])} -
+ *       Creates multiple stacked charts, one per phase group (determined by part code prefix like "P1", "P2")</li>
+ *   <li><b>Grouped mode (chronological dates):</b> {@link #updateWithGroupedDataByDate(java.util.List, java.util.List, String[], String[])} -
+ *       Plots grouped data with actual dates on the X-axis for true time-series visualization</li>
  * </ul>
  *
- * Important implementation notes:
+ * <p><b>Visual Design and Rendering:</b></p>
  * <ul>
- *   <li>Rendering jitter: a small visual jitter of +/- {@code JITTER_AMPLITUDE}
- *       is applied to plotted points via {@link #addJitter(double)} to help
- *       reveal overlapping points. This is a display-only transformation
- *       and does not modify persisted session values.</li>
- *   <li>Background bands: the component draws horizontal colored bands to
- *       indicate score ranges; the bands use the ranges: red = -0.25..0.5,
- *       orange = 0.5..1.5, orange = 1.5..2.5, yellow = 2.5..3.5, green =
- *       3.5..4.5. The Y-axis range is set to {@code -0.25 .. 4.25} by default.</li>
- *   <li>Grouped charts and time-series charts share the same band drawing
- *       helper {@link #addHorizontalBands(org.jfree.chart.plot.XYPlot, double, double)}</li>
+ *   <li><b>Background bands:</b> Colored horizontal bands indicate score ranges to aid interpretation:
+ *     <ul>
+ *       <li><span style="color:red;">Red band</span>: -0.25 to 0.5 (minimal/no proficiency)</li>
+ *       <li><span style="color:orange;">Orange bands</span>: 0.5\u20131.5, 1.5\u20132.5 (emerging skills)</li>
+ *       <li><span style="color:yellow;">Yellow band</span>: 2.5\u20133.5 (developing proficiency)</li>
+ *       <li><span style="color:green;">Green band</span>: 3.5\u20134.5 (mastery/proficient)</li>
+ *     </ul>
+ *   </li>
+ *   <li><b>Rendering jitter:</b> A configurable visual jitter of ±{@value #JITTER_AMPLITUDE} is applied
+ *       to plotted points via {@link #addJitter(double)} to reveal overlapping data points. This is a
+ *       display-only transformation and does not modify persisted values. Jitter can be:
+ *     <ul>
+ *       <li>Enabled/disabled via {@link #setJitterEnabled(boolean)}</li>
+ *       <li>Made deterministic (for testing) via {@link #setJitterDeterministic(boolean)} and {@link #setJitterSeed(Long)}</li>
+ *       <li>Configured via {@link com.studentgui.apphelpers.Settings} keys: "jitter.enabled", "jitter.deterministic", "jitter.seed"</li>
+ *     </ul>
+ *   </li>
+ *   <li><b>Color palette:</b> Consistent color-blind friendly palette used for series rendering:
+ *     <ul>
+ *       <li>{@link #PALETTE_HEX}: Hex color strings for HTML legend generation (8 colors)</li>
+ *       <li>{@link #PALETTE}: AWT Color objects for JFreeChart rendering (8 colors matching PALETTE_HEX)</li>
+ *     </ul>
+ *   </li>
  * </ul>
+ *
+ * <p><b>Typical Workflow for Assessment Pages:</b></p>
+ * <ol>
+ *   <li>Page fetches recent sessions from database via {@link com.studentgui.apphelpers.Database#fetchLatestAssessmentResultsWithDates}</li>
+ *   <li>Page calls {@link #updateWithGroupedDataByDate(java.util.List, java.util.List, String[], String[])} to populate chart</li>
+ *   <li>On submit, page calls {@link #saveGroupedCharts(java.nio.file.Path, String, int, int)} to export PNG images</li>
+ *   <li>Page generates Markdown/HTML reports linking to the exported plots</li>
+ * </ol>
+ *
+ * <p><b>Export and Persistence:</b></p>
+ * <ul>
+ *   <li>{@link #saveGroupedCharts(java.nio.file.Path, String, int, int)} - Exports each phase group as a separate PNG file</li>
+ *   <li>{@link #saveChart(java.nio.file.Path, int, int)} - Exports the single main chart (when not in grouped mode)</li>
+ *   <li>Returns Map&lt;groupName, filePath&gt; for use in report generation</li>
+ * </ul>
+ *
+ * <p><b>Accessibility:</b></p>
+ * <ul>
+ *   <li>ChartPanel accessible name set to "Skill progression chart"</li>
+ *   <li>Tooltips enabled showing coordinate values on hover</li>
+ *   <li>Keyboard navigation supported through JFreeChart's default ChartPanel behavior</li>
+ * </ul>
+ *
+ * <p><b>Settings Integration:</b> Implements {@link com.studentgui.app.SettingsChangeListener} to respond
+ * to jitter configuration changes at runtime without requiring application restart.</p>
+ *
+ * @see com.studentgui.apphelpers.Database#fetchLatestAssessmentResultsWithDates
+ * @see com.studentgui.app.SettingsChangeListener
+ * @see org.jfree.chart.JFreeChart
+ * @see org.jfree.chart.ChartPanel
  */
 public class JLineGraph extends JPanel implements com.studentgui.app.SettingsChangeListener {
     private static final long serialVersionUID = 1L;

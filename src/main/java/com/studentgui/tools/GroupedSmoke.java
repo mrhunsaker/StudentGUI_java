@@ -10,9 +10,49 @@ import com.studentgui.apphelpers.Helpers;
 import com.studentgui.apppages.JLineGraph;
 
 /**
- * Small command-line helper that renders a sample grouped chart and
- * writes an output PNG to the app data folder. Intended for smoke
- * testing chart rendering during development and CI.
+ * Automated smoke test for grouped chart rendering and multi-panel PNG export.
+ *
+ * <p>Verifies that {@link JLineGraph} correctly renders multiple stacked phase-grouped
+ * charts (as used by assessment pages like Braille, Abacus, etc.). Generates synthetic
+ * data with explicit phase prefixes (P1, P2, P3) and exports to PNG.</p>
+ *
+ * <p><b>Purpose:</b></p>
+ * <ul>
+ *   <li>Validates phase grouping logic in {@link JLineGraph#updateWithGroupedData}</li>
+ *   <li>Ensures each group renders as a separate stacked chart panel</li>
+ *   <li>Verifies PNG export of multi-chart layouts</li>
+ *   <li>Provides visual reference for chart appearance during development</li>
+ * </ul>
+ *
+ * <p><b>Usage:</b></p>
+ * <pre>{@code
+ * java -cp StudentDataGUI.jar com.studentgui.tools.GroupedSmoke
+ * }</pre>
+ *
+ * <p><b>Expected Output:</b></p>
+ * <pre>
+ * Grouped smoke wrote chart to: /path/to/app_home/StudentDataFiles/Grouped_Smoke/plots/GroupedSmoke-2024-01-15.png
+ * Exists: true
+ * </pre>
+ *
+ * <p><b>Test Data Structure:</b></p>
+ * <ul>
+ *   <li><b>Part codes:</b> 9 codes with prefixes: P1 (3 items), P2 (2 items), P3 (4 items)</li>
+ *   <li><b>Sessions:</b> 3 synthetic sessions with deterministic scores {@code (i + s) % 5}</li>
+ *   <li><b>Expected output:</b> 3 stacked chart panels (one per phase group) in a single 800×600px PNG</li>
+ * </ul>
+ *
+ * <p><b>Output Location:</b> {@code app_home/StudentDataFiles/Grouped_Smoke/plots/GroupedSmoke-<ISO_DATE>.png}</p>
+ *
+ * <p><b>Validation:</b> Inspect the generated PNG to verify:</p>
+ * <ol>
+ *   <li>Three distinct chart panels labeled "P1 - 3 items", "P2 - 2 items", "P3 - 4 items"</li>
+ *   <li>Each panel shows 3 line series (2 gray historical, 1 black latest)</li>
+ *   <li>Colored background bands visible in all panels</li>
+ * </ol>
+ *
+ * @see com.studentgui.apppages.JLineGraph#updateWithGroupedData
+ * @see com.studentgui.apppages.JLineGraph#saveChart
  */
 public class GroupedSmoke {
     /**

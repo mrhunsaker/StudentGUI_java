@@ -1,0 +1,11 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Graph Digitizer
+Comment=Extract numeric data points from plotted graphs
+Exec=graph-digitizer %f
+Icon=graph-digitizer
+Terminal=false
+Categories=Science;Education;Graphics;
+StartupWMClass=GraphDigitizer
+MimeType=application/x-graphdigitizer;

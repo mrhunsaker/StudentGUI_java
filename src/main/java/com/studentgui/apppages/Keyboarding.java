@@ -23,9 +23,39 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Keyboarding skills page. Captures program/topic/speed/accuracy results and
- * persists them to a dedicated keyboarding result table via the
- * {@code Database} helper.
+ * Touch-typing and keyboarding skills assessment page.
+ *
+ * <p>Unlike other assessment pages that use phase-score grids, this page captures
+ * structured performance metrics for keyboarding practice sessions:</p>
+ *
+ * <ul>
+ *   <li><b>Program:</b> Name of the typing curriculum or software (e.g., TypingClub, KeyBlaze, Braille2000)</li>
+ *   <li><b>Topic:</b> Specific lesson, module, or exercise completed (e.g., "Home Row Mastery", "Lesson 12")</li>
+ *   <li><b>Speed (WPM):</b> Words per minute achieved during the timed exercise</li>
+ *   <li><b>Accuracy (%):</b> Percentage of characters typed correctly</li>
+ * </ul>
+ *
+ * <p><b>Data Persistence:</b></p>
+ * <ul>
+ *   <li>Values persisted via {@link com.studentgui.apphelpers.Database#insertKeyboardingResult} to the {@code KeyboardingResult} table</li>
+ *   <li>JSON export: {@code StudentDataFiles/<student>/Sessions/Keyboarding/Keyboarding-<sessionId>-<timestamp>.json}</li>
+ *   <li>Metadata-only reports (no plots): Markdown and HTML files in {@code reports/} with session details</li>
+ * </ul>
+ *
+ * <p><b>Validation and Error Handling:</b></p>
+ * <ul>
+ *   <li>Speed and Accuracy fields must contain whole numbers (non-negative integers)</li>
+ *   <li>Empty speed/accuracy fields default to 0 for leniency</li>
+ *   <li>Invalid input triggers error dialogs and field focus for correction</li>
+ * </ul>
+ *
+ * <p>The shared {@link JLineGraph} component is present for UI consistency but is not populated
+ * with keyboarding data (keyboarding does not use assessment parts). Implements
+ * {@link com.studentgui.app.DateChangeListener} and {@link com.studentgui.app.StudentChangeListener}
+ * for title updates when global selections change.</p>
+ *
+ * @see com.studentgui.apphelpers.Database#insertKeyboardingResult
+ * @see com.studentgui.apphelpers.dto.KeyboardingPayload
  */
 public class Keyboarding extends JPanel implements com.studentgui.app.DateChangeListener, com.studentgui.app.StudentChangeListener {
     private static final Logger LOG = LoggerFactory.getLogger(Keyboarding.class);

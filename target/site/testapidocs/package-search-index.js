@@ -1,0 +1,1 @@
+packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"l":"com.studentgui.apphelpers"},{"l":"com.studentgui.apppages"},{"l":"com.studentgui.test"}];updateSearchResults();

@@ -1,0 +1,517 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
+         https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.digitizer</groupId>
+    <artifactId>graph-digitizer</artifactId>
+    <version>1.1.1</version>
+    <packaging>jar</packaging>
+
+    <name>Graph Digitizer</name>
+    <description>An interactive GUI tool for extracting numeric data points from raster images of graphs</description>
+    <url>https://github.com/your-repo/graph-digitizer</url>
+
+    <developers>
+        <developer>
+            <name>Michael Ryan Hunsaker</name>
+            <email>ryhunsaker@dsdmail.net</email>
+            <roles>
+                <role>developer</role>
+            </roles>
+        </developer>
+    </developers>
+
+    <licenses>
+        <license>
+            <name>Apache License, Version 2.0</name>
+            <url>https://www.apache.org/licenses/LICENSE-2.0</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
+        <javafx.version>21.0.2</javafx.version>
+        <javafx.maven.plugin.version>0.0.8</javafx.maven.plugin.version>
+        <log4j2.version>2.23.1</log4j2.version>
+    </properties>
+
+    <dependencies>
+        <!-- JavaFX for GUI -->
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-controls</artifactId>
+            <version>${javafx.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-fxml</artifactId>
+            <version>${javafx.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-swing</artifactId>
+            <version>${javafx.version}</version>
+        </dependency>
+
+        <!-- JSON processing -->
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.10.1</version>
+        </dependency>
+
+        <!-- CSV processing -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-csv</artifactId>
+            <version>1.10.0</version>
+        </dependency>
+
+            <!-- TwelveMonkeys ImageIO - Extended format support -->
+            <dependency>
+                <groupId>com.twelvemonkeys.imageio</groupId>
+                <artifactId>imageio-core</artifactId>
+                <version>3.10.1</version>
+            </dependency>
+            <dependency>
+                <groupId>com.twelvemonkeys.imageio</groupId>
+                <artifactId>imageio-tiff</artifactId>
+                <version>3.10.1</version>
+            </dependency>
+            <dependency>
+                <groupId>com.twelvemonkeys.imageio</groupId>
+                <artifactId>imageio-webp</artifactId>
+                <version>3.10.1</version>
+            </dependency>
+            <dependency>
+                <groupId>com.twelvemonkeys.imageio</groupId>
+                <artifactId>imageio-metadata</artifactId>
+                <version>3.10.1</version>
+            </dependency>
+
+        <!-- FlatLaf Look and Feel themes -->
+        <dependency>
+            <groupId>com.formdev</groupId>
+            <artifactId>flatlaf</artifactId>
+            <version>3.4.1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.formdev</groupId>
+            <artifactId>flatlaf-intellij-themes</artifactId>
+            <version>3.4.1</version>
+        </dependency>
+
+        <!-- Logging -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>2.0.9</version>
+        </dependency>
+        <!-- Log4j2 backend replacing logback -->
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-api</artifactId>
+            <version>${log4j2.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+            <version>${log4j2.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-slf4j2-impl</artifactId>
+            <version>${log4j2.version}</version>
+        </dependency>
+        <!-- LMAX Disruptor for Async Loggers -->
+        <dependency>
+            <groupId>com.lmax</groupId>
+            <artifactId>disruptor</artifactId>
+            <version>3.4.4</version>
+        </dependency>
+
+        <!-- Jackson (required by Log4j JsonLayout at runtime) -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.15.2</version>
+        </dependency>
+
+        <!-- Testing -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.13.2</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <version>5.9.3</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>5.9.3</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-params</artifactId>
+            <version>5.9.3</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <!-- Load selected-icon.properties if present to override icon.win/icon.mac/icon.linux -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>properties-maven-plugin</artifactId>
+                <version>1.1.0</version>
+                <executions>
+                    <execution>
+                        <id>load-selected-icon-properties</id>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>read-project-properties</goal>
+                        </goals>
+                        <configuration>
+                            <files>
+                                <file>${project.basedir}/selected-icon.properties</file>
+                            </files>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- Copy root-level icons into build/icons before packaging -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>3.3.1</version>
+                <executions>
+                    <execution>
+                        <id>copy-icons</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.basedir}/build/icons</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${project.basedir}/../icons</directory>
+                                    <includes>
+                                        <include>**/*.png</include>
+                                        <include>**/*.ico</include>
+                                    </includes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.11.0</version>
+                <configuration>
+                    <source>21</source>
+                    <target>21</target>
+                    <release>21</release>
+                </configuration>
+            </plugin>
+
+            <!-- JavaFX Maven Plugin -->
+            <plugin>
+                <groupId>org.openjfx</groupId>
+                <artifactId>javafx-maven-plugin</artifactId>
+                <version>${javafx.maven.plugin.version}</version>
+                <configuration>
+                    <mainClass>com.digitizer.ui.GraphDigitizerApp</mainClass>
+                </configuration>
+            </plugin>
+
+
+            <!-- Shade Plugin for creating the single distributable fat JAR -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.5.0</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <transformers>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass>com.digitizer.ui.GraphDigitizerApp</mainClass>
+                                </transformer>
+                            </transformers>
+                            <finalName>graph-digitizer</finalName>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Surefire Plugin for running tests -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.0.0</version>
+            </plugin>
+
+            <!-- JAR Plugin -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.3.0</version>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <mainClass>com.digitizer.ui.GraphDigitizerApp</mainClass>
+                        </manifest>
+                    </archive>
+                </configuration>
+            </plugin>
+            <!-- Maven Javadoc plugin: reduce doclint warnings during local generation -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.5.0</version>
+                <configuration>
+                    <doclint>none</doclint>
+                    <failOnError>false</failOnError>
+                </configuration>
+            </plugin>
+            
+            <!-- Profile-friendly native packaging with jlink/jpackage. Use with -Pnative -->
+        </plugins>
+    </build>
+
+    <profiles>
+        <profile>
+            <id>native</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <properties>
+                <!-- Configure the jpackage installer type; override via -Djpackage.type=exe|msi|dmg|deb|rpm -->
+                <jpackage.type>EXE</jpackage.type>
+                <!-- Icon properties (override with -Dicon.win=... etc.) -->
+                <icon.win>${project.basedir}/build/icons/scatter-plot-256.ico</icon.win>
+                <icon.mac>${project.basedir}/build/icons/scatter-plot-256.png</icon.mac> <!-- supply .icns if available -->
+                <icon.linux>${project.basedir}/build/icons/scatter-plot-256.png</icon.linux>
+            </properties>
+            <build>
+                <plugins>
+                    <!-- Note: jpackage-maven-plugin removed in favor of exec-maven-plugin to call the jpackage CLI directly. -->
+                            <!-- Consolidated maven-dependency-plugin executions: copy shaded jar, JavaFX platform jars, and runtime deps into jpackage input -->
+                            <plugin>
+                                <groupId>org.apache.maven.plugins</groupId>
+                                <artifactId>maven-dependency-plugin</artifactId>
+                                <version>3.5.0</version>
+                                <executions>
+                                            <!-- The shaded jar is copied by the antrun execution `copy-shaded-file-to-jpackage-input` during verify. -->
+                                    <execution>
+                                        <id>copy-javafx-windows</id>
+                                        <phase>prepare-package</phase>
+                                        <goals>
+                                            <goal>copy</goal>
+                                        </goals>
+                                        <configuration>
+                                            <artifactItems>
+                                                <artifactItem>
+                                                    <groupId>org.openjfx</groupId>
+                                                    <artifactId>javafx-base</artifactId>
+                                                    <version>${javafx.version}</version>
+                                                    <classifier>win</classifier>
+                                                    <type>jar</type>
+                                                    <outputDirectory>${project.build.directory}/jpackage-input/lib</outputDirectory>
+                                                </artifactItem>
+                                                <artifactItem>
+                                                    <groupId>org.openjfx</groupId>
+                                                    <artifactId>javafx-graphics</artifactId>
+                                                    <version>${javafx.version}</version>
+                                                    <classifier>win</classifier>
+                                                    <type>jar</type>
+                                                    <outputDirectory>${project.build.directory}/jpackage-input/lib</outputDirectory>
+                                                </artifactItem>
+                                                <artifactItem>
+                                                    <groupId>org.openjfx</groupId>
+                                                    <artifactId>javafx-controls</artifactId>
+                                                    <version>${javafx.version}</version>
+                                                    <classifier>win</classifier>
+                                                    <type>jar</type>
+                                                    <outputDirectory>${project.build.directory}/jpackage-input/lib</outputDirectory>
+                                                </artifactItem>
+                                                <artifactItem>
+                                                    <groupId>org.openjfx</groupId>
+                                                    <artifactId>javafx-fxml</artifactId>
+                                                    <version>${javafx.version}</version>
+                                                    <classifier>win</classifier>
+                                                    <type>jar</type>
+                                                    <outputDirectory>${project.build.directory}/jpackage-input/lib</outputDirectory>
+                                                </artifactItem>
+                                                <artifactItem>
+                                                    <groupId>org.openjfx</groupId>
+                                                    <artifactId>javafx-swing</artifactId>
+                                                    <version>${javafx.version}</version>
+                                                    <classifier>win</classifier>
+                                                    <type>jar</type>
+                                                    <outputDirectory>${project.build.directory}/jpackage-input/lib</outputDirectory>
+                                                </artifactItem>
+                                            </artifactItems>
+                                        </configuration>
+                                    </execution>
+                                    <execution>
+                                        <id>copy-runtime-dependencies</id>
+                                        <phase>prepare-package</phase>
+                                        <goals>
+                                            <goal>copy-dependencies</goal>
+                                        </goals>
+                                        <configuration>
+                                            <outputDirectory>${project.build.directory}/jpackage-input/lib</outputDirectory>
+                                            <includeScope>runtime</includeScope>
+                                            <excludeGroupIds>org.openjfx</excludeGroupIds>
+                                            <excludeArtifactIds>javafx-base,javafx-graphics,javafx-controls,javafx-fxml,javafx-swing</excludeArtifactIds>
+                                        </configuration>
+                                    </execution>
+                                </executions>
+                            </plugin>
+                            <!-- Ensure shaded jar produced in package is copied into jpackage input (rename to graph-digitizer.jar) -->
+                            <plugin>
+                                <groupId>org.apache.maven.plugins</groupId>
+                                <artifactId>maven-antrun-plugin</artifactId>
+                                <version>3.1.0</version>
+                                <executions>
+                                    <execution>
+                                        <id>copy-shaded-file-to-jpackage-input</id>
+                                        <phase>verify</phase>
+                                        <goals>
+                                            <goal>run</goal>
+                                        </goals>
+                                        <configuration>
+                                            <target>
+                                                <mkdir dir="${project.build.directory}/jpackage-input"/>
+                                                <copy todir="${project.build.directory}/jpackage-input" flatten="true">
+                                                    <fileset dir="${project.build.directory}">
+                                                        <include name="**/*-shaded.jar"/>
+                                                    </fileset>
+                                                    <mapper type="glob" from="*-shaded.jar" to="graph-digitizer.jar"/>
+                                                </copy>
+                                                <copy todir="${project.build.directory}/jpackage-input" flatten="true">
+                                                    <fileset dir="${project.build.directory}">
+                                                        <include name="**/graph-digitizer*.jar"/>
+                                                    </fileset>
+                                                    <mapper type="glob" from="graph-digitizer*.jar" to="graph-digitizer.jar"/>
+                                                </copy>
+                                            </target>
+                                        </configuration>
+                                    </execution>
+                                </executions>
+                            </plugin>
+                            <!-- Exec plugin to run jpackage CLI directly (app-image then msi). -->
+                            <plugin>
+                                <groupId>org.codehaus.mojo</groupId>
+                                <artifactId>exec-maven-plugin</artifactId>
+                                <version>3.1.0</version>
+                                <executions>
+                                    <execution>
+                                        <id>cleanup-app-image</id>
+                                        <phase>package</phase>
+                                        <goals>
+                                            <goal>exec</goal>
+                                        </goals>
+                                        <configuration>
+                                            <executable>${env.SYSTEMROOT}\System32\WindowsPowerShell\v1.0\powershell.exe</executable>
+                                            <arguments>
+                                                <argument>-NoProfile</argument>
+                                                <argument>-Command</argument>
+                                                <argument>if ('${preserve.appimage}' -ne 'true') { if (Test-Path '${project.build.directory}\jpackage\GraphDigitizer') { Remove-Item -Recurse -Force '${project.build.directory}\jpackage\GraphDigitizer' } }</argument>
+                                            </arguments>
+                                        </configuration>
+                                    </execution>
+                                    <execution>
+                                        <id>jpackage-app-image</id>
+                                        <phase>verify</phase>
+                                        <goals>
+                                            <goal>exec</goal>
+                                        </goals>
+                                        <configuration>
+                                            <executable>${env.JAVA_HOME}\bin\jpackage.exe</executable>
+                                            <arguments>
+                                                <argument>--type</argument>
+                                                <argument>app-image</argument>
+                                                <argument>--input</argument>
+                                                <argument>${project.build.directory}/jpackage-input</argument>
+                                                <argument>--main-jar</argument>
+                                                <argument>graph-digitizer.jar</argument>
+                                                <argument>--main-class</argument>
+                                                <argument>com.digitizer.ui.GraphDigitizerApp</argument>
+                                                <argument>--name</argument>
+                                                <argument>GraphDigitizer</argument>
+                                                <argument>--dest</argument>
+                                                <argument>${project.build.directory}/jpackage</argument>
+                                                <argument>--icon</argument>
+                                                <argument>${icon.win}</argument>
+                                                <argument>--app-version</argument>
+                                                <argument>${project.version}</argument>
+                                                <argument>--runtime-image</argument>
+                                                <argument>${project.build.directory}/jlink-image</argument>
+                                                <argument>--java-options</argument>
+                                                <argument>--module-path $APPDIR\\lib</argument>
+                                                <argument>--java-options</argument>
+                                                <argument>--add-modules=javafx.controls,javafx.fxml,javafx.swing</argument>
+                                                <argument>--java-options</argument>
+                                                <argument>-Djavax.accessibility.assistive_technologies=</argument>
+                                            </arguments>
+                                        </configuration>
+                                    </execution>
+                                    <execution>
+                                        <id>jpackage-msi</id>
+                                        <phase>verify</phase>
+                                        <goals>
+                                            <goal>exec</goal>
+                                        </goals>
+                                        <configuration>
+                                            <executable>${env.JAVA_HOME}\bin\jpackage.exe</executable>
+                                            <arguments>
+                                                <argument>--type</argument>
+                                                <argument>msi</argument>
+                                                <argument>--app-image</argument>
+                                                <argument>${project.build.directory}/jpackage/GraphDigitizer</argument>
+                                                <argument>--dest</argument>
+                                                <argument>${project.build.directory}/jpackage-msi</argument>
+                                                <argument>--name</argument>
+                                                <argument>GraphDigitizer</argument>
+                                                <argument>--icon</argument>
+                                                <argument>${icon.win}</argument>
+                                                <argument>--app-version</argument>
+                                                <argument>${project.version}</argument>
+                                                <argument>--win-dir-chooser</argument>
+                                                <argument>--win-menu</argument>
+                                                <argument>--win-shortcut</argument>
+                                                <argument>--win-menu-group</argument>
+                                                <argument>GraphDigitizer</argument>
+                                            </arguments>
+                                        </configuration>
+                                    </execution>
+                                </executions>
+                            </plugin>
+                            <!-- (Consolidated earlier) JavaFX platform jars and runtime dependencies are copied by a single maven-dependency-plugin declaration above -->
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+</project>
