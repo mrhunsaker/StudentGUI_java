@@ -300,6 +300,23 @@
 <error line="37" column="5" severity="error" message="Class &apos;AssessmentPayload&apos; looks like designed for extension (can be subclassed), but the method &apos;toString&apos; does not have javadoc that explains how to do that safely. If class is not designed for extension consider making the class &apos;AssessmentPayload&apos; final or making the method &apos;toString&apos; static/final/abstract/empty, or adding allowed annotation for the method." source="com.puppycrawl.tools.checkstyle.checks.design.DesignForExtensionCheck"/>
 <error line="39" severity="error" message="Line is longer than 80 characters (found 142)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
 </file>
+<file name="/run/media/ryhunsaker/250GB/GitHubRepos/StudentGUI_java/src/main/java/com/studentgui/apphelpers/dto/ContactPayload.java">
+<error line="8" column="16" severity="error" message="Variable &apos;sessionId&apos; must be private and have accessor methods." source="com.puppycrawl.tools.checkstyle.checks.design.VisibilityModifierCheck"/>
+<error line="10" column="19" severity="error" message="Variable &apos;guardian&apos; must be private and have accessor methods." source="com.puppycrawl.tools.checkstyle.checks.design.VisibilityModifierCheck"/>
+<error line="12" column="19" severity="error" message="Variable &apos;method&apos; must be private and have accessor methods." source="com.puppycrawl.tools.checkstyle.checks.design.VisibilityModifierCheck"/>
+<error line="14" column="19" severity="error" message="Variable &apos;phone&apos; must be private and have accessor methods." source="com.puppycrawl.tools.checkstyle.checks.design.VisibilityModifierCheck"/>
+<error line="16" column="19" severity="error" message="Variable &apos;email&apos; must be private and have accessor methods." source="com.puppycrawl.tools.checkstyle.checks.design.VisibilityModifierCheck"/>
+<error line="18" column="19" severity="error" message="Variable &apos;response&apos; must be private and have accessor methods." source="com.puppycrawl.tools.checkstyle.checks.design.VisibilityModifierCheck"/>
+<error line="20" column="19" severity="error" message="Variable &apos;general&apos; must be private and have accessor methods." source="com.puppycrawl.tools.checkstyle.checks.design.VisibilityModifierCheck"/>
+<error line="22" column="19" severity="error" message="Variable &apos;specific&apos; must be private and have accessor methods." source="com.puppycrawl.tools.checkstyle.checks.design.VisibilityModifierCheck"/>
+<error line="24" column="19" severity="error" message="Variable &apos;notes&apos; must be private and have accessor methods." source="com.puppycrawl.tools.checkstyle.checks.design.VisibilityModifierCheck"/>
+<error line="27" column="29" severity="error" message="&apos;{&apos; is not followed by whitespace." source="com.puppycrawl.tools.checkstyle.checks.whitespace.WhitespaceAroundCheck"/>
+<error line="27" column="30" severity="error" message="&apos;}&apos; is not preceded with whitespace." source="com.puppycrawl.tools.checkstyle.checks.whitespace.WhitespaceAroundCheck"/>
+<error line="42" severity="error" message="Line is longer than 80 characters (found 265)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
+<error line="42" column="12" severity="error" message="More than 7 parameters (found 9)." source="com.puppycrawl.tools.checkstyle.checks.sizes.ParameterNumberCheck"/>
+<error line="54" column="5" severity="error" message="Class &apos;ContactPayload&apos; looks like designed for extension (can be subclassed), but the method &apos;getSessionId&apos; does not have javadoc that explains how to do that safely. If class is not designed for extension consider making the class &apos;ContactPayload&apos; final or making the method &apos;getSessionId&apos; static/final/abstract/empty, or adding allowed annotation for the method." source="com.puppycrawl.tools.checkstyle.checks.design.DesignForExtensionCheck"/>
+<error line="55" column="31" severity="error" message="&apos;{&apos; at column 31 should have line break after." source="com.puppycrawl.tools.checkstyle.checks.blocks.LeftCurlyCheck"/>
+</file>
 <file name="/run/media/ryhunsaker/250GB/GitHubRepos/StudentGUI_java/src/main/java/com/studentgui/apphelpers/dto/KeyboardingPayload.java">
 <error line="8" column="16" severity="error" message="Variable &apos;sessionId&apos; must be private and have accessor methods." source="com.puppycrawl.tools.checkstyle.checks.design.VisibilityModifierCheck"/>
 <error line="10" column="19" severity="error" message="Variable &apos;program&apos; must be private and have accessor methods." source="com.puppycrawl.tools.checkstyle.checks.design.VisibilityModifierCheck"/>
@@ -320,22 +337,7 @@
 <error line="26" column="5" severity="error" message="Class &apos;NotesPayload&apos; looks like designed for extension (can be subclassed), but the method &apos;getSessionId&apos; does not have javadoc that explains how to do that safely. If class is not designed for extension consider making the class &apos;NotesPayload&apos; final or making the method &apos;getSessionId&apos; static/final/abstract/empty, or adding allowed annotation for the method." source="com.puppycrawl.tools.checkstyle.checks.design.DesignForExtensionCheck"/>
 <error line="27" column="31" severity="error" message="&apos;{&apos; at column 31 should have line break after." source="com.puppycrawl.tools.checkstyle.checks.blocks.LeftCurlyCheck"/>
 </file>
-<file name="/run/media/ryhunsaker/250GB/GitHubRepos/StudentGUI_java/src/main/java/com/studentgui/apphelpers/dto/ContactPayload.java">
-<error line="8" column="16" severity="error" message="Variable &apos;sessionId&apos; must be private and have accessor methods." source="com.puppycrawl.tools.checkstyle.checks.design.VisibilityModifierCheck"/>
-<error line="10" column="19" severity="error" message="Variable &apos;guardian&apos; must be private and have accessor methods." source="com.puppycrawl.tools.checkstyle.checks.design.VisibilityModifierCheck"/>
-<error line="12" column="19" severity="error" message="Variable &apos;method&apos; must be private and have accessor methods." source="com.puppycrawl.tools.checkstyle.checks.design.VisibilityModifierCheck"/>
-<error line="14" column="19" severity="error" message="Variable &apos;phone&apos; must be private and have accessor methods." source="com.puppycrawl.tools.checkstyle.checks.design.VisibilityModifierCheck"/>
-<error line="16" column="19" severity="error" message="Variable &apos;email&apos; must be private and have accessor methods." source="com.puppycrawl.tools.checkstyle.checks.design.VisibilityModifierCheck"/>
-<error line="18" column="19" severity="error" message="Variable &apos;response&apos; must be private and have accessor methods." source="com.puppycrawl.tools.checkstyle.checks.design.VisibilityModifierCheck"/>
-<error line="20" column="19" severity="error" message="Variable &apos;general&apos; must be private and have accessor methods." source="com.puppycrawl.tools.checkstyle.checks.design.VisibilityModifierCheck"/>
-<error line="22" column="19" severity="error" message="Variable &apos;specific&apos; must be private and have accessor methods." source="com.puppycrawl.tools.checkstyle.checks.design.VisibilityModifierCheck"/>
-<error line="24" column="19" severity="error" message="Variable &apos;notes&apos; must be private and have accessor methods." source="com.puppycrawl.tools.checkstyle.checks.design.VisibilityModifierCheck"/>
-<error line="27" column="29" severity="error" message="&apos;{&apos; is not followed by whitespace." source="com.puppycrawl.tools.checkstyle.checks.whitespace.WhitespaceAroundCheck"/>
-<error line="27" column="30" severity="error" message="&apos;}&apos; is not preceded with whitespace." source="com.puppycrawl.tools.checkstyle.checks.whitespace.WhitespaceAroundCheck"/>
-<error line="42" severity="error" message="Line is longer than 80 characters (found 265)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
-<error line="42" column="12" severity="error" message="More than 7 parameters (found 9)." source="com.puppycrawl.tools.checkstyle.checks.sizes.ParameterNumberCheck"/>
-<error line="54" column="5" severity="error" message="Class &apos;ContactPayload&apos; looks like designed for extension (can be subclassed), but the method &apos;getSessionId&apos; does not have javadoc that explains how to do that safely. If class is not designed for extension consider making the class &apos;ContactPayload&apos; final or making the method &apos;getSessionId&apos; static/final/abstract/empty, or adding allowed annotation for the method." source="com.puppycrawl.tools.checkstyle.checks.design.DesignForExtensionCheck"/>
-<error line="55" column="31" severity="error" message="&apos;{&apos; at column 31 should have line break after." source="com.puppycrawl.tools.checkstyle.checks.blocks.LeftCurlyCheck"/>
+<file name="/run/media/ryhunsaker/250GB/GitHubRepos/StudentGUI_java/src/main/java/com/studentgui/apphelpers/dto/SessionPayload.java">
 </file>
 <file name="/run/media/ryhunsaker/250GB/GitHubRepos/StudentGUI_java/src/main/java/com/studentgui/app/Main.java">
 <error line="1" severity="error" message="Missing package-info.java file." source="com.puppycrawl.tools.checkstyle.checks.javadoc.JavadocPackageCheck"/>
@@ -421,6 +423,8 @@
 <error line="567" severity="error" message="Line is longer than 80 characters (found 83)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
 <error line="569" severity="error" message="Line is longer than 80 characters (found 81)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
 </file>
+<file name="/run/media/ryhunsaker/250GB/GitHubRepos/StudentGUI_java/src/main/java/com/studentgui/app/DateChangeListener.java">
+</file>
 <file name="/run/media/ryhunsaker/250GB/GitHubRepos/StudentGUI_java/src/main/java/com/studentgui/app/PreferencesDialog.java">
 <error line="23" column="33" severity="error" message="&apos;{&apos; at column 33 should have line break after." source="com.puppycrawl.tools.checkstyle.checks.blocks.LeftCurlyCheck"/>
 <error line="37" severity="error" message="Line is longer than 80 characters (found 93)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
@@ -432,6 +436,10 @@
 <error line="45" severity="error" message="Line is longer than 80 characters (found 88)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
 <error line="58" severity="error" message="Line is longer than 80 characters (found 82)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
 <error line="59" severity="error" message="Line is longer than 80 characters (found 85)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
+</file>
+<file name="/run/media/ryhunsaker/250GB/GitHubRepos/StudentGUI_java/src/main/java/com/studentgui/app/SettingsChangeListener.java">
+</file>
+<file name="/run/media/ryhunsaker/250GB/GitHubRepos/StudentGUI_java/src/main/java/com/studentgui/app/StudentChangeListener.java">
 </file>
 <file name="/run/media/ryhunsaker/250GB/GitHubRepos/StudentGUI_java/src/main/java/com/studentgui/apptheming/Theme.java">
 <error line="1" severity="error" message="Missing package-info.java file." source="com.puppycrawl.tools.checkstyle.checks.javadoc.JavadocPackageCheck"/>
@@ -3193,5 +3201,7 @@
 <error line="28" severity="error" message="Line is longer than 80 characters (found 99)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
 <error line="31" severity="error" message="Line is longer than 80 characters (found 81)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
 <error line="33" severity="error" message="Line is longer than 80 characters (found 110)." source="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
+</file>
+<file name="/run/media/ryhunsaker/250GB/GitHubRepos/StudentGUI_java/src/main/resources/version.properties">
 </file>
 </checkstyle>

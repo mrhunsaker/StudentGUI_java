@@ -1,0 +1,1 @@
+packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"l":"com.studentgui.app"},{"l":"com.studentgui.apphelpers"},{"l":"com.studentgui.apphelpers.dto"},{"l":"com.studentgui.apppages"},{"l":"com.studentgui.apptheming"},{"l":"com.studentgui.bootstrap"},{"l":"com.studentgui.test"},{"l":"com.studentgui.tools"},{"l":"com.studentgui.uicomp"}];updateSearchResults();
