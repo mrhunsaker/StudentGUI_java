@@ -24,6 +24,8 @@ public class PhaseScoreField extends JPanel {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PhaseScoreField.class);
     // Ensure we only log the font-adjustment debug once to avoid noisy output in headless tests.
     private static final java.util.concurrent.atomic.AtomicBoolean FONT_ADJUST_LOGGED = new java.util.concurrent.atomic.AtomicBoolean(false);
+    /** Shared label font for all form labels so sizing stays consistent project-wide. */
+    private static final Font DEFAULT_LABEL_FONT = new Font(Font.SANS_SERIF, Font.PLAIN, 28);
     /** Wrapped, read-only label area used to display the description text. */
     private final JTextArea labelArea;
     /** Numeric spinner used for 0..4 score entry. */
@@ -36,6 +38,13 @@ public class PhaseScoreField extends JPanel {
 
     /** Horizontal spacer panel inserted to tune the gap between label and spinner. */
     private final JPanel spacer;
+
+    /**
+     * Return the shared label font used across all PhaseScoreField instances.
+     *
+     * @return default label font (24pt sans-serif)
+     */
+    public static Font getLabelFont() { return DEFAULT_LABEL_FONT; }
 
     /**
      * Create a PhaseScoreField containing a wrapped label and a numeric spinner.
@@ -52,7 +61,7 @@ public class PhaseScoreField extends JPanel {
     labelArea.setOpaque(false);
     labelArea.setFocusable(false);
     // Use explicit font so the appearance doesn't change when switching LAFs
-    Font labelFont = new Font(Font.SANS_SERIF, Font.PLAIN, 12);
+    Font labelFont = DEFAULT_LABEL_FONT;
     labelArea.setFont(labelFont);
     // Constrain width to the configured global label width so it doesn't expand.
     // Pages set GLOBAL_LABEL_WIDTH_PX to (maxLabelPx + 50). We render the label
@@ -71,7 +80,7 @@ public class PhaseScoreField extends JPanel {
         this.spinner = new JSpinner(new SpinnerNumberModel(initial, 0, 4, 1));
         JComponent editor = spinner.getEditor();
         // Set explicit font for spinner editor to keep sizing consistent across themes
-        Font spinnerFont = new Font(Font.SANS_SERIF, Font.PLAIN, 12);
+        Font spinnerFont = DEFAULT_LABEL_FONT;
         editor.setFont(spinnerFont);
         // The editor is typically a JSpinner.DefaultEditor containing a JTextField
         try {
@@ -88,8 +97,9 @@ public class PhaseScoreField extends JPanel {
                 LOG.trace("Could not adjust spinner editor textField font (field missing or inaccessible)");
             }
         }
-        editor.setPreferredSize(new Dimension(48, 20));
-        spinner.setPreferredSize(new Dimension(48, 24));
+        int spinnerHeight = Math.max(36, computePreferredHeight(spinnerFont, 1));
+        editor.setPreferredSize(new Dimension(128, spinnerHeight));
+        spinner.setPreferredSize(new Dimension(128, spinnerHeight + 4));
 
         setBorder(BorderFactory.createEmptyBorder(0, 20, 0, 0)); // left inset 20px
 
@@ -190,7 +200,7 @@ public class PhaseScoreField extends JPanel {
             return globalLabelWidthPx;
         }
         javax.swing.JLabel probe = new javax.swing.JLabel();
-        java.awt.FontMetrics fm = probe.getFontMetrics(font != null ? font : probe.getFont());
+        java.awt.FontMetrics fm = probe.getFontMetrics(font != null ? font : DEFAULT_LABEL_FONT);
         int max = 0;
         for (String s : labels) {
             if (s != null) {

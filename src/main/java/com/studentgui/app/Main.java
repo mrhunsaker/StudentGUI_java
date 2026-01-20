@@ -3,6 +3,7 @@ package com.studentgui.app;
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.FlowLayout;
+import java.awt.Font;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.List;
@@ -432,12 +433,15 @@ public class Main {
         JComboBox<String> studentBox = new JComboBox<>(students.toArray(new String[0]));
         studentBox.setEditable(false);
 
+        JLabel studentLabel = new JLabel("Student:");
+        studentLabel.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 24));
         JLabel dateLabel = new JLabel("Date (YYYY-MM-DD):");
+        dateLabel.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 24));
         JTextField dateField = new JTextField(LocalDate.now().toString(), 10);
 
         JButton goBtn = new JButton("Apply");
 
-        bar.add(new JLabel("Student:"));
+        bar.add(studentLabel);
         bar.add(studentBox);
         bar.add(dateLabel);
         bar.add(dateField);

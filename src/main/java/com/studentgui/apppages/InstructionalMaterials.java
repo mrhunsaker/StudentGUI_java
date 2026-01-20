@@ -61,7 +61,7 @@ public class InstructionalMaterials extends JPanel {
     scroll.getAccessibleContext().setAccessibleName("Instructional Materials scroll pane");
     GridBagConstraints gbc = new GridBagConstraints(); gbc.insets=new Insets(2,2,2,2); gbc.fill=GridBagConstraints.BOTH;
     JLabel title = new JLabel("Instructional Materials", JLabel.LEFT);
-        title.setFont(title.getFont().deriveFont(Font.BOLD,16));
+        title.setFont(title.getFont().deriveFont(Font.BOLD,28f));
         title.getAccessibleContext().setAccessibleName("Instructional Materials Title");
         gbc.gridx=0; gbc.gridy=0; p.add(title, gbc);
 

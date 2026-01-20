@@ -111,36 +111,36 @@ public class ContactLog extends JPanel {
     JScrollPane scroll = new JScrollPane(view);
     scroll.getAccessibleContext().setAccessibleName("Contact Log data entry scroll pane");
     GridBagConstraints gbc = new GridBagConstraints(); gbc.insets=new Insets(2,2,2,2); gbc.fill = GridBagConstraints.HORIZONTAL; gbc.anchor = GridBagConstraints.NORTHWEST;
-    JLabel title = new JLabel("Contact Log"); title.setFont(title.getFont().deriveFont(Font.BOLD,16)); title.setHorizontalAlignment(JLabel.LEFT); gbc.gridx=0; gbc.gridy=0; gbc.gridwidth=2; p.add(title, gbc);
+    JLabel title = new JLabel("Contact Log"); title.setFont(title.getFont().deriveFont(Font.BOLD,28f)); title.setHorizontalAlignment(JLabel.LEFT); gbc.gridx=0; gbc.gridy=0; gbc.gridwidth=2; p.add(title, gbc);
 
     // Structured contact fields (placed above notes)
     int row = 1;
     gbc.gridwidth = 1;
     int globalLabel = com.studentgui.uicomp.PhaseScoreField.getGlobalLabelWidth();
-    gbc.gridx = 0; gbc.gridy = row; JLabel guardianLabel = new JLabel("Guardian Name:"); guardianLabel.setPreferredSize(new java.awt.Dimension(globalLabel, guardianLabel.getPreferredSize().height)); p.add(guardianLabel, gbc);
+    gbc.gridx = 0; gbc.gridy = row; JLabel guardianLabel = new JLabel("Guardian Name:"); guardianLabel.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 24)); guardianLabel.setPreferredSize(new java.awt.Dimension(globalLabel, guardianLabel.getPreferredSize().height)); p.add(guardianLabel, gbc);
     guardianField = new JTextField(24); guardianField.setName("contactlog_guardian"); gbc.gridx = 1; p.add(guardianField, gbc);
     row++;
-    gbc.gridx = 0; gbc.gridy = row; JLabel methodLabel = new JLabel("Contact Method:"); methodLabel.setPreferredSize(new java.awt.Dimension(globalLabel, methodLabel.getPreferredSize().height)); p.add(methodLabel, gbc);
+    gbc.gridx = 0; gbc.gridy = row; JLabel methodLabel = new JLabel("Contact Method:"); methodLabel.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 24)); methodLabel.setPreferredSize(new java.awt.Dimension(globalLabel, methodLabel.getPreferredSize().height)); p.add(methodLabel, gbc);
     contactMethodCombo = new JComboBox<>(new String[]{"Phone","Email","In Person","Other"}); contactMethodCombo.setName("contactlog_method"); gbc.gridx = 1; p.add(contactMethodCombo, gbc);
     row++;
-    gbc.gridx = 0; gbc.gridy = row; JLabel phoneLabel = new JLabel("Phone Number:"); phoneLabel.setPreferredSize(new java.awt.Dimension(globalLabel, phoneLabel.getPreferredSize().height)); p.add(phoneLabel, gbc);
+    gbc.gridx = 0; gbc.gridy = row; JLabel phoneLabel = new JLabel("Phone Number:"); phoneLabel.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 24)); phoneLabel.setPreferredSize(new java.awt.Dimension(globalLabel, phoneLabel.getPreferredSize().height)); p.add(phoneLabel, gbc);
     phoneField = new JTextField(18); phoneField.setName("contactlog_phone"); gbc.gridx = 1; p.add(phoneField, gbc);
     row++;
-    gbc.gridx = 0; gbc.gridy = row; JLabel emailLabel = new JLabel("Email Address:"); emailLabel.setPreferredSize(new java.awt.Dimension(globalLabel, emailLabel.getPreferredSize().height)); p.add(emailLabel, gbc);
+    gbc.gridx = 0; gbc.gridy = row; JLabel emailLabel = new JLabel("Email Address:"); emailLabel.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 24)); emailLabel.setPreferredSize(new java.awt.Dimension(globalLabel, emailLabel.getPreferredSize().height)); p.add(emailLabel, gbc);
     emailField = new JTextField(24); emailField.setName("contactlog_email"); gbc.gridx = 1; p.add(emailField, gbc);
     row++;
-    gbc.gridx = 0; gbc.gridy = row; JLabel responseLabel = new JLabel("Contact Response:"); responseLabel.setPreferredSize(new java.awt.Dimension(globalLabel, responseLabel.getPreferredSize().height)); p.add(responseLabel, gbc);
+    gbc.gridx = 0; gbc.gridy = row; JLabel responseLabel = new JLabel("Contact Response:"); responseLabel.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 24)); responseLabel.setPreferredSize(new java.awt.Dimension(globalLabel, responseLabel.getPreferredSize().height)); p.add(responseLabel, gbc);
     contactResponseField = new JTextField(24); contactResponseField.setName("contactlog_response"); gbc.gridx = 1; p.add(contactResponseField, gbc);
     row++;
-    gbc.gridx = 0; gbc.gridy = row; JLabel generalLabel = new JLabel("Contact General:"); generalLabel.setPreferredSize(new java.awt.Dimension(globalLabel, generalLabel.getPreferredSize().height)); p.add(generalLabel, gbc);
+    gbc.gridx = 0; gbc.gridy = row; JLabel generalLabel = new JLabel("Contact General:"); generalLabel.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 24)); generalLabel.setPreferredSize(new java.awt.Dimension(globalLabel, generalLabel.getPreferredSize().height)); p.add(generalLabel, gbc);
     contactGeneralField = new JTextField(24); contactGeneralField.setName("contactlog_general"); gbc.gridx = 1; p.add(contactGeneralField, gbc);
     row++;
-    gbc.gridx = 0; gbc.gridy = row; JLabel specificLabel = new JLabel("Contact Specific:"); specificLabel.setPreferredSize(new java.awt.Dimension(globalLabel, specificLabel.getPreferredSize().height)); p.add(specificLabel, gbc);
+    gbc.gridx = 0; gbc.gridy = row; JLabel specificLabel = new JLabel("Contact Specific:"); specificLabel.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 24)); specificLabel.setPreferredSize(new java.awt.Dimension(globalLabel, specificLabel.getPreferredSize().height)); p.add(specificLabel, gbc);
     contactSpecificField = new JTextField(24); contactSpecificField.setName("contactlog_specific"); gbc.gridx = 1; p.add(contactSpecificField, gbc);
     row++;
 
     // Notes label + text area with accessibility
-    gbc.gridx = 0; gbc.gridy = row; gbc.gridwidth = 2; JLabel notesLabel = new JLabel("Notes:"); notesLabel.setPreferredSize(new java.awt.Dimension(globalLabel, notesLabel.getPreferredSize().height)); p.add(notesLabel, gbc);
+    gbc.gridx = 0; gbc.gridy = row; gbc.gridwidth = 2; JLabel notesLabel = new JLabel("Notes:"); notesLabel.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 24)); notesLabel.setPreferredSize(new java.awt.Dimension(globalLabel, notesLabel.getPreferredSize().height)); p.add(notesLabel, gbc);
     row++;
 
     gbc.gridx = 0; gbc.gridy = row; gbc.gridwidth = 2; notesArea = new JTextArea(8,40); notesArea.setLineWrap(true); notesArea.setWrapStyleWord(true); notesArea.setToolTipText("Enter contact notes for the student"); notesArea.getAccessibleContext().setAccessibleName("Contact notes"); JScrollPane notesScroll = new JScrollPane(notesArea); notesScroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER); p.add(notesScroll, gbc);

@@ -149,12 +149,12 @@ public class ScreenReader extends JPanel implements com.studentgui.app.DateChang
     this.titleLabel = new JLabel(baseTitle);
     this.titleLabel.getAccessibleContext().setAccessibleName("Screen Reader Skills Progression Title");
         // explicit title font for LAF-independence
-            this.titleLabel.setFont(new java.awt.Font(java.awt.Font.SANS_SERIF, Font.BOLD, 16));
+            this.titleLabel.setFont(new java.awt.Font(java.awt.Font.SANS_SERIF, Font.BOLD, 28));
         gbc.gridx = 0; gbc.gridy = 0; gbc.gridwidth = GridBagConstraints.REMAINDER;
         dataEntryPanel.add(this.titleLabel, gbc);
 
-    // compute label width using the PhaseScoreField label font (12pt) so wrapping is stable across themes
-    java.awt.Font labelFont = new java.awt.Font(java.awt.Font.SANS_SERIF, java.awt.Font.PLAIN, 12);
+    // compute label width using the shared PhaseScoreField label font so wrapping is stable across themes
+    java.awt.Font labelFont = com.studentgui.uicomp.PhaseScoreField.getLabelFont();
     String[] labels = java.util.Arrays.stream(parts).map(x->x[1]).toArray(String[]::new);
     int maxPx = com.studentgui.uicomp.PhaseScoreField.computeMaxLabelPixelWidth(labelFont, labels);
     // clamp wider so most labels stay on 1-2 lines (200..360 px)

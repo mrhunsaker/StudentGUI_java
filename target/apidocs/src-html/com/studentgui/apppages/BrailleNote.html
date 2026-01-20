@@ -163,7 +163,7 @@
 <span class="source-line-no">150</span><span id="line-150">        gbc.weighty = 0.0;</span>
 <span class="source-line-no">151</span><span id="line-151"></span>
 <span class="source-line-no">152</span><span id="line-152">    this.titleLabel = new JLabel(baseTitle);</span>
-<span class="source-line-no">153</span><span id="line-153">        this.titleLabel.setFont(this.titleLabel.getFont().deriveFont(Font.BOLD, 16));</span>
+<span class="source-line-no">153</span><span id="line-153">    this.titleLabel.setFont(this.titleLabel.getFont().deriveFont(Font.BOLD, 28f));</span>
 <span class="source-line-no">154</span><span id="line-154">        gbc.gridx = 0;</span>
 <span class="source-line-no">155</span><span id="line-155">        gbc.gridy = 0;</span>
 <span class="source-line-no">156</span><span id="line-156">        gbc.gridwidth = GridBagConstraints.REMAINDER;</span>
@@ -178,7 +178,7 @@
 <span class="source-line-no">165</span><span id="line-165"></span>
 <span class="source-line-no">166</span><span id="line-166">    // compute pixel width using font metrics so labels align precisely</span>
 <span class="source-line-no">167</span><span id="line-167">    String[] labelsArr = java.util.Arrays.stream(parts).map(x-&gt;x[1]).toArray(String[]::new);</span>
-<span class="source-line-no">168</span><span id="line-168">    int maxPx = com.studentgui.uicomp.PhaseScoreField.computeMaxLabelPixelWidth(titleLabel.getFont(), labelsArr);</span>
+<span class="source-line-no">168</span><span id="line-168">    int maxPx = com.studentgui.uicomp.PhaseScoreField.computeMaxLabelPixelWidth(com.studentgui.uicomp.PhaseScoreField.getLabelFont(), labelsArr);</span>
 <span class="source-line-no">169</span><span id="line-169">    com.studentgui.uicomp.PhaseScoreField.setGlobalLabelWidth(Math.min(320, Math.max(140, maxPx + 50)));</span>
 <span class="source-line-no">170</span><span id="line-170">    skillFields = new com.studentgui.uicomp.PhaseScoreField[parts.length];</span>
 <span class="source-line-no">171</span><span id="line-171">        for (int i = 0; i &lt; parts.length; i++) {</span>

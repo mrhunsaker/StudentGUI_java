@@ -131,7 +131,7 @@ public class IOS extends JPanel {
         GridBagConstraints gbc = new GridBagConstraints(); gbc.insets=new Insets(2,2,2,2); gbc.fill = GridBagConstraints.HORIZONTAL; gbc.anchor = GridBagConstraints.NORTHWEST; gbc.weightx = 1.0;
 
     JLabel title = new JLabel("iOS / iPad OS Skills");
-    title.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 16));
+    title.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 28));
     title.getAccessibleContext().setAccessibleName("iOS Skills Title");
     title.setHorizontalAlignment(JLabel.LEFT);
     gbc.gridx=0; gbc.gridy=0; gbc.gridwidth=2; p.add(title, gbc);
@@ -152,7 +152,7 @@ public class IOS extends JPanel {
             {"P6_9","6.9 Wi-Fi"},{"P6_10","6.10 AirDrop"},{"P6_11","6.11 Hotspot"}
         };
 
-    java.awt.Font labelFont = new java.awt.Font(java.awt.Font.SANS_SERIF, java.awt.Font.PLAIN, 12);
+    java.awt.Font labelFont = com.studentgui.uicomp.PhaseScoreField.getLabelFont();
     String[] labels = java.util.Arrays.stream(parts).map(x->x[1]).toArray(String[]::new);
         int maxPx = com.studentgui.uicomp.PhaseScoreField.computeMaxLabelPixelWidth(labelFont, labels);
         com.studentgui.uicomp.PhaseScoreField.setGlobalLabelWidth(Math.min(360, Math.max(200, maxPx + 50)));

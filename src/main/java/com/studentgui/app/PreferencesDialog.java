@@ -2,6 +2,7 @@ package com.studentgui.app;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.Frame;
 
 import javax.swing.JButton;
@@ -47,7 +48,9 @@ public final class PreferencesDialog {
         center.add(jitterCb);
         center.add(detCb);
     center.add(dumpsCb);
-        center.add(new JLabel("Seed:"));
+        JLabel seedLabel = new JLabel("Seed:");
+        seedLabel.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 24));
+        center.add(seedLabel);
         center.add(seedField);
 
         JPanel south = new JPanel(new FlowLayout(FlowLayout.RIGHT));

@@ -144,7 +144,7 @@
 <span class="source-line-no">131</span><span id="line-131">        GridBagConstraints gbc = new GridBagConstraints(); gbc.insets=new Insets(2,2,2,2); gbc.fill = GridBagConstraints.HORIZONTAL; gbc.anchor = GridBagConstraints.NORTHWEST; gbc.weightx = 1.0;</span>
 <span class="source-line-no">132</span><span id="line-132"></span>
 <span class="source-line-no">133</span><span id="line-133">    JLabel title = new JLabel("iOS / iPad OS Skills");</span>
-<span class="source-line-no">134</span><span id="line-134">    title.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 16));</span>
+<span class="source-line-no">134</span><span id="line-134">    title.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 28));</span>
 <span class="source-line-no">135</span><span id="line-135">    title.getAccessibleContext().setAccessibleName("iOS Skills Title");</span>
 <span class="source-line-no">136</span><span id="line-136">    title.setHorizontalAlignment(JLabel.LEFT);</span>
 <span class="source-line-no">137</span><span id="line-137">    gbc.gridx=0; gbc.gridy=0; gbc.gridwidth=2; p.add(title, gbc);</span>
@@ -165,7 +165,7 @@
 <span class="source-line-no">152</span><span id="line-152">            {"P6_9","6.9 Wi-Fi"},{"P6_10","6.10 AirDrop"},{"P6_11","6.11 Hotspot"}</span>
 <span class="source-line-no">153</span><span id="line-153">        };</span>
 <span class="source-line-no">154</span><span id="line-154"></span>
-<span class="source-line-no">155</span><span id="line-155">    java.awt.Font labelFont = new java.awt.Font(java.awt.Font.SANS_SERIF, java.awt.Font.PLAIN, 12);</span>
+<span class="source-line-no">155</span><span id="line-155">    java.awt.Font labelFont = com.studentgui.uicomp.PhaseScoreField.getLabelFont();</span>
 <span class="source-line-no">156</span><span id="line-156">    String[] labels = java.util.Arrays.stream(parts).map(x-&gt;x[1]).toArray(String[]::new);</span>
 <span class="source-line-no">157</span><span id="line-157">        int maxPx = com.studentgui.uicomp.PhaseScoreField.computeMaxLabelPixelWidth(labelFont, labels);</span>
 <span class="source-line-no">158</span><span id="line-158">        com.studentgui.uicomp.PhaseScoreField.setGlobalLabelWidth(Math.min(360, Math.max(200, maxPx + 50)));</span>

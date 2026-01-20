@@ -106,15 +106,15 @@ public class CVI extends JPanel {
     JScrollPane scroll = new JScrollPane(view);
     GridBagConstraints gbc = new GridBagConstraints(); gbc.insets=new Insets(2,2,2,2); gbc.fill = GridBagConstraints.HORIZONTAL; gbc.anchor = GridBagConstraints.NORTHWEST;
 
-    JLabel title = new JLabel("CVI Progression");
-    title.setFont(title.getFont().deriveFont(Font.BOLD,16));
+        JLabel title = new JLabel("CVI Progression");
+        title.setFont(title.getFont().deriveFont(Font.BOLD,28f));
     title.getAccessibleContext().setAccessibleName("CVI Progression Title");
     title.setHorizontalAlignment(JLabel.LEFT);
     gbc.gridx=0; gbc.gridy=0; gbc.gridwidth=2; panel.add(title, gbc);
 
     String[][] parts = new String[][]{{"P1_1","Color Preference"},{"P1_2","Need for Movement"},{"P1_3","Latency"},{"P1_4","Field Preference"},{"P1_5","Visual Complexity"},{"P1_6","Nonpurposeful Gaze"},{"P2_1","Distance Viewing"},{"P2_2","Atypical Reflexes"},{"P2_3","Visual Novelty"},{"P2_4","Visual Reach"}};
-    String[] labels = java.util.Arrays.stream(parts).map(x->x[1]).toArray(String[]::new);
-            int maxPx = com.studentgui.uicomp.PhaseScoreField.computeMaxLabelPixelWidth(title.getFont(), labels);
+        String[] labels = java.util.Arrays.stream(parts).map(x->x[1]).toArray(String[]::new);
+            int maxPx = com.studentgui.uicomp.PhaseScoreField.computeMaxLabelPixelWidth(com.studentgui.uicomp.PhaseScoreField.getLabelFont(), labels);
             com.studentgui.uicomp.PhaseScoreField.setGlobalLabelWidth(Math.min(320, Math.max(140, maxPx + 50)));
     int row = 1;
     for (String[] pdef: parts) {

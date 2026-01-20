@@ -113,7 +113,7 @@ public class BrailleSense extends JPanel {
 
         JLabel titleLabel = new JLabel("BrailleSense Skills");
         // Use an explicit font so theme changes don't alter the title appearance
-        titleLabel.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 16));
+        titleLabel.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 28));
         gbc.gridx = 0;
         gbc.gridy = 0;
         gbc.gridwidth = GridBagConstraints.REMAINDER;
@@ -141,7 +141,7 @@ public class BrailleSense extends JPanel {
 
         // compute pixel width using font metrics so labels align precisely
         String[] labels = java.util.Arrays.stream(this.parts).map(x -> x[1]).toArray(String[]::new);
-        int maxPx = com.studentgui.uicomp.PhaseScoreField.computeMaxLabelPixelWidth(titleLabel.getFont(), labels);
+        int maxPx = com.studentgui.uicomp.PhaseScoreField.computeMaxLabelPixelWidth(com.studentgui.uicomp.PhaseScoreField.getLabelFont(), labels);
         com.studentgui.uicomp.PhaseScoreField.setGlobalLabelWidth(Math.min(360, Math.max(200, maxPx + 50)));
         int row = 1;
         for (String[] def : this.parts) {

@@ -81,7 +81,7 @@ public class Observations extends JPanel {
     scroll.getAccessibleContext().setAccessibleName("Observations data entry scroll pane");
         GridBagConstraints gbc = new GridBagConstraints(); gbc.insets=new Insets(2,2,2,2); gbc.fill = GridBagConstraints.BOTH; gbc.anchor = GridBagConstraints.NORTHWEST;
     JLabel title = new JLabel("Observations", JLabel.LEFT);
-    title.setFont(title.getFont().deriveFont(Font.BOLD,16));
+    title.setFont(title.getFont().deriveFont(Font.BOLD,28f));
     title.getAccessibleContext().setAccessibleName("Observations Title");
     gbc.gridx=0; gbc.gridy=0; gbc.gridwidth=1; p.add(title, gbc);
 

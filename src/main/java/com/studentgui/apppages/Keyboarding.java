@@ -97,7 +97,7 @@ public class Keyboarding extends JPanel implements com.studentgui.app.DateChange
     p.setBorder(javax.swing.BorderFactory.createEmptyBorder(20,20,20,20));
         GridBagConstraints gbc = new GridBagConstraints(); gbc.insets=new Insets(2,2,2,2); gbc.fill = GridBagConstraints.HORIZONTAL; gbc.anchor = GridBagConstraints.NORTHWEST;
     this.titleLabel = new JLabel(baseTitle, JLabel.LEFT);
-    this.titleLabel.setFont(this.titleLabel.getFont().deriveFont(Font.BOLD,16));
+    this.titleLabel.setFont(this.titleLabel.getFont().deriveFont(Font.BOLD,28f));
     this.titleLabel.getAccessibleContext().setAccessibleName("Keyboarding Skills Title");
     gbc.gridx=0; gbc.gridy=0; gbc.gridwidth=2; p.add(this.titleLabel, gbc);
 

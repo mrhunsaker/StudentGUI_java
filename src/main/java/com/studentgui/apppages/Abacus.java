@@ -127,7 +127,7 @@ public class Abacus extends JPanel implements com.studentgui.app.DateChangeListe
         gbc.weighty = 0.0;
 
     this.titleLabel = new JLabel(baseTitle);
-    this.titleLabel.setFont(this.titleLabel.getFont().deriveFont(Font.BOLD, 16));
+    this.titleLabel.setFont(this.titleLabel.getFont().deriveFont(Font.BOLD, 28f));
         gbc.gridx = 0;
         gbc.gridy = 0;
         gbc.gridwidth = GridBagConstraints.REMAINDER;
@@ -141,7 +141,7 @@ public class Abacus extends JPanel implements com.studentgui.app.DateChangeListe
     // visual spacing controlled by PhaseScoreField and layout
 
     String[] labels = java.util.Arrays.stream(this.parts).map(x->x[1]).toArray(String[]::new);
-        int maxPx = com.studentgui.uicomp.PhaseScoreField.computeMaxLabelPixelWidth(titleLabel.getFont(), labels);
+        int maxPx = com.studentgui.uicomp.PhaseScoreField.computeMaxLabelPixelWidth(com.studentgui.uicomp.PhaseScoreField.getLabelFont(), labels);
         com.studentgui.uicomp.PhaseScoreField.setGlobalLabelWidth(Math.min(320, Math.max(140, maxPx + 50)));
     skillFields = new com.studentgui.uicomp.PhaseScoreField[this.parts.length];
     for (int i = 0; i < this.parts.length; i++) {
