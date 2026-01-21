@@ -42,7 +42,11 @@ jobs:
       - name: Build Maven Site
         run: mvn -B -U -e -V clean site
 
+      - name: List site output
+        run: ls -la target/site || true
+
       - name: Upload Pages artifact
+        if: ${{ always() }}
         uses: actions/upload-pages-artifact@v3
         with:
           path: target/site
@@ -57,3 +61,7 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+      - name: Show deployed URL
+        if: ${{ always() }}
+        run: echo "Page URL: ${{ steps.deployment.outputs.page_url }}"
