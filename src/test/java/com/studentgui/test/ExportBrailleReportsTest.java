@@ -22,6 +22,10 @@ import com.studentgui.apppages.JLineGraph;
 public class ExportBrailleReportsTest {
 
     @Test
+    /**
+     * generateBrailleExport - TODO: describe this method
+     */
+
     public void generateBrailleExport() throws Exception {
         // Force headless mode for chart rendering in CI-like environments
         System.setProperty("java.awt.headless", "true");

@@ -30,11 +30,21 @@ public class AssessmentPayload implements SessionPayload {
     }
 
     @Override
+    /**
+     * getSessionId - TODO: describe this method
+     * @return TODO: describe return value
+     */
+
     public int getSessionId() {
         return this.sessionId;
     }
 
     @Override
+    /**
+     * toString - TODO: describe this method
+     * @return TODO: describe return value
+     */
+
     public String toString() {
         return "AssessmentPayload{sessionId=" + sessionId + ", codes=" + Arrays.toString(codes) + ", scores=" + Arrays.toString(scores) + "}";
     }

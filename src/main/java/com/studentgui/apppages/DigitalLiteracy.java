@@ -427,6 +427,11 @@ public class DigitalLiteracy extends JPanel implements com.studentgui.app.DateCh
     }
 
     @Override
+    /**
+     * dateChanged - TODO: describe this method
+     * @param newDate TODO: describe parameter
+     */
+
     public void dateChanged(final LocalDate newDate) {
         this.dateParam = newDate;
         SwingUtilities.invokeLater(() -> {
@@ -436,6 +441,11 @@ public class DigitalLiteracy extends JPanel implements com.studentgui.app.DateCh
     }
 
     @Override
+    /**
+     * studentChanged - TODO: describe this method
+     * @param newStudent TODO: describe parameter
+     */
+
     public void studentChanged(final String newStudent) {
         this.studentNameParam = newStudent;
         SwingUtilities.invokeLater(() -> {

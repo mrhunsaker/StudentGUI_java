@@ -411,6 +411,11 @@ public class Abacus extends JPanel implements com.studentgui.app.DateChangeListe
         }
     }
     @Override
+    /**
+     * dateChanged - TODO: describe this method
+     * @param newDate TODO: describe parameter
+     */
+
     public void dateChanged(final LocalDate newDate) {
         this.dateParam = newDate;
         // When the global date changes, update the graph to reflect any
@@ -421,6 +426,11 @@ public class Abacus extends JPanel implements com.studentgui.app.DateChangeListe
     }
 
     @Override
+    /**
+     * studentChanged - TODO: describe this method
+     * @param newStudent TODO: describe parameter
+     */
+
     public void studentChanged(final String newStudent) {
         this.studentNameParam = newStudent;
         SwingUtilities.invokeLater(() -> {

@@ -18,6 +18,10 @@ import com.studentgui.apphelpers.SqlGenerate;
 public class BrailleDatabaseTest {
 
     @Test
+    /**
+     * smokeDatabaseFlow - TODO: describe this method
+     */
+
     public void smokeDatabaseFlow() throws Exception {
         // Ensure app folders and DB exist
         Helpers.createFolderHierarchy();

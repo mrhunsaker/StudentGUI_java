@@ -92,6 +92,11 @@ public class Theme {
         // Home
         JMenuItem home = new JMenuItem(new AbstractAction("Home") {
             @Override
+            /**
+             * actionPerformed - TODO: describe this method
+             * @param e TODO: describe parameter
+             */
+
             public void actionPerformed(final ActionEvent e) { Main.showPage("homepage", null); }
         });
         home.setMnemonic('H');

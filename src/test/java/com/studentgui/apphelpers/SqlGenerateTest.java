@@ -10,9 +10,17 @@ import java.sql.Statement;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 
+/**
+ * SqlGenerateTest - TODO: describe this SqlGenerateTest
+ */
+
 public class SqlGenerateTest {
 
     @Test
+    /**
+     * testInitializeCreatesContactLogTable - TODO: describe this method
+     */
+
     public void testInitializeCreatesContactLogTable() throws Exception {
         SqlGenerate.initializeDatabase();
         Path db = Helpers.DATABASE_PATH;

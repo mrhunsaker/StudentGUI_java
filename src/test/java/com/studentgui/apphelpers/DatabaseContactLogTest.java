@@ -6,9 +6,17 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import org.junit.jupiter.api.Test;
 
+/**
+ * DatabaseContactLogTest - TODO: describe this DatabaseContactLogTest
+ */
+
 public class DatabaseContactLogTest {
 
     @Test
+    /**
+     * testSaveAndFetchContactLog - TODO: describe this method
+     */
+
     public void testSaveAndFetchContactLog() throws Exception {
         SqlGenerate.initializeDatabase();
         String student = "Test Student";

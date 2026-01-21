@@ -18,6 +18,10 @@ import com.studentgui.apphelpers.dto.NotesPayload;
 public class SessionJsonWriterTest {
 
     @Test
+    /**
+     * writeSessionJson_includesSessionIdAndPayload - TODO: describe this method
+     */
+
     public void writeSessionJson_includesSessionIdAndPayload() throws Exception {
         String student = "UnitTestStudent-" + System.nanoTime();
         int sessionId = 314159;

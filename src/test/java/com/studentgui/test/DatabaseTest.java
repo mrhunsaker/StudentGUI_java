@@ -25,6 +25,10 @@ public class DatabaseTest {
     }
 
     @Test
+    /**
+     * testStudentCreateAndFetch - TODO: describe this method
+     */
+
     public void testStudentCreateAndFetch() throws Exception {
         int sid = com.studentgui.apphelpers.Database.getOrCreateStudent("Test Student A");
         assertTrue(sid > 0);

@@ -253,32 +253,42 @@
 <span class="source-line-no">240</span><span id="line-240">    }</span>
 <span class="source-line-no">241</span><span id="line-241"></span>
 <span class="source-line-no">242</span><span id="line-242">    @Override</span>
-<span class="source-line-no">243</span><span id="line-243">    public void dateChanged(LocalDate newDate) {</span>
-<span class="source-line-no">244</span><span id="line-244">        this.dateParam = newDate;</span>
-<span class="source-line-no">245</span><span id="line-245">        SwingUtilities.invokeLater(() -&gt; {</span>
-<span class="source-line-no">246</span><span id="line-246">            refreshGraph();</span>
-<span class="source-line-no">247</span><span id="line-247">            updateTitleDate();</span>
-<span class="source-line-no">248</span><span id="line-248">        });</span>
-<span class="source-line-no">249</span><span id="line-249">    }</span>
-<span class="source-line-no">250</span><span id="line-250"></span>
-<span class="source-line-no">251</span><span id="line-251">    @Override</span>
-<span class="source-line-no">252</span><span id="line-252">    public void studentChanged(String newStudent) {</span>
-<span class="source-line-no">253</span><span id="line-253">        this.studentNameParam = newStudent;</span>
-<span class="source-line-no">254</span><span id="line-254">        SwingUtilities.invokeLater(() -&gt; {</span>
-<span class="source-line-no">255</span><span id="line-255">            refreshGraph();</span>
-<span class="source-line-no">256</span><span id="line-256">            updateTitleDate();</span>
-<span class="source-line-no">257</span><span id="line-257">        });</span>
-<span class="source-line-no">258</span><span id="line-258">    }</span>
-<span class="source-line-no">259</span><span id="line-259"></span>
-<span class="source-line-no">260</span><span id="line-260">    private void updateTitleDate() {</span>
-<span class="source-line-no">261</span><span id="line-261">        try {</span>
-<span class="source-line-no">262</span><span id="line-262">            String dateStr = this.dateParam != null ? this.dateParam.toString() : java.time.LocalDate.now().toString();</span>
-<span class="source-line-no">263</span><span id="line-263">            this.titleLabel.setText(baseTitle + " - " + dateStr);</span>
-<span class="source-line-no">264</span><span id="line-264">        } catch (Exception ex) {</span>
-<span class="source-line-no">265</span><span id="line-265">            this.titleLabel.setText(baseTitle);</span>
-<span class="source-line-no">266</span><span id="line-266">        }</span>
-<span class="source-line-no">267</span><span id="line-267">    }</span>
-<span class="source-line-no">268</span><span id="line-268">}</span>
+<span class="source-line-no">243</span><span id="line-243">    /**</span>
+<span class="source-line-no">244</span><span id="line-244">     * dateChanged - TODO: describe this method</span>
+<span class="source-line-no">245</span><span id="line-245">     * @param newDate TODO: describe parameter</span>
+<span class="source-line-no">246</span><span id="line-246">     */</span>
+<span class="source-line-no">247</span><span id="line-247"></span>
+<span class="source-line-no">248</span><span id="line-248">    public void dateChanged(LocalDate newDate) {</span>
+<span class="source-line-no">249</span><span id="line-249">        this.dateParam = newDate;</span>
+<span class="source-line-no">250</span><span id="line-250">        SwingUtilities.invokeLater(() -&gt; {</span>
+<span class="source-line-no">251</span><span id="line-251">            refreshGraph();</span>
+<span class="source-line-no">252</span><span id="line-252">            updateTitleDate();</span>
+<span class="source-line-no">253</span><span id="line-253">        });</span>
+<span class="source-line-no">254</span><span id="line-254">    }</span>
+<span class="source-line-no">255</span><span id="line-255"></span>
+<span class="source-line-no">256</span><span id="line-256">    @Override</span>
+<span class="source-line-no">257</span><span id="line-257">    /**</span>
+<span class="source-line-no">258</span><span id="line-258">     * studentChanged - TODO: describe this method</span>
+<span class="source-line-no">259</span><span id="line-259">     * @param newStudent TODO: describe parameter</span>
+<span class="source-line-no">260</span><span id="line-260">     */</span>
+<span class="source-line-no">261</span><span id="line-261"></span>
+<span class="source-line-no">262</span><span id="line-262">    public void studentChanged(String newStudent) {</span>
+<span class="source-line-no">263</span><span id="line-263">        this.studentNameParam = newStudent;</span>
+<span class="source-line-no">264</span><span id="line-264">        SwingUtilities.invokeLater(() -&gt; {</span>
+<span class="source-line-no">265</span><span id="line-265">            refreshGraph();</span>
+<span class="source-line-no">266</span><span id="line-266">            updateTitleDate();</span>
+<span class="source-line-no">267</span><span id="line-267">        });</span>
+<span class="source-line-no">268</span><span id="line-268">    }</span>
+<span class="source-line-no">269</span><span id="line-269"></span>
+<span class="source-line-no">270</span><span id="line-270">    private void updateTitleDate() {</span>
+<span class="source-line-no">271</span><span id="line-271">        try {</span>
+<span class="source-line-no">272</span><span id="line-272">            String dateStr = this.dateParam != null ? this.dateParam.toString() : java.time.LocalDate.now().toString();</span>
+<span class="source-line-no">273</span><span id="line-273">            this.titleLabel.setText(baseTitle + " - " + dateStr);</span>
+<span class="source-line-no">274</span><span id="line-274">        } catch (Exception ex) {</span>
+<span class="source-line-no">275</span><span id="line-275">            this.titleLabel.setText(baseTitle);</span>
+<span class="source-line-no">276</span><span id="line-276">        }</span>
+<span class="source-line-no">277</span><span id="line-277">    }</span>
+<span class="source-line-no">278</span><span id="line-278">}</span>
 
 
 

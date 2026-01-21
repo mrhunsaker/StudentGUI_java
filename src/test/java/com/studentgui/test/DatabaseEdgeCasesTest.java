@@ -11,6 +11,10 @@ import org.junit.jupiter.api.Test;
 import com.studentgui.apphelpers.Helpers;
 import com.studentgui.apphelpers.SqlGenerate;
 
+/**
+ * DatabaseEdgeCasesTest - TODO: describe this DatabaseEdgeCasesTest
+ */
+
 public class DatabaseEdgeCasesTest {
 
     @BeforeAll
@@ -20,6 +24,10 @@ public class DatabaseEdgeCasesTest {
     }
 
     @Test
+    /**
+     * duplicateStudentNamesReturnSameId - TODO: describe this method
+     */
+
     public void duplicateStudentNamesReturnSameId() throws Exception {
         int a = com.studentgui.apphelpers.Database.getOrCreateStudent("Dup Student");
         int b = com.studentgui.apphelpers.Database.getOrCreateStudent("Dup Student");
@@ -27,6 +35,10 @@ public class DatabaseEdgeCasesTest {
     }
 
     @Test
+    /**
+     * ensureAssessmentPartsIsIdempotentAndIgnoresUnknownPartsOnInsert - TODO: describe this method
+     */
+
     public void ensureAssessmentPartsIsIdempotentAndIgnoresUnknownPartsOnInsert() throws Exception {
         int pt = com.studentgui.apphelpers.Database.getOrCreateProgressType("EdgeType");
         String[] parts = new String[] {"X1","X2","X3"};
@@ -45,6 +57,10 @@ public class DatabaseEdgeCasesTest {
     }
 
     @Test
+    /**
+     * saveSessionNotesPersistsNotes - TODO: describe this method
+     */
+
     public void saveSessionNotesPersistsNotes() throws Exception {
         int pt = com.studentgui.apphelpers.Database.getOrCreateProgressType("NoteType");
         int sid = com.studentgui.apphelpers.Database.getOrCreateStudent("Notes Student");

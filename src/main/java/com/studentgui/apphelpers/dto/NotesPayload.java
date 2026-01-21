@@ -24,5 +24,10 @@ public class NotesPayload implements SessionPayload {
     }
 
     @Override
+    /**
+     * getSessionId - TODO: describe this method
+     * @return TODO: describe return value
+     */
+
     public int getSessionId() { return this.sessionId; }
 }

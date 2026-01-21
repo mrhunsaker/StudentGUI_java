@@ -240,6 +240,11 @@ public class Keyboarding extends JPanel implements com.studentgui.app.DateChange
     }
 
     @Override
+    /**
+     * dateChanged - TODO: describe this method
+     * @param newDate TODO: describe parameter
+     */
+
     public void dateChanged(LocalDate newDate) {
         this.dateParam = newDate;
         SwingUtilities.invokeLater(() -> {
@@ -249,6 +254,11 @@ public class Keyboarding extends JPanel implements com.studentgui.app.DateChange
     }
 
     @Override
+    /**
+     * studentChanged - TODO: describe this method
+     * @param newStudent TODO: describe parameter
+     */
+
     public void studentChanged(String newStudent) {
         this.studentNameParam = newStudent;
         SwingUtilities.invokeLater(() -> {

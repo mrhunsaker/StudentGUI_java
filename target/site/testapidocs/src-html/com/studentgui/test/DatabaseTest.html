@@ -38,27 +38,31 @@
 <span class="source-line-no">025</span><span id="line-25">    }</span>
 <span class="source-line-no">026</span><span id="line-26"></span>
 <span class="source-line-no">027</span><span id="line-27">    @Test</span>
-<span class="source-line-no">028</span><span id="line-28">    public void testStudentCreateAndFetch() throws Exception {</span>
-<span class="source-line-no">029</span><span id="line-29">        int sid = com.studentgui.apphelpers.Database.getOrCreateStudent("Test Student A");</span>
-<span class="source-line-no">030</span><span id="line-30">        assertTrue(sid &gt; 0);</span>
+<span class="source-line-no">028</span><span id="line-28">    /**</span>
+<span class="source-line-no">029</span><span id="line-29">     * testStudentCreateAndFetch - TODO: describe this method</span>
+<span class="source-line-no">030</span><span id="line-30">     */</span>
 <span class="source-line-no">031</span><span id="line-31"></span>
-<span class="source-line-no">032</span><span id="line-32">        int ptId = com.studentgui.apphelpers.Database.getOrCreateProgressType("TestType");</span>
-<span class="source-line-no">033</span><span id="line-33">        assertTrue(ptId &gt; 0);</span>
-<span class="source-line-no">034</span><span id="line-34"></span>
-<span class="source-line-no">035</span><span id="line-35">        String[] parts = new String[] {"P1","P2","P3"};</span>
-<span class="source-line-no">036</span><span id="line-36">        com.studentgui.apphelpers.Database.ensureAssessmentParts(ptId, parts);</span>
-<span class="source-line-no">037</span><span id="line-37"></span>
-<span class="source-line-no">038</span><span id="line-38">        int sessionId = com.studentgui.apphelpers.Database.createProgressSession(sid, ptId, LocalDate.now());</span>
-<span class="source-line-no">039</span><span id="line-39">        assertTrue(sessionId &gt; 0);</span>
-<span class="source-line-no">040</span><span id="line-40"></span>
-<span class="source-line-no">041</span><span id="line-41">        int[] scores = new int[] {1,2,3};</span>
-<span class="source-line-no">042</span><span id="line-42">        com.studentgui.apphelpers.Database.insertAssessmentResults(sessionId, ptId, parts, scores);</span>
-<span class="source-line-no">043</span><span id="line-43"></span>
-<span class="source-line-no">044</span><span id="line-44">        List&lt;List&lt;Integer&gt;&gt; results = com.studentgui.apphelpers.Database.fetchLatestAssessmentResults("Test Student A", "TestType", 5);</span>
-<span class="source-line-no">045</span><span id="line-45">        assertNotNull(results);</span>
-<span class="source-line-no">046</span><span id="line-46">        assertTrue(results.size() &gt;= 1);</span>
-<span class="source-line-no">047</span><span id="line-47">    }</span>
-<span class="source-line-no">048</span><span id="line-48">}</span>
+<span class="source-line-no">032</span><span id="line-32">    public void testStudentCreateAndFetch() throws Exception {</span>
+<span class="source-line-no">033</span><span id="line-33">        int sid = com.studentgui.apphelpers.Database.getOrCreateStudent("Test Student A");</span>
+<span class="source-line-no">034</span><span id="line-34">        assertTrue(sid &gt; 0);</span>
+<span class="source-line-no">035</span><span id="line-35"></span>
+<span class="source-line-no">036</span><span id="line-36">        int ptId = com.studentgui.apphelpers.Database.getOrCreateProgressType("TestType");</span>
+<span class="source-line-no">037</span><span id="line-37">        assertTrue(ptId &gt; 0);</span>
+<span class="source-line-no">038</span><span id="line-38"></span>
+<span class="source-line-no">039</span><span id="line-39">        String[] parts = new String[] {"P1","P2","P3"};</span>
+<span class="source-line-no">040</span><span id="line-40">        com.studentgui.apphelpers.Database.ensureAssessmentParts(ptId, parts);</span>
+<span class="source-line-no">041</span><span id="line-41"></span>
+<span class="source-line-no">042</span><span id="line-42">        int sessionId = com.studentgui.apphelpers.Database.createProgressSession(sid, ptId, LocalDate.now());</span>
+<span class="source-line-no">043</span><span id="line-43">        assertTrue(sessionId &gt; 0);</span>
+<span class="source-line-no">044</span><span id="line-44"></span>
+<span class="source-line-no">045</span><span id="line-45">        int[] scores = new int[] {1,2,3};</span>
+<span class="source-line-no">046</span><span id="line-46">        com.studentgui.apphelpers.Database.insertAssessmentResults(sessionId, ptId, parts, scores);</span>
+<span class="source-line-no">047</span><span id="line-47"></span>
+<span class="source-line-no">048</span><span id="line-48">        List&lt;List&lt;Integer&gt;&gt; results = com.studentgui.apphelpers.Database.fetchLatestAssessmentResults("Test Student A", "TestType", 5);</span>
+<span class="source-line-no">049</span><span id="line-49">        assertNotNull(results);</span>
+<span class="source-line-no">050</span><span id="line-50">        assertTrue(results.size() &gt;= 1);</span>
+<span class="source-line-no">051</span><span id="line-51">    }</span>
+<span class="source-line-no">052</span><span id="line-52">}</span>
 
 
 

@@ -424,35 +424,45 @@
 <span class="source-line-no">411</span><span id="line-411">        }</span>
 <span class="source-line-no">412</span><span id="line-412">    }</span>
 <span class="source-line-no">413</span><span id="line-413">    @Override</span>
-<span class="source-line-no">414</span><span id="line-414">    public void dateChanged(final LocalDate newDate) {</span>
-<span class="source-line-no">415</span><span id="line-415">        this.dateParam = newDate;</span>
-<span class="source-line-no">416</span><span id="line-416">        // When the global date changes, update the graph to reflect any</span>
-<span class="source-line-no">417</span><span id="line-417">        // date-related logic (most refreshGraph implementations load</span>
-<span class="source-line-no">418</span><span id="line-418">        // recent sessions independent of the selected session date, but</span>
-<span class="source-line-no">419</span><span id="line-419">        // updating here keeps the saved date in sync for future submits).</span>
-<span class="source-line-no">420</span><span id="line-420">        SwingUtilities.invokeLater(this::refreshGraph);</span>
-<span class="source-line-no">421</span><span id="line-421">    }</span>
-<span class="source-line-no">422</span><span id="line-422"></span>
-<span class="source-line-no">423</span><span id="line-423">    @Override</span>
-<span class="source-line-no">424</span><span id="line-424">    public void studentChanged(final String newStudent) {</span>
-<span class="source-line-no">425</span><span id="line-425">        this.studentNameParam = newStudent;</span>
-<span class="source-line-no">426</span><span id="line-426">        SwingUtilities.invokeLater(() -&gt; {</span>
-<span class="source-line-no">427</span><span id="line-427">            refreshGraph();</span>
-<span class="source-line-no">428</span><span id="line-428">            updateTitleDate();</span>
-<span class="source-line-no">429</span><span id="line-429">        });</span>
-<span class="source-line-no">430</span><span id="line-430">    }</span>
-<span class="source-line-no">431</span><span id="line-431"></span>
-<span class="source-line-no">432</span><span id="line-432">        private void updateTitleDate() {</span>
-<span class="source-line-no">433</span><span id="line-433">            try {</span>
-<span class="source-line-no">434</span><span id="line-434">                String dateStr = this.dateParam != null ? this.dateParam.toString() : java.time.LocalDate.now().toString();</span>
-<span class="source-line-no">435</span><span id="line-435">                this.titleLabel.setText(baseTitle + " - " + dateStr);</span>
-<span class="source-line-no">436</span><span id="line-436">            } catch (Exception ex) {</span>
-<span class="source-line-no">437</span><span id="line-437">                this.titleLabel.setText(baseTitle);</span>
-<span class="source-line-no">438</span><span id="line-438">            }</span>
-<span class="source-line-no">439</span><span id="line-439">        }</span>
-<span class="source-line-no">440</span><span id="line-440">    </span>
+<span class="source-line-no">414</span><span id="line-414">    /**</span>
+<span class="source-line-no">415</span><span id="line-415">     * dateChanged - TODO: describe this method</span>
+<span class="source-line-no">416</span><span id="line-416">     * @param newDate TODO: describe parameter</span>
+<span class="source-line-no">417</span><span id="line-417">     */</span>
+<span class="source-line-no">418</span><span id="line-418"></span>
+<span class="source-line-no">419</span><span id="line-419">    public void dateChanged(final LocalDate newDate) {</span>
+<span class="source-line-no">420</span><span id="line-420">        this.dateParam = newDate;</span>
+<span class="source-line-no">421</span><span id="line-421">        // When the global date changes, update the graph to reflect any</span>
+<span class="source-line-no">422</span><span id="line-422">        // date-related logic (most refreshGraph implementations load</span>
+<span class="source-line-no">423</span><span id="line-423">        // recent sessions independent of the selected session date, but</span>
+<span class="source-line-no">424</span><span id="line-424">        // updating here keeps the saved date in sync for future submits).</span>
+<span class="source-line-no">425</span><span id="line-425">        SwingUtilities.invokeLater(this::refreshGraph);</span>
+<span class="source-line-no">426</span><span id="line-426">    }</span>
+<span class="source-line-no">427</span><span id="line-427"></span>
+<span class="source-line-no">428</span><span id="line-428">    @Override</span>
+<span class="source-line-no">429</span><span id="line-429">    /**</span>
+<span class="source-line-no">430</span><span id="line-430">     * studentChanged - TODO: describe this method</span>
+<span class="source-line-no">431</span><span id="line-431">     * @param newStudent TODO: describe parameter</span>
+<span class="source-line-no">432</span><span id="line-432">     */</span>
+<span class="source-line-no">433</span><span id="line-433"></span>
+<span class="source-line-no">434</span><span id="line-434">    public void studentChanged(final String newStudent) {</span>
+<span class="source-line-no">435</span><span id="line-435">        this.studentNameParam = newStudent;</span>
+<span class="source-line-no">436</span><span id="line-436">        SwingUtilities.invokeLater(() -&gt; {</span>
+<span class="source-line-no">437</span><span id="line-437">            refreshGraph();</span>
+<span class="source-line-no">438</span><span id="line-438">            updateTitleDate();</span>
+<span class="source-line-no">439</span><span id="line-439">        });</span>
+<span class="source-line-no">440</span><span id="line-440">    }</span>
 <span class="source-line-no">441</span><span id="line-441"></span>
-<span class="source-line-no">442</span><span id="line-442">}</span>
+<span class="source-line-no">442</span><span id="line-442">        private void updateTitleDate() {</span>
+<span class="source-line-no">443</span><span id="line-443">            try {</span>
+<span class="source-line-no">444</span><span id="line-444">                String dateStr = this.dateParam != null ? this.dateParam.toString() : java.time.LocalDate.now().toString();</span>
+<span class="source-line-no">445</span><span id="line-445">                this.titleLabel.setText(baseTitle + " - " + dateStr);</span>
+<span class="source-line-no">446</span><span id="line-446">            } catch (Exception ex) {</span>
+<span class="source-line-no">447</span><span id="line-447">                this.titleLabel.setText(baseTitle);</span>
+<span class="source-line-no">448</span><span id="line-448">            }</span>
+<span class="source-line-no">449</span><span id="line-449">        }</span>
+<span class="source-line-no">450</span><span id="line-450">    </span>
+<span class="source-line-no">451</span><span id="line-451"></span>
+<span class="source-line-no">452</span><span id="line-452">}</span>
 
 
 

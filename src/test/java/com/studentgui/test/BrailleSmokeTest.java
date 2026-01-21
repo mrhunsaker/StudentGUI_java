@@ -19,6 +19,10 @@ import com.studentgui.apppages.JLineGraph;
 public class BrailleSmokeTest {
 
     @Test
+    /**
+     * smokeTestDatabaseAndGraph - TODO: describe this method
+     */
+
     public void smokeTestDatabaseAndGraph() throws Exception {
         Helpers.createFolderHierarchy();
         SqlGenerate.initializeDatabase();

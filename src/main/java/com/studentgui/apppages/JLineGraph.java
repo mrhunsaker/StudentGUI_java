@@ -214,6 +214,10 @@ public class JLineGraph extends JPanel implements com.studentgui.app.SettingsCha
     }
 
     @Override
+    /**
+     * settingsChanged - TODO: describe this method
+     */
+
     public void settingsChanged() {
         try {
             String je = com.studentgui.apphelpers.Settings.get("jitter.enabled", String.valueOf(this.jitterEnabled));
@@ -834,6 +838,12 @@ public class JLineGraph extends JPanel implements com.studentgui.app.SettingsCha
         domain.setTickLabelFont(new Font("SansSerif", Font.PLAIN, 8));
         domain.setTickUnit(new org.jfree.chart.axis.NumberTickUnit(1) {
             @Override
+            /**
+             * valueToString - TODO: describe this method
+             * @param value TODO: describe parameter
+             * @return TODO: describe return value
+             */
+
             public String valueToString(double value) {
                 int index = (int) value - 1;
                 if (index >= 0 && index < skillLabels.length) {

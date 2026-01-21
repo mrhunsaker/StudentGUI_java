@@ -14,6 +14,10 @@ import org.junit.jupiter.api.Test;
 public class JLineGraphDeterministicJitterTest {
 
     @Test
+    /**
+     * deterministicJitterProducesSameSequence - TODO: describe this method
+     */
+
     public void deterministicJitterProducesSameSequence() throws Exception {
         JLineGraph g1 = new JLineGraph();
         JLineGraph g2 = new JLineGraph();
