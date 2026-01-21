@@ -9,9 +9,6 @@ on:
     tags:
       - 'v*.*'       # match minor tags like v1.2
       - '*.*'        # also match non-v minor tags like 1.2
-    tags-ignore:
-      - 'v*.*.*'     # ignore patch tags like v1.2.3
-      - '*.*.*'      # ignore non-v patch tags like 1.2.3
 
 permissions:
   contents: read
