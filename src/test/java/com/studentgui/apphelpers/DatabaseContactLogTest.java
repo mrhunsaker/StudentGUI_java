@@ -7,14 +7,15 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import org.junit.jupiter.api.Test;
 
 /**
- * DatabaseContactLogTest - TODO: describe this DatabaseContactLogTest
+ * Tests saving and retrieving contact log entries in the application's
+ * database layer.
  */
 
 public class DatabaseContactLogTest {
 
     @Test
     /**
-     * testSaveAndFetchContactLog - TODO: describe this method
+     * Save a contact log entry and verify it can be retrieved from the DB.
      */
 
     public void testSaveAndFetchContactLog() throws Exception {

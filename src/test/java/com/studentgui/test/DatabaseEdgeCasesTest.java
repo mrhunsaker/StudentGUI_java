@@ -12,7 +12,8 @@ import com.studentgui.apphelpers.Helpers;
 import com.studentgui.apphelpers.SqlGenerate;
 
 /**
- * DatabaseEdgeCasesTest - TODO: describe this DatabaseEdgeCasesTest
+ * Tests database edge cases such as duplicate student names, idempotent
+ * initialization, and persistence of session notes.
  */
 
 public class DatabaseEdgeCasesTest {
@@ -25,7 +26,8 @@ public class DatabaseEdgeCasesTest {
 
     @Test
     /**
-     * duplicateStudentNamesReturnSameId - TODO: describe this method
+     * Confirm that duplicate student names map to the same internal id when
+     * appropriate, preventing unexpected duplicates in the database.
      */
 
     public void duplicateStudentNamesReturnSameId() throws Exception {
@@ -36,7 +38,8 @@ public class DatabaseEdgeCasesTest {
 
     @Test
     /**
-     * ensureAssessmentPartsIsIdempotentAndIgnoresUnknownPartsOnInsert - TODO: describe this method
+     * Ensure that initializing assessment parts is idempotent and that unknown
+     * part codes are ignored when inserting sessions.
      */
 
     public void ensureAssessmentPartsIsIdempotentAndIgnoresUnknownPartsOnInsert() throws Exception {
@@ -58,7 +61,8 @@ public class DatabaseEdgeCasesTest {
 
     @Test
     /**
-     * saveSessionNotesPersistsNotes - TODO: describe this method
+     * Verify that saving session notes persists the notes text and can be
+     * retrieved later without loss.
      */
 
     public void saveSessionNotesPersistsNotes() throws Exception {

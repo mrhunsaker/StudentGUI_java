@@ -53,8 +53,9 @@ public class ContactPayload implements SessionPayload {
 
     @Override
     /**
-     * getSessionId - TODO: describe this method
-     * @return TODO: describe return value
+     * Return the database session id associated with this contact payload.
+     *
+     * @return numeric session id for the recorded contact entry
      */
 
     public int getSessionId() { return this.sessionId; }

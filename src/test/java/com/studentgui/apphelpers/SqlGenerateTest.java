@@ -11,14 +11,16 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 
 /**
- * SqlGenerateTest - TODO: describe this SqlGenerateTest
+ * Verify SQL schema initialization and helper routines used to create the
+ * application's database structure.
  */
 
 public class SqlGenerateTest {
 
     @Test
     /**
-     * testInitializeCreatesContactLogTable - TODO: describe this method
+     * Verify SQL schema initialization creates the expected contact log table
+     * and related structures needed by the application.
      */
 
     public void testInitializeCreatesContactLogTable() throws Exception {

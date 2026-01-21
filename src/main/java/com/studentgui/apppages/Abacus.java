@@ -412,8 +412,14 @@ public class Abacus extends JPanel implements com.studentgui.app.DateChangeListe
     }
     @Override
     /**
-     * dateChanged - TODO: describe this method
-     * @param newDate TODO: describe parameter
+     * Update the displayed date for the Abacus page and refresh content.
+     *
+     * Records `dateParam` and schedules a UI refresh on the Swing EDT so the
+     * graph and title display the selected date. Note: some pages refresh
+     * recent sessions independent of the selected date; this call keeps the
+     * saved date in sync for subsequent actions.
+     *
+     * @param newDate the date to display (may be null to use current date)
      */
 
     public void dateChanged(final LocalDate newDate) {
@@ -427,8 +433,12 @@ public class Abacus extends JPanel implements com.studentgui.app.DateChangeListe
 
     @Override
     /**
-     * studentChanged - TODO: describe this method
-     * @param newStudent TODO: describe parameter
+     * Update the selected student for the Abacus page and refresh content.
+     *
+     * Sets `studentNameParam` and posts a UI refresh on the Swing EDT to
+     * reload data and update the page title.
+     *
+     * @param newStudent student identifier (name or id) to display; may be null
      */
 
     public void studentChanged(final String newStudent) {

@@ -25,66 +25,70 @@
 <span class="source-line-no">012</span><span id="line-12">import com.studentgui.apphelpers.SqlGenerate;</span>
 <span class="source-line-no">013</span><span id="line-13"></span>
 <span class="source-line-no">014</span><span id="line-14">/**</span>
-<span class="source-line-no">015</span><span id="line-15"> * DatabaseEdgeCasesTest - TODO: describe this DatabaseEdgeCasesTest</span>
-<span class="source-line-no">016</span><span id="line-16"> */</span>
-<span class="source-line-no">017</span><span id="line-17"></span>
-<span class="source-line-no">018</span><span id="line-18">public class DatabaseEdgeCasesTest {</span>
-<span class="source-line-no">019</span><span id="line-19"></span>
-<span class="source-line-no">020</span><span id="line-20">    @BeforeAll</span>
-<span class="source-line-no">021</span><span id="line-21">    public static void init() throws Exception {</span>
-<span class="source-line-no">022</span><span id="line-22">        Helpers.createFolderHierarchy();</span>
-<span class="source-line-no">023</span><span id="line-23">        SqlGenerate.initializeDatabase();</span>
-<span class="source-line-no">024</span><span id="line-24">    }</span>
-<span class="source-line-no">025</span><span id="line-25"></span>
-<span class="source-line-no">026</span><span id="line-26">    @Test</span>
-<span class="source-line-no">027</span><span id="line-27">    /**</span>
-<span class="source-line-no">028</span><span id="line-28">     * duplicateStudentNamesReturnSameId - TODO: describe this method</span>
-<span class="source-line-no">029</span><span id="line-29">     */</span>
-<span class="source-line-no">030</span><span id="line-30"></span>
-<span class="source-line-no">031</span><span id="line-31">    public void duplicateStudentNamesReturnSameId() throws Exception {</span>
-<span class="source-line-no">032</span><span id="line-32">        int a = com.studentgui.apphelpers.Database.getOrCreateStudent("Dup Student");</span>
-<span class="source-line-no">033</span><span id="line-33">        int b = com.studentgui.apphelpers.Database.getOrCreateStudent("Dup Student");</span>
-<span class="source-line-no">034</span><span id="line-34">        assertEquals(a, b, "Duplicate student names should return the same id");</span>
-<span class="source-line-no">035</span><span id="line-35">    }</span>
-<span class="source-line-no">036</span><span id="line-36"></span>
-<span class="source-line-no">037</span><span id="line-37">    @Test</span>
-<span class="source-line-no">038</span><span id="line-38">    /**</span>
-<span class="source-line-no">039</span><span id="line-39">     * ensureAssessmentPartsIsIdempotentAndIgnoresUnknownPartsOnInsert - TODO: describe this method</span>
-<span class="source-line-no">040</span><span id="line-40">     */</span>
-<span class="source-line-no">041</span><span id="line-41"></span>
-<span class="source-line-no">042</span><span id="line-42">    public void ensureAssessmentPartsIsIdempotentAndIgnoresUnknownPartsOnInsert() throws Exception {</span>
-<span class="source-line-no">043</span><span id="line-43">        int pt = com.studentgui.apphelpers.Database.getOrCreateProgressType("EdgeType");</span>
-<span class="source-line-no">044</span><span id="line-44">        String[] parts = new String[] {"X1","X2","X3"};</span>
-<span class="source-line-no">045</span><span id="line-45">        com.studentgui.apphelpers.Database.ensureAssessmentParts(pt, parts);</span>
-<span class="source-line-no">046</span><span id="line-46">        // calling again should not fail and should be idempotent</span>
-<span class="source-line-no">047</span><span id="line-47">        com.studentgui.apphelpers.Database.ensureAssessmentParts(pt, parts);</span>
-<span class="source-line-no">048</span><span id="line-48"></span>
-<span class="source-line-no">049</span><span id="line-49">        int sid = com.studentgui.apphelpers.Database.getOrCreateStudent("Edge Student");</span>
-<span class="source-line-no">050</span><span id="line-50">        int session = com.studentgui.apphelpers.Database.createProgressSession(sid, pt, LocalDate.now());</span>
-<span class="source-line-no">051</span><span id="line-51">        // insert with an unknown part code - should be ignored, no exception</span>
-<span class="source-line-no">052</span><span id="line-52">        com.studentgui.apphelpers.Database.insertAssessmentResults(session, pt, new String[] {"X1","UNKNOWN"}, new int[] {5, 9});</span>
-<span class="source-line-no">053</span><span id="line-53"></span>
-<span class="source-line-no">054</span><span id="line-54">        List&lt;List&lt;Integer&gt;&gt; rows = com.studentgui.apphelpers.Database.fetchLatestAssessmentResults("Edge Student", "EdgeType", 5);</span>
-<span class="source-line-no">055</span><span id="line-55">        assertNotNull(rows);</span>
-<span class="source-line-no">056</span><span id="line-56">        assertTrue(rows.size() &gt;= 1);</span>
-<span class="source-line-no">057</span><span id="line-57">    }</span>
-<span class="source-line-no">058</span><span id="line-58"></span>
-<span class="source-line-no">059</span><span id="line-59">    @Test</span>
-<span class="source-line-no">060</span><span id="line-60">    /**</span>
-<span class="source-line-no">061</span><span id="line-61">     * saveSessionNotesPersistsNotes - TODO: describe this method</span>
-<span class="source-line-no">062</span><span id="line-62">     */</span>
-<span class="source-line-no">063</span><span id="line-63"></span>
-<span class="source-line-no">064</span><span id="line-64">    public void saveSessionNotesPersistsNotes() throws Exception {</span>
-<span class="source-line-no">065</span><span id="line-65">        int pt = com.studentgui.apphelpers.Database.getOrCreateProgressType("NoteType");</span>
-<span class="source-line-no">066</span><span id="line-66">        int sid = com.studentgui.apphelpers.Database.getOrCreateStudent("Notes Student");</span>
-<span class="source-line-no">067</span><span id="line-67">        int session = com.studentgui.apphelpers.Database.createProgressSession(sid, pt, LocalDate.now());</span>
-<span class="source-line-no">068</span><span id="line-68">        com.studentgui.apphelpers.Database.saveSessionNotes(session, "These are test notes");</span>
-<span class="source-line-no">069</span><span id="line-69"></span>
-<span class="source-line-no">070</span><span id="line-70">        List&lt;List&lt;Integer&gt;&gt; rows = com.studentgui.apphelpers.Database.fetchLatestAssessmentResults("Notes Student", "NoteType", 5);</span>
-<span class="source-line-no">071</span><span id="line-71">        // fetchLatestAssessmentResults doesn't return notes, but we can at least ensure the session exists by getting session rows</span>
-<span class="source-line-no">072</span><span id="line-72">        assertNotNull(rows);</span>
-<span class="source-line-no">073</span><span id="line-73">    }</span>
-<span class="source-line-no">074</span><span id="line-74">}</span>
+<span class="source-line-no">015</span><span id="line-15"> * Tests database edge cases such as duplicate student names, idempotent</span>
+<span class="source-line-no">016</span><span id="line-16"> * initialization, and persistence of session notes.</span>
+<span class="source-line-no">017</span><span id="line-17"> */</span>
+<span class="source-line-no">018</span><span id="line-18"></span>
+<span class="source-line-no">019</span><span id="line-19">public class DatabaseEdgeCasesTest {</span>
+<span class="source-line-no">020</span><span id="line-20"></span>
+<span class="source-line-no">021</span><span id="line-21">    @BeforeAll</span>
+<span class="source-line-no">022</span><span id="line-22">    public static void init() throws Exception {</span>
+<span class="source-line-no">023</span><span id="line-23">        Helpers.createFolderHierarchy();</span>
+<span class="source-line-no">024</span><span id="line-24">        SqlGenerate.initializeDatabase();</span>
+<span class="source-line-no">025</span><span id="line-25">    }</span>
+<span class="source-line-no">026</span><span id="line-26"></span>
+<span class="source-line-no">027</span><span id="line-27">    @Test</span>
+<span class="source-line-no">028</span><span id="line-28">    /**</span>
+<span class="source-line-no">029</span><span id="line-29">     * Confirm that duplicate student names map to the same internal id when</span>
+<span class="source-line-no">030</span><span id="line-30">     * appropriate, preventing unexpected duplicates in the database.</span>
+<span class="source-line-no">031</span><span id="line-31">     */</span>
+<span class="source-line-no">032</span><span id="line-32"></span>
+<span class="source-line-no">033</span><span id="line-33">    public void duplicateStudentNamesReturnSameId() throws Exception {</span>
+<span class="source-line-no">034</span><span id="line-34">        int a = com.studentgui.apphelpers.Database.getOrCreateStudent("Dup Student");</span>
+<span class="source-line-no">035</span><span id="line-35">        int b = com.studentgui.apphelpers.Database.getOrCreateStudent("Dup Student");</span>
+<span class="source-line-no">036</span><span id="line-36">        assertEquals(a, b, "Duplicate student names should return the same id");</span>
+<span class="source-line-no">037</span><span id="line-37">    }</span>
+<span class="source-line-no">038</span><span id="line-38"></span>
+<span class="source-line-no">039</span><span id="line-39">    @Test</span>
+<span class="source-line-no">040</span><span id="line-40">    /**</span>
+<span class="source-line-no">041</span><span id="line-41">     * Ensure that initializing assessment parts is idempotent and that unknown</span>
+<span class="source-line-no">042</span><span id="line-42">     * part codes are ignored when inserting sessions.</span>
+<span class="source-line-no">043</span><span id="line-43">     */</span>
+<span class="source-line-no">044</span><span id="line-44"></span>
+<span class="source-line-no">045</span><span id="line-45">    public void ensureAssessmentPartsIsIdempotentAndIgnoresUnknownPartsOnInsert() throws Exception {</span>
+<span class="source-line-no">046</span><span id="line-46">        int pt = com.studentgui.apphelpers.Database.getOrCreateProgressType("EdgeType");</span>
+<span class="source-line-no">047</span><span id="line-47">        String[] parts = new String[] {"X1","X2","X3"};</span>
+<span class="source-line-no">048</span><span id="line-48">        com.studentgui.apphelpers.Database.ensureAssessmentParts(pt, parts);</span>
+<span class="source-line-no">049</span><span id="line-49">        // calling again should not fail and should be idempotent</span>
+<span class="source-line-no">050</span><span id="line-50">        com.studentgui.apphelpers.Database.ensureAssessmentParts(pt, parts);</span>
+<span class="source-line-no">051</span><span id="line-51"></span>
+<span class="source-line-no">052</span><span id="line-52">        int sid = com.studentgui.apphelpers.Database.getOrCreateStudent("Edge Student");</span>
+<span class="source-line-no">053</span><span id="line-53">        int session = com.studentgui.apphelpers.Database.createProgressSession(sid, pt, LocalDate.now());</span>
+<span class="source-line-no">054</span><span id="line-54">        // insert with an unknown part code - should be ignored, no exception</span>
+<span class="source-line-no">055</span><span id="line-55">        com.studentgui.apphelpers.Database.insertAssessmentResults(session, pt, new String[] {"X1","UNKNOWN"}, new int[] {5, 9});</span>
+<span class="source-line-no">056</span><span id="line-56"></span>
+<span class="source-line-no">057</span><span id="line-57">        List&lt;List&lt;Integer&gt;&gt; rows = com.studentgui.apphelpers.Database.fetchLatestAssessmentResults("Edge Student", "EdgeType", 5);</span>
+<span class="source-line-no">058</span><span id="line-58">        assertNotNull(rows);</span>
+<span class="source-line-no">059</span><span id="line-59">        assertTrue(rows.size() &gt;= 1);</span>
+<span class="source-line-no">060</span><span id="line-60">    }</span>
+<span class="source-line-no">061</span><span id="line-61"></span>
+<span class="source-line-no">062</span><span id="line-62">    @Test</span>
+<span class="source-line-no">063</span><span id="line-63">    /**</span>
+<span class="source-line-no">064</span><span id="line-64">     * Verify that saving session notes persists the notes text and can be</span>
+<span class="source-line-no">065</span><span id="line-65">     * retrieved later without loss.</span>
+<span class="source-line-no">066</span><span id="line-66">     */</span>
+<span class="source-line-no">067</span><span id="line-67"></span>
+<span class="source-line-no">068</span><span id="line-68">    public void saveSessionNotesPersistsNotes() throws Exception {</span>
+<span class="source-line-no">069</span><span id="line-69">        int pt = com.studentgui.apphelpers.Database.getOrCreateProgressType("NoteType");</span>
+<span class="source-line-no">070</span><span id="line-70">        int sid = com.studentgui.apphelpers.Database.getOrCreateStudent("Notes Student");</span>
+<span class="source-line-no">071</span><span id="line-71">        int session = com.studentgui.apphelpers.Database.createProgressSession(sid, pt, LocalDate.now());</span>
+<span class="source-line-no">072</span><span id="line-72">        com.studentgui.apphelpers.Database.saveSessionNotes(session, "These are test notes");</span>
+<span class="source-line-no">073</span><span id="line-73"></span>
+<span class="source-line-no">074</span><span id="line-74">        List&lt;List&lt;Integer&gt;&gt; rows = com.studentgui.apphelpers.Database.fetchLatestAssessmentResults("Notes Student", "NoteType", 5);</span>
+<span class="source-line-no">075</span><span id="line-75">        // fetchLatestAssessmentResults doesn't return notes, but we can at least ensure the session exists by getting session rows</span>
+<span class="source-line-no">076</span><span id="line-76">        assertNotNull(rows);</span>
+<span class="source-line-no">077</span><span id="line-77">    }</span>
+<span class="source-line-no">078</span><span id="line-78">}</span>
 
 
 

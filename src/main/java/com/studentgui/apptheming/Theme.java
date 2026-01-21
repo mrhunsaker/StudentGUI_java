@@ -93,8 +93,10 @@ public class Theme {
         JMenuItem home = new JMenuItem(new AbstractAction("Home") {
             @Override
             /**
-             * actionPerformed - TODO: describe this method
-             * @param e TODO: describe parameter
+             * Handle the Home menu item selection by navigating the main frame
+             * to the application homepage.
+             *
+             * @param e the ActionEvent triggered by selecting the Home menu item
              */
 
             public void actionPerformed(final ActionEvent e) { Main.showPage("homepage", null); }

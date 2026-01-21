@@ -391,8 +391,12 @@ public class ScreenReader extends JPanel implements com.studentgui.app.DateChang
 
     @Override
     /**
-     * dateChanged - TODO: describe this method
-     * @param newDate TODO: describe parameter
+     * Update the displayed date for the ScreenReader page and refresh content.
+     *
+     * Stores `dateParam` and triggers `refreshGraph()` and title update on the
+     * Swing EDT so the UI reflects the new date selection.
+     *
+     * @param newDate the date to display (may be null to use current date)
      */
 
     public void dateChanged(LocalDate newDate) {
@@ -405,8 +409,12 @@ public class ScreenReader extends JPanel implements com.studentgui.app.DateChang
 
     @Override
     /**
-     * studentChanged - TODO: describe this method
-     * @param newStudent TODO: describe parameter
+     * Update the selected student for the ScreenReader page and refresh content.
+     *
+     * Sets `studentNameParam` and schedules a UI refresh on the Swing EDT to
+     * reload data and update the page title.
+     *
+     * @param newStudent student identifier (name or id) to display; may be null
      */
 
     public void studentChanged(String newStudent) {

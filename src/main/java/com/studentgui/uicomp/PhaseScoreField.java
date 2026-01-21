@@ -250,8 +250,11 @@ public class PhaseScoreField extends JPanel {
 
     @Override
     /**
-     * setName - TODO: describe this method
-     * @param name TODO: describe parameter
+     * Set the Swing component name for this field and propagate the same name
+     * to the internal spinner so automated UI tests and accessibility tools
+     * can locate both elements reliably.
+     *
+     * @param name component name to set for this row and its spinner
      */
 
     public void setName(final String name) {

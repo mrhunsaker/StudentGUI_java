@@ -429,8 +429,12 @@ public class BrailleNote extends JPanel implements com.studentgui.app.DateChange
 
     @Override
     /**
-     * dateChanged - TODO: describe this method
-     * @param newDate TODO: describe parameter
+     * Update the currently displayed date for this page and refresh the UI.
+     *
+     * Sets the internal `dateParam` and schedules a refresh of the graph and
+     * title on the Swing Event Dispatch Thread.
+     *
+     * @param newDate the date to display (may be null to use the current date)
      */
 
     public void dateChanged(LocalDate newDate) {
@@ -443,8 +447,12 @@ public class BrailleNote extends JPanel implements com.studentgui.app.DateChange
 
     @Override
     /**
-     * studentChanged - TODO: describe this method
-     * @param newStudent TODO: describe parameter
+     * Update the selected student for this page and refresh the UI.
+     *
+     * Sets the internal `studentNameParam` and schedules a refresh of the
+     * graph and title on the Swing Event Dispatch Thread.
+     *
+     * @param newStudent student identifier (name or id) to display; may be null
      */
 
     public void studentChanged(String newStudent) {

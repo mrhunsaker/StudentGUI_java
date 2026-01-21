@@ -19,7 +19,8 @@ public class SessionJsonWriterTest {
 
     @Test
     /**
-     * writeSessionJson_includesSessionIdAndPayload - TODO: describe this method
+     * Validate that the session JSON writer emits the expected keys including
+     * the session id and the embedded payload structure used by the API.
      */
 
     public void writeSessionJson_includesSessionIdAndPayload() throws Exception {

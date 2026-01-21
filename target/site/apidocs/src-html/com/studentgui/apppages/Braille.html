@@ -435,47 +435,53 @@
 <span class="source-line-no">422</span><span id="line-422"></span>
 <span class="source-line-no">423</span><span id="line-423">    @Override</span>
 <span class="source-line-no">424</span><span id="line-424">    /**</span>
-<span class="source-line-no">425</span><span id="line-425">     * dateChanged - TODO: describe this method</span>
-<span class="source-line-no">426</span><span id="line-426">     * @param newDate TODO: describe parameter</span>
-<span class="source-line-no">427</span><span id="line-427">     */</span>
-<span class="source-line-no">428</span><span id="line-428"></span>
-<span class="source-line-no">429</span><span id="line-429">    public void dateChanged(final LocalDate newDate) {</span>
-<span class="source-line-no">430</span><span id="line-430">        this.dateParam = newDate;</span>
-<span class="source-line-no">431</span><span id="line-431">        SwingUtilities.invokeLater(() -&gt; {</span>
-<span class="source-line-no">432</span><span id="line-432">            refreshGraph();</span>
-<span class="source-line-no">433</span><span id="line-433">            updateTitleDate();</span>
-<span class="source-line-no">434</span><span id="line-434">        });</span>
-<span class="source-line-no">435</span><span id="line-435">    }</span>
-<span class="source-line-no">436</span><span id="line-436">    </span>
-<span class="source-line-no">437</span><span id="line-437">    @Override</span>
-<span class="source-line-no">438</span><span id="line-438">    /**</span>
-<span class="source-line-no">439</span><span id="line-439">     * studentChanged - TODO: describe this method</span>
-<span class="source-line-no">440</span><span id="line-440">     * @param newStudent TODO: describe parameter</span>
-<span class="source-line-no">441</span><span id="line-441">     */</span>
-<span class="source-line-no">442</span><span id="line-442"></span>
-<span class="source-line-no">443</span><span id="line-443">    public void studentChanged(final String newStudent) {</span>
-<span class="source-line-no">444</span><span id="line-444">        this.studentNameParam = newStudent != null ? newStudent : "Unknown Student";</span>
-<span class="source-line-no">445</span><span id="line-445">        SwingUtilities.invokeLater(() -&gt; {</span>
-<span class="source-line-no">446</span><span id="line-446">            refreshGraph();</span>
-<span class="source-line-no">447</span><span id="line-447">            updateTitleDate();</span>
-<span class="source-line-no">448</span><span id="line-448">        });</span>
-<span class="source-line-no">449</span><span id="line-449">    }</span>
-<span class="source-line-no">450</span><span id="line-450">    </span>
-<span class="source-line-no">451</span><span id="line-451">    /**</span>
-<span class="source-line-no">452</span><span id="line-452">     * Update the page title label to include the current session date.</span>
-<span class="source-line-no">453</span><span id="line-453">     * Falls back to base title if date formatting fails.</span>
-<span class="source-line-no">454</span><span id="line-454">     */</span>
-<span class="source-line-no">455</span><span id="line-455">    private void updateTitleDate() {</span>
-<span class="source-line-no">456</span><span id="line-456">        try {</span>
-<span class="source-line-no">457</span><span id="line-457">            String dateStr = this.dateParam != null ? this.dateParam.toString() : java.time.LocalDate.now().toString();</span>
-<span class="source-line-no">458</span><span id="line-458">            this.titleLabel.setText(baseTitle + " - " + dateStr);</span>
-<span class="source-line-no">459</span><span id="line-459">        } catch (Exception ex) {</span>
-<span class="source-line-no">460</span><span id="line-460">            this.titleLabel.setText(baseTitle);</span>
-<span class="source-line-no">461</span><span id="line-461">        }</span>
-<span class="source-line-no">462</span><span id="line-462">    }</span>
-<span class="source-line-no">463</span><span id="line-463">    </span>
-<span class="source-line-no">464</span><span id="line-464"></span>
-<span class="source-line-no">465</span><span id="line-465">}</span>
+<span class="source-line-no">425</span><span id="line-425">     * Update the displayed date for the Braille page and refresh content.</span>
+<span class="source-line-no">426</span><span id="line-426">     *</span>
+<span class="source-line-no">427</span><span id="line-427">     * Stores `dateParam` and schedules a UI refresh on the Swing EDT so the</span>
+<span class="source-line-no">428</span><span id="line-428">     * graph and title reflect the new date selection.</span>
+<span class="source-line-no">429</span><span id="line-429">     *</span>
+<span class="source-line-no">430</span><span id="line-430">     * @param newDate the date to display (may be null to use current date)</span>
+<span class="source-line-no">431</span><span id="line-431">     */</span>
+<span class="source-line-no">432</span><span id="line-432">    public void dateChanged(final LocalDate newDate) {</span>
+<span class="source-line-no">433</span><span id="line-433">        this.dateParam = newDate;</span>
+<span class="source-line-no">434</span><span id="line-434">        SwingUtilities.invokeLater(() -&gt; {</span>
+<span class="source-line-no">435</span><span id="line-435">            refreshGraph();</span>
+<span class="source-line-no">436</span><span id="line-436">            updateTitleDate();</span>
+<span class="source-line-no">437</span><span id="line-437">        });</span>
+<span class="source-line-no">438</span><span id="line-438">    }</span>
+<span class="source-line-no">439</span><span id="line-439">    </span>
+<span class="source-line-no">440</span><span id="line-440">    @Override</span>
+<span class="source-line-no">441</span><span id="line-441">    /**</span>
+<span class="source-line-no">442</span><span id="line-442">     * Update the selected student for the Braille page and refresh content.</span>
+<span class="source-line-no">443</span><span id="line-443">     *</span>
+<span class="source-line-no">444</span><span id="line-444">     * Sets `studentNameParam` and posts a refresh task to the Swing EDT to</span>
+<span class="source-line-no">445</span><span id="line-445">     * reload data and update the page title.</span>
+<span class="source-line-no">446</span><span id="line-446">     *</span>
+<span class="source-line-no">447</span><span id="line-447">     * @param newStudent student identifier (name or id) to display; may be null</span>
+<span class="source-line-no">448</span><span id="line-448">     */</span>
+<span class="source-line-no">449</span><span id="line-449">    public void studentChanged(final String newStudent) {</span>
+<span class="source-line-no">450</span><span id="line-450">        this.studentNameParam = newStudent != null ? newStudent : "Unknown Student";</span>
+<span class="source-line-no">451</span><span id="line-451">        SwingUtilities.invokeLater(() -&gt; {</span>
+<span class="source-line-no">452</span><span id="line-452">            refreshGraph();</span>
+<span class="source-line-no">453</span><span id="line-453">            updateTitleDate();</span>
+<span class="source-line-no">454</span><span id="line-454">        });</span>
+<span class="source-line-no">455</span><span id="line-455">    }</span>
+<span class="source-line-no">456</span><span id="line-456">    </span>
+<span class="source-line-no">457</span><span id="line-457">    /**</span>
+<span class="source-line-no">458</span><span id="line-458">     * Update the page title label to include the current session date.</span>
+<span class="source-line-no">459</span><span id="line-459">     * Falls back to base title if date formatting fails.</span>
+<span class="source-line-no">460</span><span id="line-460">     */</span>
+<span class="source-line-no">461</span><span id="line-461">    private void updateTitleDate() {</span>
+<span class="source-line-no">462</span><span id="line-462">        try {</span>
+<span class="source-line-no">463</span><span id="line-463">            String dateStr = this.dateParam != null ? this.dateParam.toString() : java.time.LocalDate.now().toString();</span>
+<span class="source-line-no">464</span><span id="line-464">            this.titleLabel.setText(baseTitle + " - " + dateStr);</span>
+<span class="source-line-no">465</span><span id="line-465">        } catch (Exception ex) {</span>
+<span class="source-line-no">466</span><span id="line-466">            this.titleLabel.setText(baseTitle);</span>
+<span class="source-line-no">467</span><span id="line-467">        }</span>
+<span class="source-line-no">468</span><span id="line-468">    }</span>
+<span class="source-line-no">469</span><span id="line-469">    </span>
+<span class="source-line-no">470</span><span id="line-470"></span>
+<span class="source-line-no">471</span><span id="line-471">}</span>
 
 
 

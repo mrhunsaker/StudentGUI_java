@@ -20,7 +20,8 @@ public class BrailleSmokeTest {
 
     @Test
     /**
-     * smokeTestDatabaseAndGraph - TODO: describe this method
+     * Basic smoke test validating database initialization and graph rendering
+     * for a minimal usage scenario. Ensures no exceptions are thrown.
      */
 
     public void smokeTestDatabaseAndGraph() throws Exception {

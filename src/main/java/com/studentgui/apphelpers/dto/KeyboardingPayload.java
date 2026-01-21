@@ -37,8 +37,9 @@ public class KeyboardingPayload implements SessionPayload {
 
     @Override
     /**
-     * getSessionId - TODO: describe this method
-     * @return TODO: describe return value
+     * Return the database session id associated with this keyboarding payload.
+     *
+     * @return numeric session id for the recorded keyboarding session
      */
 
     public int getSessionId() { return this.sessionId; }

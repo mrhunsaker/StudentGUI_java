@@ -19,7 +19,8 @@ public class BrailleDatabaseTest {
 
     @Test
     /**
-     * smokeDatabaseFlow - TODO: describe this method
+     * Exercise a simple database create/save/fetch flow for Braille session
+     * records and assert basic invariants to detect regressions.
      */
 
     public void smokeDatabaseFlow() throws Exception {

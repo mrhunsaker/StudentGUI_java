@@ -23,7 +23,9 @@ public class ExportBrailleReportsTest {
 
     @Test
     /**
-     * generateBrailleExport - TODO: describe this method
+     * Generate example Braille export files (PNG per phase, markdown and HTML
+     * report) for a test student in headless mode. Useful for validating the
+     * export rendering logic in CI environments.
      */
 
     public void generateBrailleExport() throws Exception {

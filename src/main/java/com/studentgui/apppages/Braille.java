@@ -422,10 +422,13 @@ public class Braille extends JPanel implements com.studentgui.app.DateChangeList
 
     @Override
     /**
-     * dateChanged - TODO: describe this method
-     * @param newDate TODO: describe parameter
+     * Update the displayed date for the Braille page and refresh content.
+     *
+     * Stores `dateParam` and schedules a UI refresh on the Swing EDT so the
+     * graph and title reflect the new date selection.
+     *
+     * @param newDate the date to display (may be null to use current date)
      */
-
     public void dateChanged(final LocalDate newDate) {
         this.dateParam = newDate;
         SwingUtilities.invokeLater(() -> {
@@ -436,10 +439,13 @@ public class Braille extends JPanel implements com.studentgui.app.DateChangeList
     
     @Override
     /**
-     * studentChanged - TODO: describe this method
-     * @param newStudent TODO: describe parameter
+     * Update the selected student for the Braille page and refresh content.
+     *
+     * Sets `studentNameParam` and posts a refresh task to the Swing EDT to
+     * reload data and update the page title.
+     *
+     * @param newStudent student identifier (name or id) to display; may be null
      */
-
     public void studentChanged(final String newStudent) {
         this.studentNameParam = newStudent != null ? newStudent : "Unknown Student";
         SwingUtilities.invokeLater(() -> {

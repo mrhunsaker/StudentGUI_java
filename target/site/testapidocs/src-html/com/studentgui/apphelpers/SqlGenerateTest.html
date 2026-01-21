@@ -24,29 +24,31 @@
 <span class="source-line-no">011</span><span id="line-11">import org.junit.jupiter.api.Test;</span>
 <span class="source-line-no">012</span><span id="line-12"></span>
 <span class="source-line-no">013</span><span id="line-13">/**</span>
-<span class="source-line-no">014</span><span id="line-14"> * SqlGenerateTest - TODO: describe this SqlGenerateTest</span>
-<span class="source-line-no">015</span><span id="line-15"> */</span>
-<span class="source-line-no">016</span><span id="line-16"></span>
-<span class="source-line-no">017</span><span id="line-17">public class SqlGenerateTest {</span>
-<span class="source-line-no">018</span><span id="line-18"></span>
-<span class="source-line-no">019</span><span id="line-19">    @Test</span>
-<span class="source-line-no">020</span><span id="line-20">    /**</span>
-<span class="source-line-no">021</span><span id="line-21">     * testInitializeCreatesContactLogTable - TODO: describe this method</span>
-<span class="source-line-no">022</span><span id="line-22">     */</span>
-<span class="source-line-no">023</span><span id="line-23"></span>
-<span class="source-line-no">024</span><span id="line-24">    public void testInitializeCreatesContactLogTable() throws Exception {</span>
-<span class="source-line-no">025</span><span id="line-25">        SqlGenerate.initializeDatabase();</span>
-<span class="source-line-no">026</span><span id="line-26">        Path db = Helpers.DATABASE_PATH;</span>
-<span class="source-line-no">027</span><span id="line-27">        assertTrue(Files.exists(db));</span>
-<span class="source-line-no">028</span><span id="line-28">        String url = "jdbc:sqlite:" + db.toString();</span>
-<span class="source-line-no">029</span><span id="line-29">        try (Connection c = DriverManager.getConnection(url)) {</span>
-<span class="source-line-no">030</span><span id="line-30">            try (Statement st = c.createStatement()) {</span>
-<span class="source-line-no">031</span><span id="line-31">                ResultSet rs = st.executeQuery("SELECT name FROM sqlite_master WHERE type='table' AND name='ContactLog'");</span>
-<span class="source-line-no">032</span><span id="line-32">                assertTrue(rs.next(), "ContactLog table should exist after initialization");</span>
-<span class="source-line-no">033</span><span id="line-33">            }</span>
-<span class="source-line-no">034</span><span id="line-34">        }</span>
-<span class="source-line-no">035</span><span id="line-35">    }</span>
-<span class="source-line-no">036</span><span id="line-36">}</span>
+<span class="source-line-no">014</span><span id="line-14"> * Verify SQL schema initialization and helper routines used to create the</span>
+<span class="source-line-no">015</span><span id="line-15"> * application's database structure.</span>
+<span class="source-line-no">016</span><span id="line-16"> */</span>
+<span class="source-line-no">017</span><span id="line-17"></span>
+<span class="source-line-no">018</span><span id="line-18">public class SqlGenerateTest {</span>
+<span class="source-line-no">019</span><span id="line-19"></span>
+<span class="source-line-no">020</span><span id="line-20">    @Test</span>
+<span class="source-line-no">021</span><span id="line-21">    /**</span>
+<span class="source-line-no">022</span><span id="line-22">     * Verify SQL schema initialization creates the expected contact log table</span>
+<span class="source-line-no">023</span><span id="line-23">     * and related structures needed by the application.</span>
+<span class="source-line-no">024</span><span id="line-24">     */</span>
+<span class="source-line-no">025</span><span id="line-25"></span>
+<span class="source-line-no">026</span><span id="line-26">    public void testInitializeCreatesContactLogTable() throws Exception {</span>
+<span class="source-line-no">027</span><span id="line-27">        SqlGenerate.initializeDatabase();</span>
+<span class="source-line-no">028</span><span id="line-28">        Path db = Helpers.DATABASE_PATH;</span>
+<span class="source-line-no">029</span><span id="line-29">        assertTrue(Files.exists(db));</span>
+<span class="source-line-no">030</span><span id="line-30">        String url = "jdbc:sqlite:" + db.toString();</span>
+<span class="source-line-no">031</span><span id="line-31">        try (Connection c = DriverManager.getConnection(url)) {</span>
+<span class="source-line-no">032</span><span id="line-32">            try (Statement st = c.createStatement()) {</span>
+<span class="source-line-no">033</span><span id="line-33">                ResultSet rs = st.executeQuery("SELECT name FROM sqlite_master WHERE type='table' AND name='ContactLog'");</span>
+<span class="source-line-no">034</span><span id="line-34">                assertTrue(rs.next(), "ContactLog table should exist after initialization");</span>
+<span class="source-line-no">035</span><span id="line-35">            }</span>
+<span class="source-line-no">036</span><span id="line-36">        }</span>
+<span class="source-line-no">037</span><span id="line-37">    }</span>
+<span class="source-line-no">038</span><span id="line-38">}</span>
 
 
 

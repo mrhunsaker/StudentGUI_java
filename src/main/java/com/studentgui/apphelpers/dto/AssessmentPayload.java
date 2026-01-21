@@ -31,18 +31,20 @@ public class AssessmentPayload implements SessionPayload {
 
     @Override
     /**
-     * getSessionId - TODO: describe this method
-     * @return TODO: describe return value
+     * Return the numeric database session id associated with this payload.
+     *
+     * @return the session id stored in this payload
      */
-
     public int getSessionId() {
         return this.sessionId;
     }
 
     @Override
     /**
-     * toString - TODO: describe this method
-     * @return TODO: describe return value
+     * Return a compact, human-readable representation of this payload suitable
+     * for logging and diagnostics.
+     *
+     * @return a one-line string describing the payload contents
      */
 
     public String toString() {

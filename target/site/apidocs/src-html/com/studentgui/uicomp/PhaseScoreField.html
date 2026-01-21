@@ -263,40 +263,43 @@
 <span class="source-line-no">250</span><span id="line-250"></span>
 <span class="source-line-no">251</span><span id="line-251">    @Override</span>
 <span class="source-line-no">252</span><span id="line-252">    /**</span>
-<span class="source-line-no">253</span><span id="line-253">     * setName - TODO: describe this method</span>
-<span class="source-line-no">254</span><span id="line-254">     * @param name TODO: describe parameter</span>
-<span class="source-line-no">255</span><span id="line-255">     */</span>
-<span class="source-line-no">256</span><span id="line-256"></span>
-<span class="source-line-no">257</span><span id="line-257">    public void setName(final String name) {</span>
-<span class="source-line-no">258</span><span id="line-258">        super.setName(name);</span>
-<span class="source-line-no">259</span><span id="line-259">        spinner.setName(name);</span>
-<span class="source-line-no">260</span><span id="line-260">    }</span>
-<span class="source-line-no">261</span><span id="line-261"></span>
-<span class="source-line-no">262</span><span id="line-262">    // Diagnostics: expose spinner X and label wrap width (useful to verify layout)</span>
-<span class="source-line-no">263</span><span id="line-263">    /**</span>
-<span class="source-line-no">264</span><span id="line-264">     * Get the X coordinate of the spinner inside this component (pixels).</span>
-<span class="source-line-no">265</span><span id="line-265">     *</span>
-<span class="source-line-no">266</span><span id="line-266">     * @return spinner X position in pixels</span>
-<span class="source-line-no">267</span><span id="line-267">     */</span>
-<span class="source-line-no">268</span><span id="line-268">    public int getSpinnerX() { return spinner.getLocation().x; }</span>
-<span class="source-line-no">269</span><span id="line-269"></span>
-<span class="source-line-no">270</span><span id="line-270">    /**</span>
-<span class="source-line-no">271</span><span id="line-271">     * Return the configured label wrap container's current width in pixels.</span>
-<span class="source-line-no">272</span><span id="line-272">     *</span>
-<span class="source-line-no">273</span><span id="line-273">     * @return label wrap width in pixels</span>
-<span class="source-line-no">274</span><span id="line-274">     */</span>
-<span class="source-line-no">275</span><span id="line-275">    public int getLabelWrapWidth() { return labelWrap.getWidth(); }</span>
-<span class="source-line-no">276</span><span id="line-276"></span>
-<span class="source-line-no">277</span><span id="line-277">    /**</span>
-<span class="source-line-no">278</span><span id="line-278">     * Actual horizontal gap in pixels between the label wrap right edge and the spinner left edge.</span>
-<span class="source-line-no">279</span><span id="line-279">     *</span>
-<span class="source-line-no">280</span><span id="line-280">     * @return pixel gap between label and spinner</span>
-<span class="source-line-no">281</span><span id="line-281">     */</span>
-<span class="source-line-no">282</span><span id="line-282">    public int getActualGap() {</span>
-<span class="source-line-no">283</span><span id="line-283">        int labelRight = labelWrap.getX() + labelWrap.getWidth();</span>
-<span class="source-line-no">284</span><span id="line-284">        return spinner.getX() - labelRight;</span>
-<span class="source-line-no">285</span><span id="line-285">    }</span>
-<span class="source-line-no">286</span><span id="line-286">}</span>
+<span class="source-line-no">253</span><span id="line-253">     * Set the Swing component name for this field and propagate the same name</span>
+<span class="source-line-no">254</span><span id="line-254">     * to the internal spinner so automated UI tests and accessibility tools</span>
+<span class="source-line-no">255</span><span id="line-255">     * can locate both elements reliably.</span>
+<span class="source-line-no">256</span><span id="line-256">     *</span>
+<span class="source-line-no">257</span><span id="line-257">     * @param name component name to set for this row and its spinner</span>
+<span class="source-line-no">258</span><span id="line-258">     */</span>
+<span class="source-line-no">259</span><span id="line-259"></span>
+<span class="source-line-no">260</span><span id="line-260">    public void setName(final String name) {</span>
+<span class="source-line-no">261</span><span id="line-261">        super.setName(name);</span>
+<span class="source-line-no">262</span><span id="line-262">        spinner.setName(name);</span>
+<span class="source-line-no">263</span><span id="line-263">    }</span>
+<span class="source-line-no">264</span><span id="line-264"></span>
+<span class="source-line-no">265</span><span id="line-265">    // Diagnostics: expose spinner X and label wrap width (useful to verify layout)</span>
+<span class="source-line-no">266</span><span id="line-266">    /**</span>
+<span class="source-line-no">267</span><span id="line-267">     * Get the X coordinate of the spinner inside this component (pixels).</span>
+<span class="source-line-no">268</span><span id="line-268">     *</span>
+<span class="source-line-no">269</span><span id="line-269">     * @return spinner X position in pixels</span>
+<span class="source-line-no">270</span><span id="line-270">     */</span>
+<span class="source-line-no">271</span><span id="line-271">    public int getSpinnerX() { return spinner.getLocation().x; }</span>
+<span class="source-line-no">272</span><span id="line-272"></span>
+<span class="source-line-no">273</span><span id="line-273">    /**</span>
+<span class="source-line-no">274</span><span id="line-274">     * Return the configured label wrap container's current width in pixels.</span>
+<span class="source-line-no">275</span><span id="line-275">     *</span>
+<span class="source-line-no">276</span><span id="line-276">     * @return label wrap width in pixels</span>
+<span class="source-line-no">277</span><span id="line-277">     */</span>
+<span class="source-line-no">278</span><span id="line-278">    public int getLabelWrapWidth() { return labelWrap.getWidth(); }</span>
+<span class="source-line-no">279</span><span id="line-279"></span>
+<span class="source-line-no">280</span><span id="line-280">    /**</span>
+<span class="source-line-no">281</span><span id="line-281">     * Actual horizontal gap in pixels between the label wrap right edge and the spinner left edge.</span>
+<span class="source-line-no">282</span><span id="line-282">     *</span>
+<span class="source-line-no">283</span><span id="line-283">     * @return pixel gap between label and spinner</span>
+<span class="source-line-no">284</span><span id="line-284">     */</span>
+<span class="source-line-no">285</span><span id="line-285">    public int getActualGap() {</span>
+<span class="source-line-no">286</span><span id="line-286">        int labelRight = labelWrap.getX() + labelWrap.getWidth();</span>
+<span class="source-line-no">287</span><span id="line-287">        return spinner.getX() - labelRight;</span>
+<span class="source-line-no">288</span><span id="line-288">    }</span>
+<span class="source-line-no">289</span><span id="line-289">}</span>
 
 
 

@@ -20,30 +20,31 @@
 <span class="source-line-no">007</span><span id="line-7">import org.junit.jupiter.api.Test;</span>
 <span class="source-line-no">008</span><span id="line-8"></span>
 <span class="source-line-no">009</span><span id="line-9">/**</span>
-<span class="source-line-no">010</span><span id="line-10"> * DatabaseContactLogTest - TODO: describe this DatabaseContactLogTest</span>
-<span class="source-line-no">011</span><span id="line-11"> */</span>
-<span class="source-line-no">012</span><span id="line-12"></span>
-<span class="source-line-no">013</span><span id="line-13">public class DatabaseContactLogTest {</span>
-<span class="source-line-no">014</span><span id="line-14"></span>
-<span class="source-line-no">015</span><span id="line-15">    @Test</span>
-<span class="source-line-no">016</span><span id="line-16">    /**</span>
-<span class="source-line-no">017</span><span id="line-17">     * testSaveAndFetchContactLog - TODO: describe this method</span>
-<span class="source-line-no">018</span><span id="line-18">     */</span>
-<span class="source-line-no">019</span><span id="line-19"></span>
-<span class="source-line-no">020</span><span id="line-20">    public void testSaveAndFetchContactLog() throws Exception {</span>
-<span class="source-line-no">021</span><span id="line-21">        SqlGenerate.initializeDatabase();</span>
-<span class="source-line-no">022</span><span id="line-22">        String student = "Test Student";</span>
-<span class="source-line-no">023</span><span id="line-23">        int sid = Database.getOrCreateStudent(student);</span>
-<span class="source-line-no">024</span><span id="line-24">        int pt = Database.getOrCreateProgressType("ContactLog");</span>
-<span class="source-line-no">025</span><span id="line-25">        int sessionId = Database.createProgressSession(sid, pt, LocalDate.now());</span>
-<span class="source-line-no">026</span><span id="line-26">        Database.saveContactLog(sessionId, student, LocalDate.now().toString(), "Guardian A", "Phone", "+1234567890", "a@example.com", "Left voicemail", "General summary", "Specific item", "Detailed notes");</span>
-<span class="source-line-no">027</span><span id="line-27">    com.studentgui.apphelpers.dto.ContactPayload fetched = Database.fetchLatestContactLog(student);</span>
-<span class="source-line-no">028</span><span id="line-28">    assertNotNull(fetched);</span>
-<span class="source-line-no">029</span><span id="line-29">    assertEquals("Guardian A", fetched.guardian);</span>
-<span class="source-line-no">030</span><span id="line-30">    assertEquals("+1234567890", fetched.phone);</span>
-<span class="source-line-no">031</span><span id="line-31">    assertEquals("Detailed notes", fetched.notes);</span>
-<span class="source-line-no">032</span><span id="line-32">    }</span>
-<span class="source-line-no">033</span><span id="line-33">}</span>
+<span class="source-line-no">010</span><span id="line-10"> * Tests saving and retrieving contact log entries in the application's</span>
+<span class="source-line-no">011</span><span id="line-11"> * database layer.</span>
+<span class="source-line-no">012</span><span id="line-12"> */</span>
+<span class="source-line-no">013</span><span id="line-13"></span>
+<span class="source-line-no">014</span><span id="line-14">public class DatabaseContactLogTest {</span>
+<span class="source-line-no">015</span><span id="line-15"></span>
+<span class="source-line-no">016</span><span id="line-16">    @Test</span>
+<span class="source-line-no">017</span><span id="line-17">    /**</span>
+<span class="source-line-no">018</span><span id="line-18">     * Save a contact log entry and verify it can be retrieved from the DB.</span>
+<span class="source-line-no">019</span><span id="line-19">     */</span>
+<span class="source-line-no">020</span><span id="line-20"></span>
+<span class="source-line-no">021</span><span id="line-21">    public void testSaveAndFetchContactLog() throws Exception {</span>
+<span class="source-line-no">022</span><span id="line-22">        SqlGenerate.initializeDatabase();</span>
+<span class="source-line-no">023</span><span id="line-23">        String student = "Test Student";</span>
+<span class="source-line-no">024</span><span id="line-24">        int sid = Database.getOrCreateStudent(student);</span>
+<span class="source-line-no">025</span><span id="line-25">        int pt = Database.getOrCreateProgressType("ContactLog");</span>
+<span class="source-line-no">026</span><span id="line-26">        int sessionId = Database.createProgressSession(sid, pt, LocalDate.now());</span>
+<span class="source-line-no">027</span><span id="line-27">        Database.saveContactLog(sessionId, student, LocalDate.now().toString(), "Guardian A", "Phone", "+1234567890", "a@example.com", "Left voicemail", "General summary", "Specific item", "Detailed notes");</span>
+<span class="source-line-no">028</span><span id="line-28">    com.studentgui.apphelpers.dto.ContactPayload fetched = Database.fetchLatestContactLog(student);</span>
+<span class="source-line-no">029</span><span id="line-29">    assertNotNull(fetched);</span>
+<span class="source-line-no">030</span><span id="line-30">    assertEquals("Guardian A", fetched.guardian);</span>
+<span class="source-line-no">031</span><span id="line-31">    assertEquals("+1234567890", fetched.phone);</span>
+<span class="source-line-no">032</span><span id="line-32">    assertEquals("Detailed notes", fetched.notes);</span>
+<span class="source-line-no">033</span><span id="line-33">    }</span>
+<span class="source-line-no">034</span><span id="line-34">}</span>
 
 
 

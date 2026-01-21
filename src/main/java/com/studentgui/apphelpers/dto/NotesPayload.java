@@ -25,8 +25,9 @@ public class NotesPayload implements SessionPayload {
 
     @Override
     /**
-     * getSessionId - TODO: describe this method
-     * @return TODO: describe return value
+     * Return the database session id associated with this notes payload.
+     *
+     * @return numeric session id for the recorded notes entry
      */
 
     public int getSessionId() { return this.sessionId; }

@@ -215,7 +215,9 @@ public class JLineGraph extends JPanel implements com.studentgui.app.SettingsCha
 
     @Override
     /**
-     * settingsChanged - TODO: describe this method
+     * Load chart-related preferences from the global Settings store and apply
+     * them to this graph instance. Currently this updates jitter-related
+     * configuration such as enabled/deterministic flags and the optional seed.
      */
 
     public void settingsChanged() {
@@ -839,9 +841,14 @@ public class JLineGraph extends JPanel implements com.studentgui.app.SettingsCha
         domain.setTickUnit(new org.jfree.chart.axis.NumberTickUnit(1) {
             @Override
             /**
-             * valueToString - TODO: describe this method
-             * @param value TODO: describe parameter
-             * @return TODO: describe return value
+             * Convert a numeric X-axis tick value into the corresponding skill
+             * label. The chart uses 1-based integer positions; this method maps
+             * that position (cast to an index) into the precomputed
+             * `skillLabels` array and returns an empty string for out-of-range
+             * values.
+             *
+             * @param value numeric tick value provided by the axis
+             * @return the skill label for the given tick, or an empty string
              */
 
             public String valueToString(double value) {

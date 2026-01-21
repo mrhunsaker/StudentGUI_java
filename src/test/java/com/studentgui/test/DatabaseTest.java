@@ -26,7 +26,8 @@ public class DatabaseTest {
 
     @Test
     /**
-     * testStudentCreateAndFetch - TODO: describe this method
+     * Test creating a student record and fetching it back to ensure basic
+     * CRUD operations work as expected.
      */
 
     public void testStudentCreateAndFetch() throws Exception {

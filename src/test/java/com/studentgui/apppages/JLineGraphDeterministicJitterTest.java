@@ -15,7 +15,8 @@ public class JLineGraphDeterministicJitterTest {
 
     @Test
     /**
-     * deterministicJitterProducesSameSequence - TODO: describe this method
+     * Verify that deterministic jitter with the same seed produces identical
+     * numeric sequences across separate JLineGraph instances.
      */
 
     public void deterministicJitterProducesSameSequence() throws Exception {

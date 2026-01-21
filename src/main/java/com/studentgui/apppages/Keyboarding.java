@@ -241,8 +241,12 @@ public class Keyboarding extends JPanel implements com.studentgui.app.DateChange
 
     @Override
     /**
-     * dateChanged - TODO: describe this method
-     * @param newDate TODO: describe parameter
+     * Update the displayed date for the Keyboarding page and refresh content.
+     *
+     * Stores the provided `dateParam` and schedules a refresh on the Swing EDT
+     * so the UI (graph and title) reflects the new date.
+     *
+     * @param newDate the date to display (may be null to use current date)
      */
 
     public void dateChanged(LocalDate newDate) {
@@ -255,8 +259,12 @@ public class Keyboarding extends JPanel implements com.studentgui.app.DateChange
 
     @Override
     /**
-     * studentChanged - TODO: describe this method
-     * @param newStudent TODO: describe parameter
+     * Update the selected student for the Keyboarding page and refresh content.
+     *
+     * Sets `studentNameParam` and schedules a UI update on the Swing EDT to
+     * reload page data and update the title.
+     *
+     * @param newStudent student identifier (name or id) to display; may be null
      */
 
     public void studentChanged(String newStudent) {
