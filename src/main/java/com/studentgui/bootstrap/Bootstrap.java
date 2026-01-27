@@ -9,6 +9,15 @@ package com.studentgui.bootstrap;
 public final class Bootstrap {
     private Bootstrap() { throw new AssertionError("not instantiable"); }
 
+    /**
+     * Bootstrap main entry.
+     *
+     * Sets early system properties required for logging (APP_HOME and
+     * LOG_TS) and ensures the logs directory exists, then delegates to
+     * the real application entry point.
+     *
+     * @param args command-line arguments forwarded to the application
+     */
     public static void main(final String[] args) {
         try {
             String appHome = com.studentgui.apphelpers.Helpers.APP_HOME.toString();

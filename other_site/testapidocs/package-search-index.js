@@ -1,0 +1,1 @@
+packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html","k":"18"},{"l":"com.digitizer.core"},{"l":"com.digitizer.integration"},{"l":"com.digitizer.test.util"}];updateSearchResults();

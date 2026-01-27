@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description" content="source: package: com.studentgui.bootstrap, class: Bootstrap">
 <meta name="generator" content="javadoc/SourceToHTMLConverter">
-<link rel="stylesheet" type="text/css" href="../../../../resource-files/stylesheet.css">
+<link rel="stylesheet" type="text/css" href="../../../../resource-files/maven-theme.css">
 </head>
 <body class="source-page">
 <main role="main">
@@ -22,37 +22,46 @@
 <span class="source-line-no">009</span><span id="line-9">public final class Bootstrap {</span>
 <span class="source-line-no">010</span><span id="line-10">    private Bootstrap() { throw new AssertionError("not instantiable"); }</span>
 <span class="source-line-no">011</span><span id="line-11"></span>
-<span class="source-line-no">012</span><span id="line-12">    public static void main(final String[] args) {</span>
-<span class="source-line-no">013</span><span id="line-13">        try {</span>
-<span class="source-line-no">014</span><span id="line-14">            String appHome = com.studentgui.apphelpers.Helpers.APP_HOME.toString();</span>
-<span class="source-line-no">015</span><span id="line-15">            System.setProperty("APP_HOME", appHome);</span>
-<span class="source-line-no">016</span><span id="line-16">        } catch (Throwable t) {</span>
-<span class="source-line-no">017</span><span id="line-17">            // Best-effort: if Helpers isn't available, fall back to a relative path</span>
-<span class="source-line-no">018</span><span id="line-18">            System.setProperty("APP_HOME", "app_home");</span>
-<span class="source-line-no">019</span><span id="line-19">        }</span>
-<span class="source-line-no">020</span><span id="line-20">        // Ensure a stable per-run timestamp for Logback file naming. Use</span>
-<span class="source-line-no">021</span><span id="line-21">        // the same yyyyMMddHHmmss pattern that logback's &lt;timestamp&gt;</span>
-<span class="source-line-no">022</span><span id="line-22">        // element uses so filenames match when possible.</span>
-<span class="source-line-no">023</span><span id="line-23">        try {</span>
-<span class="source-line-no">024</span><span id="line-24">            java.time.format.DateTimeFormatter df = java.time.format.DateTimeFormatter.ofPattern("yyyyMMddHHmmss").withZone(java.time.ZoneOffset.UTC);</span>
-<span class="source-line-no">025</span><span id="line-25">            String ts = df.format(java.time.Instant.now());</span>
-<span class="source-line-no">026</span><span id="line-26">            System.setProperty("LOG_TS", ts);</span>
-<span class="source-line-no">027</span><span id="line-27">        } catch (Exception ex) {</span>
-<span class="source-line-no">028</span><span id="line-28">            System.setProperty("LOG_TS", String.valueOf(java.time.Instant.now().getEpochSecond()));</span>
-<span class="source-line-no">029</span><span id="line-29">        }</span>
-<span class="source-line-no">030</span><span id="line-30"></span>
-<span class="source-line-no">031</span><span id="line-31">        // Create logs directory early to avoid races when Logback opens the file</span>
+<span class="source-line-no">012</span><span id="line-12">    /**</span>
+<span class="source-line-no">013</span><span id="line-13">     * Bootstrap main entry.</span>
+<span class="source-line-no">014</span><span id="line-14">     *</span>
+<span class="source-line-no">015</span><span id="line-15">     * Sets early system properties required for logging (APP_HOME and</span>
+<span class="source-line-no">016</span><span id="line-16">     * LOG_TS) and ensures the logs directory exists, then delegates to</span>
+<span class="source-line-no">017</span><span id="line-17">     * the real application entry point.</span>
+<span class="source-line-no">018</span><span id="line-18">     *</span>
+<span class="source-line-no">019</span><span id="line-19">     * @param args command-line arguments forwarded to the application</span>
+<span class="source-line-no">020</span><span id="line-20">     */</span>
+<span class="source-line-no">021</span><span id="line-21">    public static void main(final String[] args) {</span>
+<span class="source-line-no">022</span><span id="line-22">        try {</span>
+<span class="source-line-no">023</span><span id="line-23">            String appHome = com.studentgui.apphelpers.Helpers.APP_HOME.toString();</span>
+<span class="source-line-no">024</span><span id="line-24">            System.setProperty("APP_HOME", appHome);</span>
+<span class="source-line-no">025</span><span id="line-25">        } catch (Throwable t) {</span>
+<span class="source-line-no">026</span><span id="line-26">            // Best-effort: if Helpers isn't available, fall back to a relative path</span>
+<span class="source-line-no">027</span><span id="line-27">            System.setProperty("APP_HOME", "app_home");</span>
+<span class="source-line-no">028</span><span id="line-28">        }</span>
+<span class="source-line-no">029</span><span id="line-29">        // Ensure a stable per-run timestamp for Logback file naming. Use</span>
+<span class="source-line-no">030</span><span id="line-30">        // the same yyyyMMddHHmmss pattern that logback's &lt;timestamp&gt;</span>
+<span class="source-line-no">031</span><span id="line-31">        // element uses so filenames match when possible.</span>
 <span class="source-line-no">032</span><span id="line-32">        try {</span>
-<span class="source-line-no">033</span><span id="line-33">            java.nio.file.Path logs = java.nio.file.Paths.get(System.getProperty("APP_HOME")).resolve("logs");</span>
-<span class="source-line-no">034</span><span id="line-34">            java.nio.file.Files.createDirectories(logs);</span>
-<span class="source-line-no">035</span><span id="line-35">        } catch (Exception ex) {</span>
-<span class="source-line-no">036</span><span id="line-36">            // ignore - best effort</span>
-<span class="source-line-no">037</span><span id="line-37">        }</span>
-<span class="source-line-no">038</span><span id="line-38"></span>
-<span class="source-line-no">039</span><span id="line-39">        // Delegate to the main application</span>
-<span class="source-line-no">040</span><span id="line-40">        com.studentgui.app.Main.main(args);</span>
-<span class="source-line-no">041</span><span id="line-41">    }</span>
-<span class="source-line-no">042</span><span id="line-42">}</span>
+<span class="source-line-no">033</span><span id="line-33">            java.time.format.DateTimeFormatter df = java.time.format.DateTimeFormatter.ofPattern("yyyyMMddHHmmss").withZone(java.time.ZoneOffset.UTC);</span>
+<span class="source-line-no">034</span><span id="line-34">            String ts = df.format(java.time.Instant.now());</span>
+<span class="source-line-no">035</span><span id="line-35">            System.setProperty("LOG_TS", ts);</span>
+<span class="source-line-no">036</span><span id="line-36">        } catch (Exception ex) {</span>
+<span class="source-line-no">037</span><span id="line-37">            System.setProperty("LOG_TS", String.valueOf(java.time.Instant.now().getEpochSecond()));</span>
+<span class="source-line-no">038</span><span id="line-38">        }</span>
+<span class="source-line-no">039</span><span id="line-39"></span>
+<span class="source-line-no">040</span><span id="line-40">        // Create logs directory early to avoid races when Logback opens the file</span>
+<span class="source-line-no">041</span><span id="line-41">        try {</span>
+<span class="source-line-no">042</span><span id="line-42">            java.nio.file.Path logs = java.nio.file.Paths.get(System.getProperty("APP_HOME")).resolve("logs");</span>
+<span class="source-line-no">043</span><span id="line-43">            java.nio.file.Files.createDirectories(logs);</span>
+<span class="source-line-no">044</span><span id="line-44">        } catch (Exception ex) {</span>
+<span class="source-line-no">045</span><span id="line-45">            // ignore - best effort</span>
+<span class="source-line-no">046</span><span id="line-46">        }</span>
+<span class="source-line-no">047</span><span id="line-47"></span>
+<span class="source-line-no">048</span><span id="line-48">        // Delegate to the main application</span>
+<span class="source-line-no">049</span><span id="line-49">        com.studentgui.app.Main.main(args);</span>
+<span class="source-line-no">050</span><span id="line-50">    }</span>
+<span class="source-line-no">051</span><span id="line-51">}</span>
 
 
 

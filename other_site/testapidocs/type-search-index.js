@@ -1,0 +1,1 @@
+typeSearchIndex = [{"l":"All Classes and Interfaces","u":"allclasses-index.html","k":"18"},{"p":"com.digitizer.core","l":"ColorUtilsTest"},{"p":"com.digitizer.core","l":"FileUtilsTest"},{"p":"com.digitizer.test.util","l":"GenerateEdgeCaseImages"},{"p":"com.digitizer.test.util","l":"TestImageGenerator"}];updateSearchResults();

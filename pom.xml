@@ -83,6 +83,7 @@
                     <additionalparam>-Xdoclint:none</additionalparam>
                     <source>${maven.compiler.release}</source>
                     <linksource>true</linksource>
+                    <stylesheetfile>${project.basedir}/src/site/resources/css/maven-theme.css</stylesheetfile>
                     <quiet>true</quiet>
                 </configuration>
                 <executions>
@@ -247,6 +248,7 @@
                     <doclint>none</doclint>
                     <failOnError>false</failOnError>
                     <linksource>true</linksource>
+                    <stylesheetfile>${project.basedir}/src/site/resources/css/maven-theme.css</stylesheetfile>
                     <quiet>true</quiet>
                 </configuration>
             </plugin>
